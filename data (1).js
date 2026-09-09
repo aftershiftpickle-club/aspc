@@ -76,7 +76,7 @@ const HERO = {
    PHOTOS: make a folder called  photos  next to index.html,
    then a folder called  about  inside it. Drop your pictures
    in and list the file names below, like:
-       photos: ["photos/about/1.jpg", "photos/about/2.jpg"]
+       photos: ["photos/about/1.png", "photos/about/2.jpg"]
    Leave it as  photos: []  until you have images ready.
    --------------------------------------------------------- */
 const ABOUT = {
@@ -86,8 +86,8 @@ const ABOUT = {
     "Whether you've been playing for a while or you're holding a paddle for the first time, there's a place for you at Aftershift.",
     "We keep things social, competitive enough to make things interesting, and welcoming enough that you can show up alone and leave knowing a few more people."
   ],
-  closing: "After work. After hours. Aftershift.",
-  photos: []
+  closing: "Same time. Aftershift.",
+  photos: ["photos/about/a.png]
 };
 
 
