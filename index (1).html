@@ -728,7 +728,9 @@ function renderClub(){
   $("brandName").textContent = parts[0];
   $("brandTag").textContent = parts.slice(1).join(" ") || CLUB.tagline;
   loadLogo(0);
-  $("footText").textContent = CLUB.name;
+  $("footText").textContent = CLUB.established
+    ? `${CLUB.name} — ${CLUB.established}`
+    : CLUB.name;
 }
 
 /* ---------- content pages ----------
@@ -864,7 +866,10 @@ function renderGallery(){
   $("galleryIntro").textContent = GALLERY.intro;
   $("galleryAbout").innerHTML = `<article class="panel">
       ${(GALLERY.categories || []).map(c => label(c.name) + `<p>${esc(c.text)}</p>`).join("")}
-      ${GALLERY.caption ? `<div class="note"><p class="pull" style="margin:0">${esc(GALLERY.caption)}</p></div>` : ""}
+      ${(GALLERY.captions && GALLERY.captions.length)
+        ? label("Captions we use") + `<ul class="ticks">${GALLERY.captions.map(c =>
+            `<li>${esc(c)}</li>`).join("")}</ul>`
+        : ""}
     </article>`;
 }
 
