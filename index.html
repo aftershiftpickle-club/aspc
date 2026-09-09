@@ -375,7 +375,7 @@ footer{border-top:1px solid #1E1E1E;padding:1.7rem 0 2.6rem;color:var(--muted);f
 
 <div class="datebar" id="datebar">
   <div class="wrap datebar__in">
-    <label for="dateSelect">Session</label>
+    <label for="dateSelect" id="dateLabel">Session</label>
     <select id="dateSelect"></select>
     <div class="seg" id="divSeg" role="group" aria-label="Division"></div>
     <div class="chips" id="chips"></div>
@@ -612,12 +612,12 @@ function ensureDivision(){
 function renderRankings(){
   /* No games in data.js yet — show a friendly placeholder instead. */
   if (!current){
-    $("courtSub").textContent = "Session results";
+    $("courtSub").textContent = `${divName(currentDiv)} session results`;
     $("courtTitle").textContent = "No sessions recorded yet";
-    $("standingsHead").textContent = "Standings";
+    $("standingsHead").textContent = `${divName(currentDiv)} standings`;
     $("standingsNote").textContent = "";
-    $("podium").innerHTML = `<p class="court__empty">Rankings appear here once you add players and games to data.js.</p>`;
-    $("tableBody").innerHTML = `<tr><td colspan="6" class="empty">No results yet.</td></tr>`;
+    $("podium").innerHTML = `<p class="court__empty">No ${divName(currentDiv)} games recorded yet.</p>`;
+    $("tableBody").innerHTML = `<tr><td colspan="6" class="empty">No ${divName(currentDiv)} results yet.</td></tr>`;
     $("chips").innerHTML = "";
     return;
   }
@@ -728,7 +728,9 @@ function renderClub(){
   $("brandName").textContent = parts[0];
   $("brandTag").textContent = parts.slice(1).join(" ") || CLUB.tagline;
   loadLogo(0);
-  $("footText").textContent = CLUB.name;
+  $("footText").textContent = CLUB.established
+    ? `${CLUB.name} — ${CLUB.established}`
+    : CLUB.name;
 }
 
 /* ---------- content pages ----------
@@ -864,7 +866,10 @@ function renderGallery(){
   $("galleryIntro").textContent = GALLERY.intro;
   $("galleryAbout").innerHTML = `<article class="panel">
       ${(GALLERY.categories || []).map(c => label(c.name) + `<p>${esc(c.text)}</p>`).join("")}
-      ${GALLERY.caption ? `<div class="note"><p class="pull" style="margin:0">${esc(GALLERY.caption)}</p></div>` : ""}
+      ${(GALLERY.captions && GALLERY.captions.length)
+        ? label("Captions we use") + `<ul class="ticks">${GALLERY.captions.map(c =>
+            `<li>${esc(c)}</li>`).join("")}</ul>`
+        : ""}
     </article>`;
 }
 
@@ -901,9 +906,14 @@ $("dateSelect").addEventListener("change", e => {
 });
 
 function renderDivisions(){
+  /* No sessions yet: hide the date picker but keep the division
+     toggle, so the divisions are still visible and switchable.   */
+  $("dateLabel").hidden = !dates.length;
+  $("dateSelect").hidden = !dates.length;
+
   $("divSeg").hidden = DIVISIONS.length < 2;
   $("divSeg").innerHTML = DIVISIONS.map(d => {
-    const empty = gamesOn(current, d.id).length ? "" : ` data-empty="1"`;
+    const empty = (dates.length && !gamesOn(current, d.id).length) ? ` data-empty="1"` : "";
     return `<button type="button" data-div="${d.id}" aria-pressed="${d.id === currentDiv}"${empty}>${d.name}</button>`;
   }).join("");
 }
@@ -930,7 +940,7 @@ function route(){
     if (a.getAttribute("href") === "#/" + view) a.setAttribute("aria-current","page");
     else a.removeAttribute("aria-current");
   });
-  $("datebar").hidden = !(view === "rankings" || view === "games") || !dates.length;
+  $("datebar").hidden = !(view === "rankings" || view === "games");
   $("hero").hidden = (view !== "rankings");
   window.scrollTo(0,0);
 }
