@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Aftershift Pickleclub</title>
-<meta name="description" content="Weekly open play rankings, game results and photos.">
+<meta name="description" content="Aftershift Pickleclub — a Dubai pickleball community. Open play, Ascend beginner sessions, schedule, rankings and photos.">
 <meta name="theme-color" content="#0A0A0A">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%23C7D92C'/%3E%3Cg fill='%230A0A0A'%3E%3Ccircle cx='11' cy='10' r='2.4'/%3E%3Ccircle cx='21' cy='9' r='2.4'/%3E%3Ccircle cx='16' cy='17' r='2.4'/%3E%3Ccircle cx='9' cy='20' r='2.4'/%3E%3Ccircle cx='23' cy='19' r='2.4'/%3E%3Ccircle cx='16' cy='26' r='2.4'/%3E%3C/g%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -230,6 +230,66 @@ td.l{color:#8E958A}
 .about a{color:#fff;text-decoration-color:var(--volt);text-underline-offset:3px}
 .about a:hover{color:var(--volt)}
 
+/* ---------- home hero ---------- */
+.hero{background:#0E0E0E;border-bottom:1px solid #1E1E1E}
+.hero__in{padding:2.5rem 0 2.3rem;display:grid;gap:.9rem;max-width:46rem}
+.eyebrow--left{justify-content:flex-start}
+.eyebrow--left::after{display:none}
+.hero h2{font-family:"Anton",Impact,sans-serif;font-size:clamp(2rem,6.5vw,3.3rem);
+  text-transform:uppercase;color:#fff;letter-spacing:.01em}
+.hero p{margin:0;color:#B9BEB2;max-width:56ch}
+.hero__cta{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.35rem}
+.hero__cta .btn{margin-top:0;align-self:center}
+.btn--quiet{background:transparent;color:#fff;box-shadow:inset 0 0 0 1.5px var(--edge)}
+.btn--quiet:hover{background:transparent;color:var(--volt);box-shadow:inset 0 0 0 1.5px var(--volt)}
+
+/* ---------- content pages ---------- */
+.stack{display:grid;gap:1.1rem}
+.panel{background:var(--panel);border:1px solid var(--edge);border-radius:var(--r);padding:1.5rem}
+.panel > h3{font-family:"Anton",sans-serif;font-size:1.3rem;text-transform:uppercase;letter-spacing:.02em;color:#fff}
+.panel__tag{font-size:.72rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--volt);margin:.4rem 0 0}
+.panel p{margin:.85rem 0 0;color:#B9BEB2;max-width:72ch}
+.lbl{font-size:.7rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--muted);margin:1.5rem 0 .1rem}
+.pull{font-family:"Anton",sans-serif;font-size:1.1rem;text-transform:uppercase;color:var(--volt);
+  letter-spacing:.02em;margin:1.2rem 0 0}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:1rem 1.4rem;
+  margin:1.3rem 0 0;padding-top:1.3rem;border-top:1px solid var(--edge)}
+.kv dt{font-size:.68rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.kv dd{margin:.25rem 0 0;font-weight:600;color:#fff}
+.ticks{list-style:none;padding:0;margin:.7rem 0 0;display:grid;gap:.4rem}
+.ticks li{position:relative;padding-left:1.15rem;color:#B9BEB2}
+.ticks li::before{content:"";position:absolute;left:0;top:.6em;width:6px;height:6px;
+  background:var(--volt);border-radius:50%}
+.steps{list-style:none;counter-reset:s;padding:0;margin:0;display:grid;gap:1rem}
+.steps li{counter-increment:s;display:grid;grid-template-columns:2rem 1fr;gap:.8rem}
+.steps li::before{content:counter(s);font-family:"Anton",sans-serif;font-size:1.3rem;
+  color:var(--volt);line-height:1.1}
+.steps b{display:block;color:#fff}
+.steps p{margin:.2rem 0 0;color:#B9BEB2}
+.note{border-left:3px solid var(--volt);padding:.1rem 0 .1rem 1rem;margin-top:1.3rem}
+.note p{margin:0}
+.faq{display:grid;gap:.55rem}
+.faq details{background:var(--panel);border:1px solid var(--edge);border-radius:var(--r);padding:0 1.3rem}
+.faq summary{cursor:pointer;list-style:none;padding:1.05rem 0;font-weight:700;color:#fff;
+  display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";font-family:"Anton",sans-serif;font-size:1.3rem;color:var(--volt);line-height:1}
+.faq details[open] summary::after{content:"–"}
+.faq__body{padding-bottom:1.2rem}
+.faq__body p{margin:0 0 .7rem;color:#B9BEB2;max-width:72ch}
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:.8rem;margin-top:1.4rem}
+.gallery img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px;border:1px solid var(--edge)}
+.linkrow{display:flex;align-items:baseline;justify-content:space-between;gap:1rem;
+  padding:.9rem 1.15rem;background:var(--panel);border:1px solid var(--edge);
+  border-radius:var(--r);text-decoration:none}
+a.linkrow:hover{border-color:var(--volt)}
+.linkrow b{color:#fff;font-weight:700}
+.linkrow span{color:var(--muted);font-size:.85rem;text-align:right}
+.linkrow--off{opacity:.45}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.1rem}
+
 footer{border-top:1px solid #1E1E1E;padding:1.7rem 0 2.6rem;color:var(--muted);font-size:.78rem;
   letter-spacing:.14em;text-transform:uppercase;font-weight:600}
 .empty{padding:2rem;text-align:center;color:var(--muted)}
@@ -295,11 +355,23 @@ footer{border-top:1px solid #1E1E1E;padding:1.7rem 0 2.6rem;color:var(--muted);f
     <nav class="nav" id="nav" aria-label="Main">
       <a href="#/rankings">Rankings</a>
       <a href="#/games">Games</a>
+      <a href="#/sessions">Sessions</a>
+      <a href="#/schedule">Schedule</a>
       <a href="#/photos">Photos</a>
       <a href="#/about">About</a>
+      <a href="#/faq">FAQ</a>
     </nav>
   </div>
 </header>
+
+<section class="hero" id="hero" hidden>
+  <div class="wrap hero__in">
+    <p class="eyebrow eyebrow--left" id="heroEyebrow"></p>
+    <h2 id="heroHeadline"></h2>
+    <p id="heroText"></p>
+    <div class="hero__cta" id="heroCta"></div>
+  </div>
+</section>
 
 <div class="datebar" id="datebar">
   <div class="wrap datebar__in">
@@ -352,10 +424,44 @@ footer{border-top:1px solid #1E1E1E;padding:1.7rem 0 2.6rem;color:var(--muted);f
   <section id="view-photos" hidden>
     <div class="wrap section">
       <div class="section__head">
-        <h2>Photos</h2>
-        <p>Albums open in Google Photos, newest first.</p>
+        <h2 id="galleryTitle">Photos</h2>
+        <p id="galleryIntro"></p>
       </div>
+      <div class="stack" id="galleryAbout" style="margin-bottom:1.5rem"></div>
       <div class="albums" id="albumList"></div>
+    </div>
+  </section>
+
+  <!-- SESSIONS -->
+  <section id="view-sessions" hidden>
+    <div class="wrap section">
+      <div class="section__head">
+        <h2>Play sessions</h2>
+        <p>What we run, what it costs, and how to get a slot.</p>
+      </div>
+      <div class="stack" id="sessionList"></div>
+
+      <div class="section__head" style="margin-top:3rem">
+        <h2 id="queueTitle">How our queueing works</h2>
+      </div>
+      <div class="stack" id="queueBlock"></div>
+    </div>
+  </section>
+
+  <!-- SCHEDULE -->
+  <section id="view-schedule" hidden>
+    <div class="wrap section">
+      <div class="section__head">
+        <h2>Weekly schedule</h2>
+        <p id="scheduleIntro"></p>
+      </div>
+      <div class="cols" id="scheduleDays"></div>
+      <div class="stack" id="scheduleExtras" style="margin-top:1.1rem"></div>
+
+      <div class="section__head" style="margin-top:3rem">
+        <h2 id="annTitle">Announcements</h2>
+      </div>
+      <div class="stack" id="annBlock"></div>
     </div>
   </section>
 
@@ -363,10 +469,18 @@ footer{border-top:1px solid #1E1E1E;padding:1.7rem 0 2.6rem;color:var(--muted);f
   <section id="view-about" hidden>
     <div class="wrap section">
       <div class="section__head"><h2 id="aboutTitle">About the club</h2></div>
+      <div class="stack" id="aboutBlock"></div>
+      <div class="stack" id="communityBlock" style="margin-top:1.1rem"></div>
+
+      <div class="section__head" style="margin-top:3rem"><h2>Contact</h2></div>
       <div class="about">
         <div>
-          <h3>Who we are</h3>
-          <p id="aboutText"></p>
+          <h3>Organisers</h3>
+          <ul id="teamList"></ul>
+        </div>
+        <div>
+          <h3>Social media</h3>
+          <ul id="socialList"></ul>
         </div>
         <div>
           <h3>Where we play</h3>
@@ -374,11 +488,21 @@ footer{border-top:1px solid #1E1E1E;padding:1.7rem 0 2.6rem;color:var(--muted);f
           <h3 style="margin-top:1.2rem">Schedule</h3>
           <p id="aboutSchedule"></p>
         </div>
-        <div>
-          <h3>Get in touch</h3>
-          <ul id="aboutContacts"></ul>
-        </div>
       </div>
+
+      <div class="section__head" style="margin-top:3rem"><h2>Important links</h2></div>
+      <div class="stack" id="linkList"></div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="view-faq" hidden>
+    <div class="wrap section">
+      <div class="section__head">
+        <h2>Frequently asked questions</h2>
+        <p>Tap a question to open the answer.</p>
+      </div>
+      <div class="faq" id="faqList"></div>
     </div>
   </section>
 </main>
@@ -486,6 +610,18 @@ function ensureDivision(){
 
 /* ---------- rendering ---------- */
 function renderRankings(){
+  /* No games in data.js yet — show a friendly placeholder instead. */
+  if (!current){
+    $("courtSub").textContent = "Session results";
+    $("courtTitle").textContent = "No sessions recorded yet";
+    $("standingsHead").textContent = "Standings";
+    $("standingsNote").textContent = "";
+    $("podium").innerHTML = `<p class="court__empty">Rankings appear here once you add players and games to data.js.</p>`;
+    $("tableBody").innerHTML = `<tr><td colspan="6" class="empty">No results yet.</td></tr>`;
+    $("chips").innerHTML = "";
+    return;
+  }
+
   const list = standings(current, currentDiv);
   const played = gamesOn(current, currentDiv).length;
 
@@ -592,13 +728,167 @@ function renderClub(){
   $("brandName").textContent = parts[0];
   $("brandTag").textContent = parts.slice(1).join(" ") || CLUB.tagline;
   loadLogo(0);
+  $("footText").textContent = CLUB.name;
+}
+
+/* ---------- content pages ----------
+   These build the Sessions, Schedule, About and FAQ pages out of
+   data.js. Anything you leave out of data.js is simply skipped.   */
+const esc = s => String(s ?? "").replace(/[&<>"]/g,
+  c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
+const paras  = a => (a || []).map(t => `<p>${esc(t)}</p>`).join("");
+const ticks  = a => (a && a.length) ? `<ul class="ticks">${a.map(i => `<li>${esc(i)}</li>`).join("")}</ul>` : "";
+const label  = t => `<p class="lbl">${esc(t)}</p>`;
+const kv = list => (list && list.length)
+  ? `<dl class="kv">${list.map(d => `<div><dt>${esc(d.label)}</dt><dd>${esc(d.value)}</dd></div>`).join("")}</dl>`
+  : "";
+const link = (b, quiet, gap) => (b && b.url)
+  ? `<a class="btn${quiet ? " btn--quiet" : ""}" style="margin-top:${gap || "1.3rem"}"
+       href="${esc(b.url)}" target="_blank" rel="noopener">${esc(b.label)}</a>`
+  : "";
+const address = v => v
+  ? `${label(v.title || "Venue")}<p>${(v.lines || []).map(esc).join("<br>")}</p>
+     ${link({ label: "Open in Google Maps", url: v.mapUrl }, true, "1.1rem")}
+     ${v.note ? `<p>${esc(v.note)}</p>` : ""}`
+  : "";
+
+function renderHero(){
+  $("heroEyebrow").textContent = HERO.eyebrow;
+  $("heroHeadline").textContent = HERO.headline;
+  $("heroText").textContent = HERO.text;
+  $("heroCta").innerHTML = HERO.buttons.map(b =>
+    `<a class="btn${b.quiet ? " btn--quiet" : ""}" href="${esc(b.url)}"
+        target="_blank" rel="noopener">${esc(b.label)}</a>`).join("");
+}
+
+function renderSessions(){
+  $("sessionList").innerHTML = SESSIONS.map(s => `<article class="panel">
+      <h3>${esc(s.name)}</h3>
+      ${s.tagline ? `<p class="panel__tag">${esc(s.tagline)}</p>` : ""}
+      ${paras(s.paragraphs)}
+      ${s.motto ? `<p class="pull">${esc(s.motto)}</p>` : ""}
+      ${s.list ? label(s.list.title) + ticks(s.list.items) : ""}
+      ${kv(s.details)}
+      ${s.join ? label(s.join.title) + paras(s.join.paragraphs) : ""}
+      ${link(s.button)}
+      ${address(s.venue)}
+    </article>`).join("");
+
+  $("queueTitle").textContent = QUEUE.title;
+  $("queueBlock").innerHTML = `
+    <article class="panel">
+      ${paras(QUEUE.intro)}
+      ${label("How it works")}
+      <ol class="steps" style="margin-top:.9rem">${QUEUE.steps.map(s =>
+        `<li><b>${esc(s.title)}</b><p>${esc(s.text)}</p></li>`).join("")}</ol>
+      ${kv(QUEUE.format)}
+    </article>
+    <article class="panel">
+      <h3>Queueing rules</h3>
+      ${ticks(QUEUE.rules)}
+      ${label("When sessions get busy")}
+      <p>${esc(QUEUE.busy)}</p>
+      <div class="note"><p class="pull" style="margin:0">${esc(QUEUE.goal)}</p></div>
+    </article>`;
+}
+
+function renderSchedule(){
+  $("scheduleIntro").textContent = SCHEDULE.intro;
+  $("scheduleDays").innerHTML = SCHEDULE.days.map(d =>
+    `<article class="panel"><h3>${esc(d.day)}</h3>${kv(d.details)}</article>`).join("");
+  $("scheduleExtras").innerHTML = `<article class="panel">
+      ${(SCHEDULE.extras || []).map(e => label(e.title) + `<p>${esc(e.text)}</p>`).join("")}
+      <div class="note"><p>${esc(SCHEDULE.notice)}</p></div>
+    </article>`;
+
+  const A = ANNOUNCEMENTS;
+  $("annTitle").textContent = A.title;
+  $("annBlock").innerHTML = `
+    <div class="cols">${A.items.map(i => `<article class="panel">
+        <h3>${esc(i.name)}</h3>
+        <p class="panel__tag">${fmtDate(i.date)}</p>
+        <dl class="kv"><div><dt>Time</dt><dd>${esc(i.time)}</dd></div></dl>
+        ${i.note ? `<p>${esc(i.note)}</p>` : ""}
+      </article>`).join("")}</div>
+    <article class="panel">
+      <h3>${esc(A.venue.title)}</h3>
+      <p>${A.venue.lines.map(esc).join("<br>")}</p>
+      ${link({ label: "Open in Google Maps", url: A.venue.mapUrl }, true, "1.2rem")}
+    </article>
+    <article class="panel">
+      <h3>${esc(A.registration.title)}</h3>
+      <p>${esc(A.registration.text)}</p>
+      ${link(A.registration.button)}
+      <div class="note"><p>${esc(A.registration.note)}</p></div>
+    </article>
+    <article class="panel">
+      <h3>${esc(A.policy.title)}</h3>
+      ${paras(A.policy.paragraphs)}
+      ${label(A.policy.payTitle)}
+      <ul class="ticks">${A.policy.payTo.map(p => `<li>${esc(p.name)} — ${p.url
+        ? `<a href="${esc(p.url)}" target="_blank" rel="noopener"
+             style="color:#fff;text-decoration-color:var(--volt);text-underline-offset:3px">${esc(p.label)}</a>`
+        : esc(p.label)}</li>`).join("")}</ul>
+    </article>`;
+}
+
+function renderAbout(){
   $("aboutTitle").textContent = "About " + CLUB.name;
-  $("aboutText").textContent = CLUB.about;
+  $("aboutBlock").innerHTML = `<article class="panel">
+      <p class="pull" style="margin-top:0">${esc(ABOUT.lede)}</p>
+      ${paras(ABOUT.paragraphs)}
+      ${ABOUT.closing ? `<p class="pull">${esc(ABOUT.closing)}</p>` : ""}
+      ${(ABOUT.photos && ABOUT.photos.length)
+        ? `<div class="gallery">${ABOUT.photos.map(src =>
+            `<img src="${esc(src)}" alt="" loading="lazy">`).join("")}</div>`
+        : ""}
+    </article>`;
   $("aboutWhere").textContent = CLUB.where;
   $("aboutSchedule").textContent = CLUB.schedule;
-  $("aboutContacts").innerHTML = CLUB.contacts
-    .map(c => `<li><a href="${c.url}" target="_blank" rel="noopener">${c.label}</a></li>`).join("");
-  $("footText").textContent = CLUB.name;
+  $("teamList").innerHTML = TEAM.map(t => `<li>
+      <b style="color:#fff">${esc(t.name)}</b> — ${esc(t.role)}<br>
+      ${t.url ? `<a href="${esc(t.url)}" target="_blank" rel="noopener">${esc(t.label)}</a>` : esc(t.label)}
+    </li>`).join("");
+  $("socialList").innerHTML = SOCIAL.map(s => `<li>${s.url
+    ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.label)}</a>`
+    : `${esc(s.label)} — ${esc(s.handle)}`}</li>`).join("");
+  $("linkList").innerHTML = LINKS.map(l => l.url
+    ? `<a class="linkrow" href="${esc(l.url)}" target="_blank" rel="noopener">
+         <b>${esc(l.label)}</b><span>${esc(l.note || "")}</span></a>`
+    : `<div class="linkrow linkrow--off"><b>${esc(l.label)}</b><span>${esc(l.note || "TBA")}</span></div>`
+  ).join("");
+}
+
+function renderGallery(){
+  $("galleryTitle").textContent = GALLERY.title;
+  $("galleryIntro").textContent = GALLERY.intro;
+  $("galleryAbout").innerHTML = `<article class="panel">
+      ${(GALLERY.categories || []).map(c => label(c.name) + `<p>${esc(c.text)}</p>`).join("")}
+      ${GALLERY.caption ? `<div class="note"><p class="pull" style="margin:0">${esc(GALLERY.caption)}</p></div>` : ""}
+    </article>`;
+}
+
+function renderCommunity(){
+  $("communityBlock").innerHTML = `<article class="panel">
+      <h3>${esc(COMMUNITY.title)}</h3>
+      <p>${esc(COMMUNITY.intro)}</p>
+      ${ticks(COMMUNITY.shares)}
+      ${label("Group name")}<p>${esc(COMMUNITY.groupName)}</p>
+      ${COMMUNITY.button && COMMUNITY.button.url
+        ? link(COMMUNITY.button)
+        : `<p class="lbl" style="margin-top:1.3rem">Group link — TBA</p>`}
+    </article>`;
+}
+
+function renderFaq(){
+  $("faqList").innerHTML = FAQ.map(f => `<details>
+      <summary>${esc(f.q)}</summary>
+      <div class="faq__body">
+        ${paras(f.a)}
+        ${ticks(f.list)}
+        ${link(f.button, true, "1.1rem")}
+      </div>
+    </details>`).join("");
 }
 
 /* ---------- date and division selectors ---------- */
@@ -631,7 +921,7 @@ function refresh(){
 }
 
 /* ---------- navigation ---------- */
-const views = ["rankings","games","photos","about"];
+const views = ["rankings","games","sessions","schedule","photos","about","faq"];
 function route(){
   const name = (location.hash.replace("#/","") || "rankings").toLowerCase();
   const view = views.includes(name) ? name : "rankings";
@@ -640,15 +930,23 @@ function route(){
     if (a.getAttribute("href") === "#/" + view) a.setAttribute("aria-current","page");
     else a.removeAttribute("aria-current");
   });
-  $("datebar").hidden = (view === "photos" || view === "about");
+  $("datebar").hidden = !(view === "rankings" || view === "games") || !dates.length;
+  $("hero").hidden = (view !== "rankings");
   window.scrollTo(0,0);
 }
 window.addEventListener("hashchange", route);
 
 renderClub();
+renderHero();
 ensureDivision();
 refresh();
 renderAlbums();
+renderSessions();
+renderSchedule();
+renderAbout();
+renderGallery();
+renderCommunity();
+renderFaq();
 route();
 </script>
 </body>
