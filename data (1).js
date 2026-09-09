@@ -37,6 +37,7 @@ const VENUE_MAP = "https://maps.app.goo.gl/TCNKFhghdgNyuupn9";
 /* 2. YOUR CLUB -------------------------------------------- */
 const CLUB = {
   name: "Aftershift Pickleclub",
+  established: "Est. 2026",
   tagline: "Clock out, court in.",
   about:
     "Aftershift Pickleclub is a Dubai-based pickleball community bringing people together after work through open play, beginner sessions, social games, drills, and a shared love of the sport.",
@@ -175,7 +176,16 @@ const GALLERY = {
     { name: "Drills",      text: "Training sessions, skill work, practice and development." },
     { name: "Community",   text: "Group photos, celebrations, funny moments, rankings, winners and everything in between." }
   ],
-  caption: "Good games. Better company."
+  captions: [
+    "Another night after shift.",
+    "Good games. Better company.",
+    "Clocked out. Paddled up.",
+    "From coworkers to court rivals.",
+    "One more game.",
+    "After hours, on court.",
+    "The Aftershift crew.",
+    "See you in the queue."
+  ]
 };
 
 /* 9. HOW OUR QUEUEING WORKS -------------------------------
@@ -408,7 +418,8 @@ const ANNOUNCEMENTS = {
     paragraphs: [
       "To help prevent last-minute cancellations and keep session slots fair for everyone, ASPC follows a payment-first confirmation policy.",
       "Players may initially be placed on the waitlist or registration list. Your place is officially confirmed once the required payment has been completed.",
-      "Same-day cancellations are non-refundable. Once your place has been confirmed, that slot has been reserved specifically for you and may be difficult to fill at short notice."
+      "Same-day cancellations are non-refundable. Once your place has been confirmed, that slot has been reserved specifically for you and may be difficult to fill at short notice.",
+      "Thank you for helping us keep sessions organised and fair for everyone."
     ],
     payTitle: "Send your payment receipt to",
     payTo: [
@@ -521,7 +532,10 @@ const SOCIAL = [
 ];
 
 const LINKS = [
-  { label: "Official ASPC registration form", note: "Open play, Ascend and social play", url: REGISTRATION_FORM },
+  { label: "Official ASPC registration form", note: "One form for every session", url: REGISTRATION_FORM },
+  { label: "Regular open play registration",  note: "Uses the official ASPC form", url: REGISTRATION_FORM },
+  { label: "Ascend registration",             note: "Uses the official ASPC form", url: REGISTRATION_FORM },
+  { label: "Social play registration",        note: "Uses the official ASPC form when announced", url: REGISTRATION_FORM },
   { label: "Current venue map",               note: "The English College – Al Safa", url: VENUE_MAP },
   { label: "WhatsApp community",              note: "TBA", url: "" },
   { label: "Instagram",                       note: "@aftershift.official", url: "https://www.instagram.com/aftershift.official/" },
