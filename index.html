@@ -179,6 +179,17 @@ tbody tr:hover{background:#171717}
 td.w{color:var(--volt);font-weight:700}
 td.l{color:#8E958A}
 .pct{font-weight:700;font-variant-numeric:tabular-nums}
+.diff{font-variant-numeric:tabular-nums;color:#8E958A}
+.diff.up{color:var(--volt)}
+.strk{font-weight:700;font-variant-numeric:tabular-nums}
+.strk.sw{color:var(--volt)}
+.strk.sl{color:#8E958A}
+/* organisers: shown, but outside the ranking */
+tr.org td{background:#0D0D0D}
+tr.org .rk{color:#5E655A;font-size:1rem}
+tr.org .who span{color:#9BA294}
+.tag-o{font-style:normal;font-size:.58rem;font-weight:800;letter-spacing:.12em;color:#8E958A;
+  border:1px solid #303030;border-radius:999px;padding:.12rem .4rem;margin-left:.45rem;vertical-align:middle}
 
 /* ---------- games ---------- */
 .games{display:grid;gap:.6rem}
@@ -316,6 +327,7 @@ footer{border-top:1px solid #1E1E1E;padding:1.7rem 0 2.6rem;color:var(--muted);f
   .game__no{grid-row:span 2}
   .side--b{text-align:left;order:3}
   .score{order:2;justify-self:start;grid-column:2;font-size:1.2rem}
+  .hide-sm{display:none}
   th,td{padding:.65rem .35rem}
   th:first-child,td:first-child{padding-left:.7rem;width:2.6rem}
   th:last-child,td:last-child{padding-right:.7rem}
@@ -401,7 +413,7 @@ footer{border-top:1px solid #1E1E1E;padding:1.7rem 0 2.6rem;color:var(--muted);f
       <div class="card">
         <table>
           <thead>
-            <tr><th>Rank</th><th>Player</th><th>W</th><th>L</th><th>GP</th><th>Win %</th></tr>
+            <tr><th>Rank</th><th>Player</th><th>W</th><th>L</th><th>GP</th><th>Win %</th><th class="hide-sm">Diff</th><th class="hide-sm">Streak</th></tr>
           </thead>
           <tbody id="tableBody"></tbody>
         </table>
@@ -565,35 +577,67 @@ document.addEventListener("error", e => {
 }, true);
 
 /* ---------- ranking logic ----------
-   1. most wins   2. highest win %   3. name
-   Players with identical wins and win % share a rank.
-   Change the sort below if you want a different system.       */
+   1. highest win %   2. best streak   3. best point difference
+
+   Organisers are left out of the ranking completely. Everyone
+   below them moves up a place, and the organisers are added at
+   the bottom with /O after their name.
+
+   To mark someone as an organiser, add  organiser: true  to
+   their line in data.js, like this:
+
+       { id: "paul", name: "Paul", photo: "", organiser: true },
+
+   Remove that and they go straight back into the rankings.     */
 function gamesOn(date, div){
   return MATCHES.filter(m => m.date === date && (m.div || "regular") === div);
 }
 
+/* How many games in a row they've won or lost. Positive is a win
+   streak, negative is a losing streak, so 3 means 3 wins on the
+   trot and -2 means two losses.                                 */
+function streakOf(seq){
+  if (!seq.length) return 0;
+  const last = seq[seq.length - 1];
+  let n = 0;
+  for (let i = seq.length - 1; i >= 0 && seq[i] === last; i--) n++;
+  return last === "W" ? n : -n;
+}
+function streakText(s){ return s ? Math.abs(s) + (s > 0 ? "W" : "L") : "—"; }
+
 function standings(date, div){
   const rows = {};
-  const seen = p => rows[p] || (rows[p] = { id:p, name:nameOf(p), wins:0, losses:0 });
+  const seen = p => rows[p] || (rows[p] = { id:p, name:nameOf(p), wins:0, losses:0, diff:0, seq:[] });
 
   gamesOn(date, div).forEach(m => {
     const t1won = m.score1 > m.score2;
-    m.team1.forEach(p => t1won ? seen(p).wins++ : seen(p).losses++);
-    m.team2.forEach(p => t1won ? seen(p).losses++ : seen(p).wins++);
+    const margin = m.score1 - m.score2;
+    m.team1.forEach(p => {
+      const r = seen(p); r.diff += margin; r.seq.push(t1won ? "W" : "L");
+      t1won ? r.wins++ : r.losses++;
+    });
+    m.team2.forEach(p => {
+      const r = seen(p); r.diff -= margin; r.seq.push(t1won ? "L" : "W");
+      t1won ? r.losses++ : r.wins++;
+    });
   });
 
   const list = Object.values(rows).map(r => {
     const gp = r.wins + r.losses;
+    const player = byId[r.id] || { id:r.id, name:r.name, photo:"" };
     return { ...r, gp, pct: gp ? Math.round(r.wins / gp * 100) : 0,
-             player: byId[r.id] || { id:r.id, name:r.name, photo:"" } };
+             streak: streakOf(r.seq), player, organiser: !!player.organiser };
   });
 
-  list.sort((a,b) => b.wins - a.wins || b.pct - a.pct || a.name.localeCompare(b.name));
-  list.forEach((r,i) => {
-    const prev = list[i-1];
-    r.rank = (prev && prev.wins === r.wins && prev.pct === r.pct) ? prev.rank : i + 1;
-  });
-  return list;
+  const order = (a,b) => b.pct - a.pct || b.streak - a.streak
+                      || b.diff - a.diff || a.name.localeCompare(b.name);
+
+  const ranked     = list.filter(r => !r.organiser).sort(order);
+  const organisers = list.filter(r =>  r.organiser).sort(order);
+
+  const all = ranked.concat(organisers);
+  all.forEach((r,i) => r.rank = i + 1);
+  return all;
 }
 
 const dates = [...new Set(MATCHES.map(m => m.date))].sort().reverse();
@@ -617,7 +661,7 @@ function renderRankings(){
     $("standingsHead").textContent = `${divName(currentDiv)} standings`;
     $("standingsNote").textContent = "";
     $("podium").innerHTML = `<p class="court__empty">No ${divName(currentDiv)} games recorded yet.</p>`;
-    $("tableBody").innerHTML = `<tr><td colspan="6" class="empty">No ${divName(currentDiv)} results yet.</td></tr>`;
+    $("tableBody").innerHTML = `<tr><td colspan="8" class="empty">No ${divName(currentDiv)} results yet.</td></tr>`;
     $("chips").innerHTML = "";
     return;
   }
@@ -629,14 +673,17 @@ function renderRankings(){
   $("courtTitle").textContent = fmtDate(current);
   $("standingsHead").textContent = `${divName(currentDiv)} standings`;
   $("standingsNote").textContent = list.length
-    ? `${list.length} players · ${played} games · ranked by wins, then win percentage`
+    ? `${list.length} players · ${played} games · ranked by win %, then streak, then point difference`
     : "";
 
+  /* The podium only ever shows ranked players — organisers are
+     excluded even if a session was too small to fill three places. */
+  const podiumList = list.filter(r => !r.organiser);
   const order = [1,0,2]; // 2nd, 1st, 3rd
-  $("podium").innerHTML = !list.length
+  $("podium").innerHTML = !podiumList.length
     ? `<p class="court__empty">No ${divName(currentDiv)} games recorded for this session yet.</p>`
     : order.map(i => {
-        const r = list[i];
+        const r = podiumList[i];
         if (!r) return "";
         return `<article class="pod pod--${i + 1}">
           ${avatar(r.player, "pod__photo")}
@@ -650,15 +697,17 @@ function renderRankings(){
       }).join("");
 
   $("tableBody").innerHTML = list.length
-    ? list.map(r => `<tr>
+    ? list.map(r => `<tr class="${r.organiser ? "org" : ""}">
         <td class="rk">${r.rank}</td>
-        <td><div class="who">${avatar(r.player)}<span>${r.name}</span></div></td>
+        <td><div class="who">${avatar(r.player)}<span>${r.name}${r.organiser ? `<i class="tag-o">/O</i>` : ""}</span></div></td>
         <td class="w">${r.wins}</td>
         <td class="l">${r.losses}</td>
         <td>${r.gp}</td>
         <td class="pct">${r.pct}%</td>
+        <td class="diff hide-sm ${r.diff > 0 ? "up" : ""}">${r.diff > 0 ? "+" + r.diff : r.diff}</td>
+        <td class="strk hide-sm ${r.streak > 0 ? "sw" : "sl"}">${streakText(r.streak)}</td>
       </tr>`).join("")
-    : `<tr><td colspan="6" class="empty">No ${divName(currentDiv)} results for this session yet.</td></tr>`;
+    : `<tr><td colspan="8" class="empty">No ${divName(currentDiv)} results for this session yet.</td></tr>`;
 
   $("chips").innerHTML = list.length
     ? `<span class="chip"><b>${list.length}</b> players</span>
