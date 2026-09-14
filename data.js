@@ -274,23 +274,13 @@ const ALBUMS = [
 const GALLERY = {
   title: "Sesh gallery",
   intro: "Life after shift — a little look at what happens when the workday ends and the paddles come out.",
-  categories: [
-    { name: "Open play",   text: "Regular ASPC sessions, rallies, matchups and court moments." },
-    { name: "Ascend",      text: "First games, beginner sessions, learning moments and player progress." },
-    { name: "Social play", text: "Mixed games, community nights, group moments and friendly matchups." },
-    { name: "Drills",      text: "Training sessions, skill work, practice and development." },
-    { name: "Community",   text: "Group photos, celebrations, funny moments, rankings, winners and everything in between." }
-  ],
-  captions: [
-    "Another night after shift.",
-    "Good games. Better company.",
-    "Clocked out. Paddled up.",
-    "From coworkers to court rivals.",
-    "One more game.",
-    "After hours, on court.",
-    "The Aftershift crew.",
-    "See you in the queue."
-  ]
+  /* Categories and captions are switched off — the Photos page
+     shows just the album links and their dates. To bring the
+     text back, add blocks into either list below, like:
+       categories: [ { name: "Open play", text: "A short line." } ],
+       captions:   [ "Another night after shift." ]              */
+  categories: [],
+  captions: []
 };
 
 /* 9. HOW OUR QUEUEING WORKS -------------------------------
