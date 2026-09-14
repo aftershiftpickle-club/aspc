@@ -228,7 +228,13 @@ const MATCHES = [
    },
    --------------------------------------------------------- */
 const ALBUMS = [
-
+{
+    date: "2026-09-11",
+    title: "August 1, 2026 Open Play",
+    description: "Regular & Ascend",
+    url: "https://drive.google.com/drive/folders/18J90HwSJBGXcmFHtwnCsHxF5aU_VC2uO?usp=sharing",
+    cover: ""
+  }
 ];
 
 
