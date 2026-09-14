@@ -228,13 +228,14 @@ const MATCHES = [
    },
    --------------------------------------------------------- */
 const ALBUMS = [
-{
-    date: "2026-09-11",
+  {
+    date: "2026-08-01",
     title: "August 1, 2026 Open Play",
-    description: "Regular & Ascend",
-    url: "https://drive.google.com/drive/folders/18J90HwSJBGXcmFHtwnCsHxF5aU_VC2uO?usp=sharing",
+    description: "Regular and Ascend.",
+    url: "https://drive.google.com/drive/folders/18J90HwSJBGXcmFHtwnCsHxF5aU_VC2uO?usp=drive_link",
     cover: ""
-  }
+  }, 
+   
 ];
 
 
@@ -461,20 +462,14 @@ const ANNOUNCEMENTS = {
   title: "Upcoming sessions",
   items: [
     {
-      name: "Tuesday open play",
-      date: "2026-09-15",
-      time: "7:00 PM – 10:00 PM",
-      note: "Registration and final session details will be announced through the ASPC community."
-    },
-   {
       name: "Friday open play",
-      date: "2026-09-18",
+      date: "2026-09-11",
       time: "7:00 PM – 10:00 PM",
       note: "Registration and final session details will be announced through the ASPC community."
     },
     {
       name: "Saturday open play",
-      date: "2026-09-16",
+      date: "2026-09-12",
       time: "7:00 PM – 10:00 PM",
       note: "Please arrive by 6:50 PM so we can check everyone in and start on time."
     }
