@@ -242,7 +242,7 @@ tr.org .who span{color:#9BA294}
 .about a:hover{color:var(--volt)}
 
 /* ---------- home hero ---------- */
-.hero{background:#0E0E0E;border-bottom:1px solid #1E1E1E}
+.hero{background:#0E0E0E;border-top:1px solid #1E1E1E;margin-top:1rem}
 .hero__in{padding:2.5rem 0 2.3rem;display:grid;gap:.9rem;max-width:46rem}
 .eyebrow--left{justify-content:flex-start}
 .eyebrow--left::after{display:none}
@@ -376,15 +376,6 @@ footer{border-top:1px solid #1E1E1E;padding:1.7rem 0 2.6rem;color:var(--muted);f
   </div>
 </header>
 
-<section class="hero" id="hero" hidden>
-  <div class="wrap hero__in">
-    <p class="eyebrow eyebrow--left" id="heroEyebrow"></p>
-    <h2 id="heroHeadline"></h2>
-    <p id="heroText"></p>
-    <div class="hero__cta" id="heroCta"></div>
-  </div>
-</section>
-
 <div class="datebar" id="datebar">
   <div class="wrap datebar__in">
     <label for="dateSelect" id="dateLabel">Session</label>
@@ -419,6 +410,17 @@ footer{border-top:1px solid #1E1E1E;padding:1.7rem 0 2.6rem;color:var(--muted);f
         </table>
       </div>
     </div>
+
+    <!-- Join prompt. Sits below the standings so the podium and
+         session results are the first thing people see. -->
+    <section class="hero" id="hero" hidden>
+      <div class="wrap hero__in">
+        <p class="eyebrow eyebrow--left" id="heroEyebrow"></p>
+        <h2 id="heroHeadline"></h2>
+        <p id="heroText"></p>
+        <div class="hero__cta" id="heroCta"></div>
+      </div>
+    </section>
   </section>
 
   <!-- GAMES -->
@@ -609,7 +611,10 @@ function standings(date, div){
   const rows = {};
   const seen = p => rows[p] || (rows[p] = { id:p, name:nameOf(p), wins:0, losses:0, diff:0, seq:[] });
 
-  gamesOn(date, div).forEach(m => {
+  /* Always read the games in the order they were played, so the
+     streak is right even if the list in data.js is pasted in a
+     different order. Game 1 first, game 2 next, and so on.       */
+  gamesOn(date, div).slice().sort((a,b) => (a.game || 0) - (b.game || 0)).forEach(m => {
     const t1won = m.score1 > m.score2;
     const margin = m.score1 - m.score2;
     m.team1.forEach(p => {
@@ -913,10 +918,17 @@ function renderAbout(){
 function renderGallery(){
   $("galleryTitle").textContent = GALLERY.title;
   $("galleryIntro").textContent = GALLERY.intro;
-  $("galleryAbout").innerHTML = `<article class="panel">
-      ${(GALLERY.categories || []).map(c => label(c.name) + `<p>${esc(c.text)}</p>`).join("")}
-      ${(GALLERY.captions && GALLERY.captions.length)
-        ? label("Captions we use") + `<ul class="ticks">${GALLERY.captions.map(c =>
+
+  const cats = GALLERY.categories || [];
+  const caps = GALLERY.captions || [];
+
+  /* If both lists are empty the whole panel is left out, so the
+     Photos page shows nothing but the albums themselves.        */
+  $("galleryAbout").innerHTML = (!cats.length && !caps.length) ? "" :
+    `<article class="panel">
+      ${cats.map(c => label(c.name) + `<p>${esc(c.text)}</p>`).join("")}
+      ${caps.length
+        ? label("Captions we use") + `<ul class="ticks">${caps.map(c =>
             `<li>${esc(c)}</li>`).join("")}</ul>`
         : ""}
     </article>`;
