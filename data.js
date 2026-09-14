@@ -256,6 +256,13 @@ const ALBUMS = [
     url: "https://drive.google.com/drive/folders/1DJvrmR7VXC7dK9N1kJWQVmt3YVpCFuFF?usp=drive_link",
     cover: ""
   }, 
+    {
+    date: "2026-09-04",
+    title: "Sept 4, 2026 Open Play",
+    description: "Regular and Ascend.",
+    url: "https://drive.google.com/drive/folders/1ICyb5uV0frpyunOKOsTdq_O1xZaHVeSH?usp=drive_link",
+    cover: ""
+  }, 
    
 ];
 
