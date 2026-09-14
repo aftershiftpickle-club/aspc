@@ -120,6 +120,25 @@ select:hover{border-color:var(--volt)}
   font-family:"Anton",sans-serif;font-size:1.6rem;color:var(--rim);
 }
 .pod--1 .pod__photo{width:108px;height:108px;font-size:2rem}
+
+/* ---------- cut-out podium photos ----------
+   A transparent PNG stands on top of the cylinder, the way the
+   session graphics are laid out. The negative margin lets the
+   name plate and cylinder overlap the bottom of the figure, so
+   the player reads as standing on the podium rather than
+   floating above it.                                           */
+.pod__figure{
+  position:relative;display:block;width:100%;height:158px;flex:none;
+  margin-bottom:-1.5rem;z-index:1;
+}
+.pod--1 .pod__figure{height:198px}
+.pod--3 .pod__figure{height:150px}
+.pod__cut{
+  position:absolute;left:50%;bottom:0;transform:translateX(-50%);
+  height:100%;width:auto;max-width:135%;object-fit:contain;object-position:bottom center;
+  filter:drop-shadow(0 10px 16px rgba(0,0,0,.65));pointer-events:none;
+}
+.pod__plate,.pod__cyl{position:relative;z-index:2}
 .pod__plate{
   width:100%;background:#101010;border:2px solid var(--rim);border-radius:9px;
   padding:.5rem .7rem;font-weight:700;font-size:.95rem;color:#fff;line-height:1.25;
@@ -312,10 +331,14 @@ footer{border-top:1px solid #1E1E1E;padding:1.7rem 0 2.6rem;color:var(--muted);f
   .court{padding:1.8rem 0 2.2rem}
   .court::before,.court::after{width:70px}
   .podium{grid-template-columns:1fr;gap:.8rem;align-items:stretch}
-  .pod{display:grid;grid-template-columns:64px 1fr;grid-template-areas:"photo plate" "photo cyl";
+  .pod{display:grid;grid-template-columns:72px 1fr;grid-template-areas:"photo plate" "photo cyl";
        align-items:center;gap:.5rem .85rem;text-align:left}
   .pod--1{order:-1}
   .pod__photo{grid-area:photo;width:64px !important;height:64px !important;font-size:1.3rem !important}
+  .pod__figure{grid-area:photo;width:72px !important;height:100% !important;
+    min-height:96px;margin:0 !important;align-self:end}
+  .pod--1 .pod__figure,.pod--3 .pod__figure{height:100% !important}
+  .pod__cut{max-width:100%}
   .pod__plate{grid-area:plate}
   .pod__cyl{grid-area:cyl;min-height:0 !important;padding:.6rem .85rem !important;border-radius:12px;
     display:grid;grid-template-columns:auto 1fr 1fr;align-items:center;gap:.5rem;box-shadow:0 0 26px -16px var(--rim)}
@@ -552,8 +575,39 @@ function avatar(player, cls){
   const src = player.photo || (id ? `photos/${id}.${PHOTO_EXTS[0]}` : "");
   const c = cls || "avatar";
   if (!src) return `<div class="${c}" aria-hidden="true">${initials(player.name)}</div>`;
-  return `<img class="${c}" src="${src}" alt="${player.name}"
+
+  /* focus lets one player's photo be nudged inside the circle when
+     the crop cuts their head off. Add it in data.js, for example:
+       { id: "colleen", name: "Colleen", photo: "", focus: "50% 20%" }
+     First number is left-to-right, second is top-to-bottom. Lower
+     the second number to show more of the top of the picture.
+     Leave it out and the photo stays centred as before.          */
+  const focus = player.focus ? ` style="object-position:${player.focus}"` : "";
+
+  return `<img class="${c}" src="${src}" alt="${player.name}"${focus}
     data-name="${player.name}" data-id="${id}" data-step="${player.photo ? "custom" : "0"}">`;
+}
+
+/* ---------- podium photos ----------
+   The podium looks for a cut-out PNG first:
+
+       photos/cutouts/colleen.png
+
+   If that file exists you get the cut-out treatment, standing on
+   a lit disc with the head breaking past the top. If it doesn't
+   exist, the player falls back to their normal round photo, and
+   then to their initials. Nothing to configure either way.
+
+   So to update after a session: save cut-outs for the six podium
+   players into photos/cutouts/, named after their id. That's it.
+   Everyone else keeps the round frame automatically.             */
+function podiumPhoto(player){
+  const id = player.id || "";
+  if (!id) return avatar(player, "pod__photo");
+  return `<span class="pod__figure">
+    <img class="pod__cut" src="photos/cutouts/${id}.png" alt="${player.name}"
+      data-name="${player.name}" data-id="${id}" data-step="cutout">
+  </span>`;
 }
 
 /* If an image is missing, try the next file type, then show initials. */
@@ -561,6 +615,16 @@ document.addEventListener("error", e => {
   const el = e.target;
   if (el.tagName !== "IMG") return;
   if (el.classList.contains("album__img")) { el.remove(); return; }
+
+  /* No cut-out for this player, so swap the whole figure for the
+     ordinary round podium photo and let it fall back from there. */
+  if (el.classList.contains("pod__cut")){
+    const figure = el.closest(".pod__figure") || el;
+    const player = byId[el.dataset.id] || { id: el.dataset.id, name: el.dataset.name };
+    figure.outerHTML = avatar(player, "pod__photo");
+    return;
+  }
+
   if (!el.classList.contains("avatar") && !el.classList.contains("pod__photo")) return;
 
   const step = el.dataset.step, id = el.dataset.id, name = el.dataset.name || "";
@@ -691,12 +755,12 @@ function renderRankings(){
         const r = podiumList[i];
         if (!r) return "";
         return `<article class="pod pod--${i + 1}">
-          ${avatar(r.player, "pod__photo")}
+          ${podiumPhoto(r.player)}
           <div class="pod__plate">${r.name}</div>
           <div class="pod__cyl">
             <div class="pod__rank">${ordinal(r.rank)}<small>place</small></div>
-            <div class="pod__bar"><b>${r.wins}</b> W &nbsp;—&nbsp; <b>${r.losses}</b> L</div>
-            <div class="pod__bar"><b>${r.gp}</b> games &nbsp;·&nbsp; <b>${r.pct}%</b> win rate</div>
+            <div class="pod__bar">Win rate: <b>${r.pct}%</b></div>
+            <div class="pod__bar">Win / loss: <b>${r.wins}&#8211;${r.losses}</b></div>
           </div>
         </article>`;
       }).join("");
