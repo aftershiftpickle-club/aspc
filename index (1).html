@@ -127,15 +127,20 @@ select:hover{border-color:var(--volt)}
    name plate and cylinder overlap the bottom of the figure, so
    the player reads as standing on the podium rather than
    floating above it.                                           */
+/* Figure heights. Raise all three together to make the players
+   bigger, keeping first place tallest. If a cut-out looks small
+   with a gap above the head, that gap is usually empty space
+   inside the PNG itself rather than these numbers — see the note
+   in podiumPhoto() below.                                      */
 .pod__figure{
-  position:relative;display:block;width:100%;height:272px;flex:none;
+  position:relative;display:block;width:100%;height:326px;flex:none;
   margin-bottom:-1.5rem;z-index:1;
 }
-.pod--1 .pod__figure{height:336px}
-.pod--3 .pod__figure{height:258px}
+.pod--1 .pod__figure{height:404px}
+.pod--3 .pod__figure{height:310px}
 .pod__cut{
   position:absolute;left:50%;bottom:0;transform:translateX(-50%);
-  height:100%;width:auto;max-width:150%;object-fit:contain;object-position:bottom center;
+  height:100%;width:auto;max-width:165%;object-fit:contain;object-position:bottom center;
   filter:drop-shadow(0 10px 16px rgba(0,0,0,.65));pointer-events:none;
 }
 .pod__plate,.pod__cyl{position:relative;z-index:2}
