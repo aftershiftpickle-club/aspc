@@ -105,7 +105,7 @@ select:hover{border-color:var(--volt)}
   font-size:clamp(2.6rem,9vw,5rem);letter-spacing:.005em;text-transform:uppercase;
   text-shadow:0 0 34px rgba(199,217,44,.35);margin-bottom:.55rem;
 }
-.court__date{font-size:1rem;font-weight:600;color:#fff;margin:.9rem 0 2.2rem;letter-spacing:.04em}
+.court__date{font-size:1rem;font-weight:600;color:#fff;margin:.9rem 0 1rem;letter-spacing:.04em}
 .court__empty{color:var(--muted);padding:1.5rem 0 .5rem}
 
 .podium{display:grid;grid-template-columns:1fr 1.22fr 1fr;gap:1rem;align-items:end;text-align:center}
@@ -127,22 +127,24 @@ select:hover{border-color:var(--volt)}
    name plate and cylinder overlap the bottom of the figure, so
    the player reads as standing on the podium rather than
    floating above it.                                           */
-/* Figure heights. Raise all three together to make the players
-   bigger, keeping first place tallest. If a cut-out looks small
-   with a gap above the head, that gap is usually empty space
-   inside the PNG itself rather than these numbers — see the note
-   in podiumPhoto() below.                                      */
+/* The slot reserves a bit less than the image's full height and
+   lets the top of the figure overflow upward. That way any empty
+   space inside the PNG doesn't turn into a gap under the heading.
+   Change the .pod__cut heights to resize the players; change the
+   .pod__figure heights to control how much room is reserved.   */
 .pod__figure{
-  position:relative;display:block;width:100%;height:326px;flex:none;
+  position:relative;display:block;width:100%;height:232px;flex:none;
   margin-bottom:-1.5rem;z-index:1;
 }
-.pod--1 .pod__figure{height:404px}
-.pod--3 .pod__figure{height:310px}
+.pod--1 .pod__figure{height:315px}
+.pod--3 .pod__figure{height:222px}
 .pod__cut{
   position:absolute;left:50%;bottom:0;transform:translateX(-50%);
-  height:100%;width:auto;max-width:165%;object-fit:contain;object-position:bottom center;
+  height:358px;width:auto;max-width:165%;object-fit:contain;object-position:bottom center;
   filter:drop-shadow(0 10px 16px rgba(0,0,0,.65));pointer-events:none;
 }
+.pod--1 .pod__cut{height:404px}
+.pod--3 .pod__cut{height:342px}
 .pod__plate,.pod__cyl{position:relative;z-index:2}
 .pod__plate{
   width:100%;background:#101010;border:2px solid var(--rim);border-radius:9px;
@@ -343,7 +345,7 @@ footer{border-top:1px solid #1E1E1E;padding:1.7rem 0 2.6rem;color:var(--muted);f
   .pod__figure{grid-area:photo;width:92px !important;height:100% !important;
     min-height:132px;margin:0 !important;align-self:end}
   .pod--1 .pod__figure,.pod--3 .pod__figure{height:100% !important}
-  .pod__cut{max-width:100%}
+  .pod__cut{max-width:100%;height:100% !important}
   .pod__plate{grid-area:plate}
   .pod__cyl{grid-area:cyl;min-height:0 !important;padding:.6rem .85rem !important;border-radius:12px;
     display:grid;grid-template-columns:auto 1fr 1fr;align-items:center;gap:.5rem;box-shadow:0 0 26px -16px var(--rim)}
