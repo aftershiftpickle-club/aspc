@@ -465,7 +465,7 @@ const ANNOUNCEMENTS = {
       date: "2026-09-19",
       time: "7:00 PM – 10:00 PM",
       note: "Registration and final session details will be announced through the ASPC community."
-    }
+    },
     {
       name: "Saturday open play",
       date: "2026-09-20",
