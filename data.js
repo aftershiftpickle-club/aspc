@@ -385,14 +385,20 @@ const ANNOUNCEMENTS = {
   title: "Upcoming sessions",
   items: [
     {
+      name: "Tuesday open play",
+      date: "2026-09-15",
+      time: "7:00 PM – 10:00 PM",
+      note: "Registration and final session details will be announced through the ASPC community."
+    },
+    {
       name: "Friday open play",
-      date: "2026-09-11",
+      date: "2026-09-18",
       time: "7:00 PM – 10:00 PM",
       note: "Registration and final session details will be announced through the ASPC community."
     },
     {
       name: "Saturday open play",
-      date: "2026-09-12",
+      date: "2026-09-19",
       time: "7:00 PM – 10:00 PM",
       note: "Please arrive by 6:50 PM so we can check everyone in and start on time."
     }
