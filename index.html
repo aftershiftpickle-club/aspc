@@ -128,14 +128,14 @@ select:hover{border-color:var(--volt)}
    the player reads as standing on the podium rather than
    floating above it.                                           */
 .pod__figure{
-  position:relative;display:block;width:100%;height:158px;flex:none;
+  position:relative;display:block;width:100%;height:272px;flex:none;
   margin-bottom:-1.5rem;z-index:1;
 }
-.pod--1 .pod__figure{height:198px}
-.pod--3 .pod__figure{height:150px}
+.pod--1 .pod__figure{height:336px}
+.pod--3 .pod__figure{height:258px}
 .pod__cut{
   position:absolute;left:50%;bottom:0;transform:translateX(-50%);
-  height:100%;width:auto;max-width:135%;object-fit:contain;object-position:bottom center;
+  height:100%;width:auto;max-width:150%;object-fit:contain;object-position:bottom center;
   filter:drop-shadow(0 10px 16px rgba(0,0,0,.65));pointer-events:none;
 }
 .pod__plate,.pod__cyl{position:relative;z-index:2}
@@ -331,12 +331,12 @@ footer{border-top:1px solid #1E1E1E;padding:1.7rem 0 2.6rem;color:var(--muted);f
   .court{padding:1.8rem 0 2.2rem}
   .court::before,.court::after{width:70px}
   .podium{grid-template-columns:1fr;gap:.8rem;align-items:stretch}
-  .pod{display:grid;grid-template-columns:72px 1fr;grid-template-areas:"photo plate" "photo cyl";
+  .pod{display:grid;grid-template-columns:92px 1fr;grid-template-areas:"photo plate" "photo cyl";
        align-items:center;gap:.5rem .85rem;text-align:left}
   .pod--1{order:-1}
   .pod__photo{grid-area:photo;width:64px !important;height:64px !important;font-size:1.3rem !important}
-  .pod__figure{grid-area:photo;width:72px !important;height:100% !important;
-    min-height:96px;margin:0 !important;align-self:end}
+  .pod__figure{grid-area:photo;width:92px !important;height:100% !important;
+    min-height:132px;margin:0 !important;align-self:end}
   .pod--1 .pod__figure,.pod--3 .pod__figure{height:100% !important}
   .pod__cut{max-width:100%}
   .pod__plate{grid-area:plate}
