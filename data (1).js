@@ -242,6 +242,13 @@ const ALBUMS = [
     url: "https://drive.google.com/drive/folders/1oHnQqSrIACIAXa5G-j8b0zIKdehFLntZ?usp=sharing",
     cover: ""
   }, 
+   {
+    date: "2026-08-22",
+    title: "August 22, 2026 LNP & Ascend",
+    description: "Learm & Play and Ascend.",
+    url: "https://drive.google.com/drive/folders/1QWheNr5hU6zPdCKVZe-IZOAPjIaVRkD0?usp=drive_link",
+    cover: ""
+  }, 
    
 ];
 
