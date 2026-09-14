@@ -105,7 +105,7 @@ select:hover{border-color:var(--volt)}
   font-size:clamp(2.6rem,9vw,5rem);letter-spacing:.005em;text-transform:uppercase;
   text-shadow:0 0 34px rgba(199,217,44,.35);margin-bottom:.55rem;
 }
-.court__date{font-size:1rem;font-weight:600;color:#fff;margin:.9rem 0 1rem;letter-spacing:.04em}
+.court__date{font-size:1rem;font-weight:600;color:#fff;margin:.9rem 0 1.4rem;letter-spacing:.04em}
 .court__empty{color:var(--muted);padding:1.5rem 0 .5rem}
 
 .podium{display:grid;grid-template-columns:1fr 1.22fr 1fr;gap:1rem;align-items:end;text-align:center}
@@ -132,12 +132,22 @@ select:hover{border-color:var(--volt)}
    space inside the PNG doesn't turn into a gap under the heading.
    Change the .pod__cut heights to resize the players; change the
    .pod__figure heights to control how much room is reserved.   */
+/* Each slot reserves exactly the height of the figure standing in
+   it, so a player can never ride up over the date line above.
+
+   Resize the players by changing BOTH numbers for a place to the
+   same value — the .pod__figure height and the .pod__cut height.
+   They are kept equal on purpose.
+
+   If someone shows a gap above their head, that empty space is
+   inside their PNG. Crop the file so its top edge meets the top
+   of their hair, rather than changing the numbers here.        */
 .pod__figure{
-  position:relative;display:block;width:100%;height:232px;flex:none;
+  position:relative;display:block;width:100%;height:358px;flex:none;
   margin-bottom:-1.5rem;z-index:1;
 }
-.pod--1 .pod__figure{height:315px}
-.pod--3 .pod__figure{height:222px}
+.pod--1 .pod__figure{height:404px}
+.pod--3 .pod__figure{height:342px}
 .pod__cut{
   position:absolute;left:50%;bottom:0;transform:translateX(-50%);
   height:358px;width:auto;max-width:165%;object-fit:contain;object-position:bottom center;
