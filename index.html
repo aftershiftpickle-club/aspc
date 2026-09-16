@@ -258,6 +258,15 @@ tr.org .who span{color:#9BA294}
 .album__cover img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;z-index:1}
 .album__cover span{position:relative;font-family:"Anton",sans-serif;color:var(--volt);font-size:1.25rem;
   text-transform:uppercase;letter-spacing:.02em}
+/* Cover photo fade: when an album has a cover photo, the bottom of the
+   photo fades to dark and the date sits in the corner on top of it.
+   Make the fade darker or lighter by changing .8 (e.g. .6 or .9).
+   For a fade over the WHOLE photo with the date in the middle, replace
+   these two lines with:
+   .album__cover:has(img)::after{content:"";position:absolute;inset:0;z-index:2;background:rgba(0,0,0,.45)}
+   .album__cover span{z-index:3}                                        */
+.album__cover:has(img)::after{content:"";position:absolute;inset:0;z-index:2;background:linear-gradient(to top,rgba(0,0,0,.8),transparent 55%)}
+.album__cover:has(img) span{position:absolute;left:14px;bottom:10px;z-index:3}
 .album__body{padding:1.05rem 1.15rem 1.25rem;display:flex;flex-direction:column;gap:.4rem;flex:1}
 .album__body h3{font-size:1.02rem;font-weight:700}
 .album__body p{margin:0;color:var(--muted);font-size:.88rem}
