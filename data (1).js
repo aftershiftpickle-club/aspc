@@ -217,7 +217,14 @@ const MATCHES = [
 /* 8. PHOTO ALBUMS -----------------------------------------
    Paste the share link from Google Photos (Album > Share >
    Create link > Copy). cover can stay "" — the card draws a
-   court pattern instead. One block per album:
+   court pattern instead.
+
+   COVER PHOTOS: save one picture per album inside the folder
+   photos/albums/ (next to index.html), named with the album's
+   date, lowercase .jpg:  photos/albums/2026-09-04.jpg
+   Leave cover as "" and the site finds it automatically. The
+   date then shows faded in the corner of the photo.
+   One block per album:
 
    {
      date: "2026-09-11",
