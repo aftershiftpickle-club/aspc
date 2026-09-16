@@ -233,7 +233,7 @@ const ALBUMS = [
     title: "August 1, 2026 Open Play",
     description: "Regular and Ascend.",
     url: "https://drive.google.com/drive/folders/18J90HwSJBGXcmFHtwnCsHxF5aU_VC2uO?usp=drive_link",
-    cover: ""
+    cover: "https://drive.google.com/thumbnail?id=18J90HwSJBGXcmFHtwnCsHxF5aU_VC2uO"
   }, 
    {
     date: "2026-08-21",
@@ -245,7 +245,7 @@ const ALBUMS = [
    {
     date: "2026-08-22",
     title: "August 22, 2026 LNP & Ascend",
-    description: "Learm & Play and Ascend.",
+    description: "Learn & Play and Ascend.",
     url: "https://drive.google.com/drive/folders/1QWheNr5hU6zPdCKVZe-IZOAPjIaVRkD0?usp=drive_link",
     cover: ""
   }, 
