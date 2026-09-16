@@ -271,17 +271,10 @@ const ALBUMS = [
     cover: ""
   }, 
    {
-    date: "2026-09-11",
-    title: "Sept 11, 2026 Open Play",
-    description: "Regular and Ascend.",
-    url: "https://drive.google.com/drive/folders/1zwYg3nRLVPJIOV2npW5IgtT24Efzdusn?usp=drive_link",
-    cover: ""
-  }, 
-   {
-    date: "2026-09-15",
+    date: "2026-09-16",
     title: "Sept 15, 2026 Social Play",
-    description: "Regular and Ascend.",
-    url: "https://drive.google.com/drive/folders/1ZYI2ntfxvEaQ_X85xyoc8ALWB4LyGmjT?usp=drive_link",
+    description: "Tuesday Social/Open Play",
+    url: "https://drive.google.com/drive/folders/1ZYI2ntfxvEaQ_X85xyoc8ALWB4LyGmjT?usp=share_link",
     cover: ""
   }, 
    
