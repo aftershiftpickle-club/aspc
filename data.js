@@ -233,7 +233,7 @@ const ALBUMS = [
     title: "August 1, 2026 Open Play",
     description: "Regular and Ascend.",
     url: "https://drive.google.com/drive/folders/18J90HwSJBGXcmFHtwnCsHxF5aU_VC2uO?usp=drive_link",
-    cover: ""
+    cover: "https://drive.google.com/thumbnail?id=18J90HwSJBGXcmFHtwnCsHxF5aU_VC2uO"
   }, 
    {
     date: "2026-08-21",
@@ -245,7 +245,7 @@ const ALBUMS = [
    {
     date: "2026-08-22",
     title: "August 22, 2026 LNP & Ascend",
-    description: "Learm & Play and Ascend.",
+    description: "Learn & Play and Ascend.",
     url: "https://drive.google.com/drive/folders/1QWheNr5hU6zPdCKVZe-IZOAPjIaVRkD0?usp=drive_link",
     cover: ""
   }, 
@@ -480,20 +480,14 @@ const ANNOUNCEMENTS = {
   title: "Upcoming sessions",
   items: [
     {
-      name: "Tuesday Open Play",
-      date: "2026-09-15",
-      time: "7:00 PM – 10:00 PM",
-      note: "Registration and final session details will be announced through the ASPC community."
-    },
-     {
-      name: "Friday Open Play",
-      date: "2026-09-18",
+      name: "Friday open play",
+      date: "2026-09-11",
       time: "7:00 PM – 10:00 PM",
       note: "Registration and final session details will be announced through the ASPC community."
     },
     {
       name: "Saturday open play",
-      date: "2026-09-20",
+      date: "2026-09-12",
       time: "7:00 PM – 10:00 PM",
       note: "Please arrive by 6:50 PM so we can check everyone in and start on time."
     }
