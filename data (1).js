@@ -233,7 +233,7 @@ const ALBUMS = [
     title: "August 1, 2026 Open Play",
     description: "Regular and Ascend.",
     url: "https://drive.google.com/drive/folders/18J90HwSJBGXcmFHtwnCsHxF5aU_VC2uO?usp=drive_link",
-    cover: "https://drive.google.com/thumbnail?id=18J90HwSJBGXcmFHtwnCsHxF5aU_VC2uO&sz=w800"
+    cover: "https://drive.google.com/thumbnail?id=1FnMcpvFg2qY9_4OLAjP0onKoHwBF8FLO=w800"
   }, 
    {
     date: "2026-08-21",
