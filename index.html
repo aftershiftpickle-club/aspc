@@ -605,10 +605,15 @@ async function loadFromDatabase(){
     }
   };
   try {
-    const [players, matches] = await Promise.all([
+    const [players, allMatches, published] = await Promise.all([
       getAll("players?select=id,name,photo_url,organiser&order=id"),
-      getAll("matches?select=session_date,division,game,team1,team2,score1,score2&order=session_date,id")
+      getAll("matches?select=session_id,session_date,division,game,team1,team2,score1,score2&order=session_date,id"),
+      getAll("sessions?select=id&published=eq.true")
     ]);
+    /* Only sessions an organiser has tapped "Publish" on are shown.
+       Drafts stay private in admin.html until they're checked.      */
+    const pub = new Set(published.map(s => s.id));
+    const matches = allMatches.filter(m => pub.has(m.session_id));
     /* keep anything extra from data.js, like a photo "focus" setting */
     const extra = Object.fromEntries(PLAYERS.map(p => [p.id, p]));
     const fromDb = players.map(p => ({
