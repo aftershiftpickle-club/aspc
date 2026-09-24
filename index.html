@@ -611,17 +611,28 @@ async function loadFromDatabase(){
     ]);
     /* keep anything extra from data.js, like a photo "focus" setting */
     const extra = Object.fromEntries(PLAYERS.map(p => [p.id, p]));
-    ROSTER = players.map(p => ({
+    const fromDb = players.map(p => ({
       ...(extra[p.id] || {}),
       id: p.id,
       name: p.name,
       photo: p.photo_url || (extra[p.id] && extra[p.id].photo) || "",
-      organiser: !!p.organiser
+      /* data.js wins if it says something (e.g. organiser: ["regular"]),
+         otherwise the Organiser tick from admin.html is used.          */
+      organiser: (extra[p.id] && extra[p.id].organiser !== undefined)
+        ? extra[p.id].organiser : !!p.organiser
     }));
-    GAMES = matches.map(m => ({
+    const inDb = new Set(fromDb.map(p => p.id));
+    ROSTER = fromDb.concat(PLAYERS.filter(p => !inDb.has(p.id)));
+
+    const dbGames = matches.map(m => ({
       date: m.session_date, div: m.division, game: m.game,
       team1: m.team1, team2: m.team2, score1: m.score1, score2: m.score2
     }));
+    /* SAFETY NET: any session that is only in data.js (not yet in
+       the database) is still shown, so older results and podiums
+       can never disappear. If a date is in both, the database wins. */
+    const dbDates = new Set(dbGames.map(g => g.date));
+    GAMES = dbGames.concat(MATCHES.filter(m => !dbDates.has(m.date)));
   } catch (err){
     console.warn("Could not reach the database — showing data.js instead.", err);
   }
@@ -771,7 +782,10 @@ function standings(date, div){
     const gp = r.wins + r.losses;
     const player = byId[r.id] || { id:r.id, name:r.name, photo:"" };
     return { ...r, gp, pct: gp ? Math.round(r.wins / gp * 100) : 0,
-             streak: streakOf(r.seq), player, organiser: !!player.organiser };
+             streak: streakOf(r.seq), player,
+             /* organiser: true = every division; ["regular"] = Regular only */
+             organiser: Array.isArray(player.organiser)
+               ? player.organiser.includes(div) : !!player.organiser };
   });
 
   const order = (a,b) => b.pct - a.pct || b.streak - a.streak
