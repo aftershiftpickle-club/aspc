@@ -332,7 +332,10 @@ function sessBar(){
     ${tab==='rally'&&s?`<label class="chk"><input type="checkbox" data-act="autoFill" ${autoFill?'checked':''}>Auto-fill courts</label>
       <label class="chk"><input type="checkbox" data-act="balance" ${balance?'checked':''}>Balance by DUPR</label>`:''}
     ${s&&s.status!=='live'?`<button class="btn sm" data-act="goLive">▶ Go live</button>`:''}
-    ${s&&s.status==='live'?`<button class="btn danger sm" data-act="endSession">🏁 End session</button>`:''}</div>`;
+    ${s&&s.status==='live'?`<button class="btn danger sm" data-act="endSession">🏁 End session</button>`:''}
+    ${s?(s.published
+      ?`<span class="chip" style="color:#0A0A0A;background:var(--volt);border-color:var(--volt)">✓ On website</span><button class="btn quiet sm" data-act="unpublish">Unpublish</button>`
+      :`<span class="chip" style="color:#e0a868;border-color:#6b4a22">Draft · not on website</span><button class="btn sm" data-act="publish">📣 Publish results</button>`):''}</div>`;
 }
 const noSession=()=>`<div class="empty"><p>No session selected yet.</p><button class="btn" data-act="newSession">+ Create your first session</button></div>`;
 
@@ -407,7 +410,8 @@ function poolCard(p){
 /* ---- Results ---- */
 function resultsView(){
   if(!cur) return noSession();
-  return `<div class="sec-head"><div><h2>Results · ${fmtDate(curS().session_date)}</h2><p>These feed the podium and standings on the website.</p></div></div>
+  return `<div class="sec-head"><div><h2>Results · ${fmtDate(curS().session_date)}</h2><p>${curS().published?'✓ Published — these are showing on the website podium and standings.':'Draft — only organisers can see these. Check every score, fix anything with Edit, then publish.'}</p></div>
+    ${curS().published?'':'<button class="btn" data-act="publish">📣 Publish results</button>'}</div>
   <div class="card">${matches.map(m=>{const aw=m.score1>m.score2;
     return `<div class="rrow"><span class="dim" style="font-size:.78rem">${fmtTime(m.created_at)}<br><span class="chip ${m.division}">${esc(m.court||DIVS[m.division])} · G${m.game??''}</span></span>
       <span class="${aw?'won':'lost'}">${aw?'🏆 ':''}${names(m.team1)}</span><span class="sc">${m.score1}–${m.score2}</span>
@@ -531,8 +535,15 @@ async function act(d,el,e){
       need(await sb.from('sessions').update({status:'live'}).eq('id',cur));
       await loadAll();render();toast('Live! The TV and website now show this session');break;
     case 'endSession':
-      if(!confirm('End this session? The results stay saved on the website.'))break;
-      need(await sb.from('sessions').update({status:'ended'}).eq('id',cur));await loadAll();render();toast('Session ended — results saved');break;
+      if(!confirm('End this session? Results are saved as a draft — check them in the Results tab, then tap Publish.'))break;
+      need(await sb.from('sessions').update({status:'ended'}).eq('id',cur));await loadAll();tab='results';render();scrollTo(0,0);
+      toast('Session ended — check the scores, then tap 📣 Publish results');break;
+    case 'publish':
+      if(!confirm('Publish these results? The podium and standings on the website will update for everyone.'))break;
+      need(await sb.from('sessions').update({published:true}).eq('id',cur));await loadAll();render();toast('Published ✓ The website now shows this session');break;
+    case 'unpublish':
+      if(!confirm('Hide these results from the website? Nothing is deleted — you can publish again any time.'))break;
+      need(await sb.from('sessions').update({published:false}).eq('id',cur));await loadAll();render();toast('Hidden from the website — nothing deleted');break;
     case 'fill': await fillCourt(court());render();break;
     case 'undo': await undoCourt(court());render();toast('Game undone — those four are back in their old places');break;
     case 'record': openScore('record',Number(d.id));break;
