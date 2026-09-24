@@ -112,20 +112,12 @@ const DIVISIONS = [
 
        { id: "john", name: "John Smith", photo: "" },
 
-   ORGANISERS (/O): shown at the bottom of the standings, never
-   on the podium.
-       organiser: true           → organiser in every division
-       organiser: ["regular"]    → organiser in Regular only
-       organiser: ["ascend"]     → organiser in Ascend only
-
    PHOTOS: leave the photo line as "" and save the picture as the
    player's id — john.jpg — inside the photos folder. No file yet?
    Their initials show instead. Nothing breaks.
    --------------------------------------------------------- */
 const PLAYERS = [
   { id: "adrian",     name: "Adrian",     photo: "" },
-  { id: "ayah",       name: "Ayah",       photo: "", organiser: ["regular"] },
-  { id: "benz",       name: "Benz",       photo: "", organiser: true },
   { id: "bon",        name: "Bon",        photo: "", organiser: true },
   { id: "christian",  name: "Christian",  photo: "" },
   { id: "clark",      name: "Clark",      photo: "" },
@@ -133,36 +125,26 @@ const PLAYERS = [
   { id: "david",      name: "David",      photo: "" },
   { id: "ejay",       name: "Ejay",       photo: "" },
   { id: "emman",      name: "Emman",      photo: "" },
-  { id: "gerard",     name: "Gerard",     photo: "" },
   { id: "gilbert",    name: "Gilbert",    photo: "" },
   { id: "hubert",     name: "Hubert",     photo: "" },
-  { id: "ian",        name: "Ian",        photo: "" },
   { id: "janelle",    name: "Janelle",    photo: "" },
   { id: "jared",      name: "Jared",      photo: "", organiser: true },
   { id: "jelo",       name: "Jelo",       photo: "" },
-  { id: "jes",        name: "Jes",        photo: "", organiser: true },
   { id: "joy",        name: "Joy",        photo: "" },
   { id: "julian",     name: "Julian",     photo: "" },
   { id: "justin",     name: "Justin",     photo: "" },
   { id: "karen",      name: "Karen",      photo: "" },
-  { id: "khayji",     name: "Khayji",     photo: "" },
-  { id: "lovemarie",  name: "Lovemarie",  photo: "" },
   { id: "marie",      name: "Marie",      photo: "" },
   { id: "maryan",     name: "Maryan",     photo: "" },
   { id: "mitch",      name: "Mitch",      photo: "" },
   { id: "nique",      name: "Nique",      photo: "" },
   { id: "paul",       name: "Paul",       photo: "", organiser: true },
-  { id: "pearl",      name: "Pearl",      photo: "" },
   { id: "pj",         name: "PJ",         photo: "" },
-  { id: "raistlin",   name: "Raistlin",   photo: "" },
   { id: "rocelyn",    name: "Rocelyn",    photo: "" },
   { id: "russel",     name: "Russel",     photo: "" },
-  { id: "sai",        name: "Sai",        photo: "" },
   { id: "sam",        name: "Sam",        photo: "" },
   { id: "sandy",      name: "Sandy",      photo: "" },
-  { id: "warren",     name: "Warren",     photo: "" },
-  { id: "winter",     name: "Winter",     photo: "" },
-  { id: "yuan",       name: "Yuan",       photo: "" }
+  { id: "warren",     name: "Warren",     photo: "" }
 ];
 
 
@@ -171,8 +153,7 @@ const PLAYERS = [
 
    date    written YYYY-MM-DD
    div     "regular" or "ascend" — keeps the two rankings apart
-   game    numbering starts at 1 again for each division, in the
-           order the games were played (game 1 = first game)
+   game    numbering starts at 1 again for each division
    team1   the two player ids on one side
    team2   the two player ids on the other side
    score1  team1's score        score2  team2's score
@@ -229,60 +210,7 @@ const MATCHES = [
   { date: "2026-09-11", div: "regular",  game: 23, team1: ["warren", "ejay"],         team2: ["jelo", "clark"],          score1: 11, score2:  2 },
   { date: "2026-09-11", div: "ascend",   game: 19, team1: ["christian", "pj"],        team2: ["adrian", "justin"],       score1:  4, score2:  9 },
   { date: "2026-09-11", div: "regular",  game: 24, team1: ["bon", "david"],           team2: ["paul", "jared"],          score1: 11, score2: 12 },
-  { date: "2026-09-11", div: "ascend",   game: 20, team1: ["rocelyn", "sandy"],       team2: ["gilbert", "nique"],       score1:  9, score2: 11 },
-
-  /* ---- Friday 18 September 2026 — Regular ---- */
-  { date: "2026-09-18", div: "regular",  game:  1, team1: ["jelo", "christian"],      team2: ["raistlin", "bon"],        score1:  9, score2: 11 },
-  { date: "2026-09-18", div: "regular",  game:  2, team1: ["russel", "clark"],        team2: ["karen", "david"],         score1:  6, score2: 11 },
-  { date: "2026-09-18", div: "regular",  game:  3, team1: ["jared", "jes"],           team2: ["benz", "paul"],           score1:  5, score2:  8 },
-  { date: "2026-09-18", div: "regular",  game:  4, team1: ["warren", "yuan"],         team2: ["gerard", "christian"],    score1:  0, score2: 11 },
-  { date: "2026-09-18", div: "regular",  game:  5, team1: ["jelo", "karen"],          team2: ["david", "russel"],        score1:  5, score2: 11 },
-  { date: "2026-09-18", div: "regular",  game:  6, team1: ["bon", "benz"],            team2: ["paul", "gerard"],         score1:  4, score2: 11 },
-  { date: "2026-09-18", div: "regular",  game:  7, team1: ["jared", "christian"],     team2: ["david", "jelo"],          score1: 10, score2:  7 },
-  { date: "2026-09-18", div: "regular",  game:  8, team1: ["raistlin", "warren"],     team2: ["clark", "yuan"],          score1:  7, score2: 10 },
-  { date: "2026-09-18", div: "regular",  game:  9, team1: ["russel", "benz"],         team2: ["paul", "karen"],          score1:  9, score2: 11 },
-  { date: "2026-09-18", div: "regular",  game: 10, team1: ["gerard", "jelo"],         team2: ["bon", "david"],           score1:  3, score2: 11 },
-  { date: "2026-09-18", div: "regular",  game: 11, team1: ["jared", "warren"],        team2: ["yuan", "christian"],      score1:  9, score2: 11 },
-  { date: "2026-09-18", div: "regular",  game: 12, team1: ["clark", "benz"],          team2: ["karen", "raistlin"],      score1:  7, score2:  8 },
-  { date: "2026-09-18", div: "regular",  game: 13, team1: ["paul", "david"],          team2: ["bon", "gerard"],          score1:  5, score2: 11 },
-  { date: "2026-09-18", div: "regular",  game: 14, team1: ["russel", "jelo"],         team2: ["yuan", "christian"],      score1:  0, score2: 11 },
-  { date: "2026-09-18", div: "regular",  game: 15, team1: ["bon", "jes"],             team2: ["benz", "ayah"],           score1:  5, score2:  8 },
-  { date: "2026-09-18", div: "regular",  game: 16, team1: ["clark", "yuan"],          team2: ["paul", "christian"],      score1:  5, score2: 11 },
-  { date: "2026-09-18", div: "regular",  game: 17, team1: ["warren", "gerard"],       team2: ["jared", "jelo"],          score1: 10, score2:  7 },
-  { date: "2026-09-18", div: "regular",  game: 18, team1: ["raistlin", "benz"],       team2: ["karen", "russel"],        score1:  9, score2:  6 },
-  { date: "2026-09-18", div: "regular",  game: 19, team1: ["yuan", "christian"],      team2: ["david", "clark"],         score1:  6, score2: 10 },
-  { date: "2026-09-18", div: "regular",  game: 20, team1: ["warren", "bon"],          team2: ["jared", "gerard"],        score1:  5, score2: 11 },
-  { date: "2026-09-18", div: "regular",  game: 21, team1: ["paul", "jelo"],           team2: ["raistlin", "benz"],       score1: 11, score2:  5 },
-  { date: "2026-09-18", div: "regular",  game: 22, team1: ["russel", "yuan"],         team2: ["karen", "christian"],     score1:  8, score2:  4 },
-  { date: "2026-09-18", div: "regular",  game: 23, team1: ["david", "warren"],        team2: ["clark", "gerard"],        score1: 11, score2:  8 },
-  { date: "2026-09-18", div: "regular",  game: 24, team1: ["raistlin", "bon"],        team2: ["jelo", "benz"],           score1:  8, score2:  6 },
-  { date: "2026-09-18", div: "regular",  game: 25, team1: ["jared", "gerard"],        team2: ["paul", "clark"],          score1: 11, score2:  4 },
-  { date: "2026-09-18", div: "regular",  game: 26, team1: ["david", "karen"],         team2: ["russel", "warren"],       score1: 11, score2:  3 },
-  { date: "2026-09-18", div: "regular",  game: 27, team1: ["ayah", "jes"],            team2: ["karen", "russel"],        score1: 11, score2:  9 },
-  { date: "2026-09-18", div: "regular",  game: 28, team1: ["raistlin", "yuan"],       team2: ["clark", "warren"],        score1: 15, score2:  8 },
-
-  /* ---- Friday 18 September 2026 — Ascend ---- */
-  { date: "2026-09-18", div: "ascend",   game:  1, team1: ["adrian", "emman"],        team2: ["sai", "khayji"],          score1:  6, score2:  9 },
-  { date: "2026-09-18", div: "ascend",   game:  2, team1: ["lovemarie", "joy"],       team2: ["mitch", "maryan"],        score1:  0, score2: 11 },
-  { date: "2026-09-18", div: "ascend",   game:  3, team1: ["pj", "justin"],           team2: ["gilbert", "ian"],         score1:  6, score2:  5 },
-  { date: "2026-09-18", div: "ascend",   game:  4, team1: ["sandy", "ayah"],          team2: ["jes", "sai"],             score1:  5, score2: 10 },
-  { date: "2026-09-18", div: "ascend",   game:  5, team1: ["winter", "emman"],        team2: ["khayji", "pearl"],        score1: 11, score2:  3 },
-  { date: "2026-09-18", div: "ascend",   game:  6, team1: ["adrian", "mitch"],        team2: ["maryan", "pj"],           score1:  5, score2: 11 },
-  { date: "2026-09-18", div: "ascend",   game:  7, team1: ["lovemarie", "gilbert"],   team2: ["joy", "ian"],             score1:  6, score2:  8 },
-  { date: "2026-09-18", div: "ascend",   game:  8, team1: ["sandy", "pearl"],         team2: ["ayah", "mitch"],          score1:  4, score2: 11 },
-  { date: "2026-09-18", div: "ascend",   game:  9, team1: ["justin", "adrian"],       team2: ["emman", "pj"],            score1:  3, score2: 11 },
-  { date: "2026-09-18", div: "ascend",   game: 10, team1: ["winter", "khayji"],       team2: ["sai", "maryan"],          score1:  6, score2: 11 },
-  { date: "2026-09-18", div: "ascend",   game: 11, team1: ["joy", "gilbert"],         team2: ["ian", "lovemarie"],       score1:  7, score2:  8 },
-  { date: "2026-09-18", div: "ascend",   game: 12, team1: ["sandy", "justin"],        team2: ["pearl", "mitch"],         score1: 11, score2:  4 },
-  { date: "2026-09-18", div: "ascend",   game: 13, team1: ["emman", "sai"],           team2: ["pj", "adrian"],           score1: 10, score2: 11 },
-  { date: "2026-09-18", div: "ascend",   game: 14, team1: ["maryan", "khayji"],       team2: ["lovemarie", "joy"],       score1: 11, score2:  5 },
-  { date: "2026-09-18", div: "ascend",   game: 15, team1: ["sandy", "mitch"],         team2: ["justin", "pj"],           score1:  4, score2:  8 },
-  { date: "2026-09-18", div: "ascend",   game: 16, team1: ["adrian", "sai"],          team2: ["maryan", "lovemarie"],    score1: 11, score2:  6 },
-  { date: "2026-09-18", div: "ascend",   game: 17, team1: ["winter", "pearl"],        team2: ["ian", "gilbert"],         score1:  2, score2: 10 },
-  { date: "2026-09-18", div: "ascend",   game: 18, team1: ["emman", "khayji"],        team2: ["joy", "justin"],          score1: 11, score2:  4 },
-  { date: "2026-09-18", div: "ascend",   game: 19, team1: ["sandy", "pj"],            team2: ["maryan", "lovemarie"],    score1:  5, score2:  8 },
-  { date: "2026-09-18", div: "ascend",   game: 20, team1: ["ian", "mitch"],           team2: ["gilbert", "adrian"],      score1:  2, score2: 11 },
-  { date: "2026-09-18", div: "ascend",   game: 21, team1: ["winter", "pj"],           team2: ["pearl", "justin"],        score1:  6, score2:  7 }
+  { date: "2026-09-11", div: "ascend",   game: 20, team1: ["rocelyn", "sandy"],       team2: ["gilbert", "nique"],       score1:  9, score2: 11 }
 ];
 
 
@@ -313,49 +241,50 @@ const ALBUMS = [
     description: "Regular and Ascend.",
     url: "https://drive.google.com/drive/folders/18J90HwSJBGXcmFHtwnCsHxF5aU_VC2uO?usp=drive_link",
     cover: ""
-  },
-  {
+  }, 
+   {
     date: "2026-08-21",
     title: "August 21, 2026 Open Play",
     description: "Regular and Ascend.",
     url: "https://drive.google.com/drive/folders/1oHnQqSrIACIAXa5G-j8b0zIKdehFLntZ?usp=sharing",
     cover: ""
-  },
-  {
+  }, 
+   {
     date: "2026-08-22",
     title: "August 22, 2026 LNP & Ascend",
     description: "Learn & Play and Ascend.",
     url: "https://drive.google.com/drive/folders/1QWheNr5hU6zPdCKVZe-IZOAPjIaVRkD0?usp=drive_link",
     cover: ""
-  },
-  {
+  }, 
+   {
     date: "2026-08-28",
     title: "August 28, 2026 Open Play",
     description: "Regular and Ascend.",
     url: "https://drive.google.com/drive/folders/1DJvrmR7VXC7dK9N1kJWQVmt3YVpCFuFF?usp=drive_link",
     cover: ""
-  },
-  {
+  }, 
+    {
     date: "2026-09-04",
     title: "Sept 4, 2026 Open Play",
     description: "Regular and Ascend.",
     url: "https://drive.google.com/drive/folders/1ICyb5uV0frpyunOKOsTdq_O1xZaHVeSH?usp=drive_link",
     cover: ""
-  },
-  {
+  }, 
+    {
     date: "2026-09-11",
     title: "Sept 11, 2026 Open Play",
     description: "Regular and Ascend",
     url: "https://drive.google.com/drive/folders/13PCHXqP0EpsuicrK87lyFUxTBNA_kAXL?usp=sharing",
     cover: ""
-  },
-  {
+  }, 
+   {
     date: "2026-09-15",
     title: "Sept 15, 2026 Social Play",
     description: "Tuesday Social/Open Play",
     url: "https://drive.google.com/drive/folders/1ZYI2ntfxvEaQ_X85xyoc8ALWB4LyGmjT?usp=share_link",
     cover: ""
-  }
+  }, 
+   
 ];
 
 
