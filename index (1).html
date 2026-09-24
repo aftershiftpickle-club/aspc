@@ -60,6 +60,9 @@ img{display:block;max-width:100%}
 .nav a{text-decoration:none;padding:.5rem .85rem;border-radius:999px;font-weight:600;font-size:.9rem;color:var(--muted)}
 .nav a:hover{color:#fff}
 .nav a[aria-current="page"]{background:var(--volt);color:#0A0A0A}
+.nav .livelink{display:inline-flex;align-items:center;gap:.4rem}
+.nav .livelink i{width:7px;height:7px;border-radius:50%;background:#E2543B;animation:livepulse 1.4s infinite}
+@keyframes livepulse{50%{opacity:.3}}
 
 /* ---------- date + division bar ---------- */
 .datebar{background:#0E0E0E;border-bottom:1px solid #1E1E1E}
@@ -382,11 +385,8 @@ footer{border-top:1px solid #1E1E1E;padding:1.7rem 0 2.6rem;color:var(--muted);f
   th:last-child,td:last-child{padding-right:.7rem}
   .who .avatar{width:32px;height:32px}
 }
-@media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}} 
-  /* About page: easier-to-read intro and closing lines */
-#aboutBlock .pull{font-family:"Montserrat",sans-serif;font-weight:600;font-size:1.15rem;
-  text-transform:none;letter-spacing:0;line-height:1.5}
-</style> 
+@media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
+</style>
 </head>
 <body>
 
@@ -418,6 +418,7 @@ footer{border-top:1px solid #1E1E1E;padding:1.7rem 0 2.6rem;color:var(--muted);f
     </a>
     <nav class="nav" id="nav" aria-label="Main">
       <a href="#/rankings">Rankings</a>
+      <a href="tv.html" class="livelink"><i></i>Live</a>
       <a href="#/games">Games</a>
       <a href="#/sessions">Sessions</a>
       <a href="#/schedule">Schedule</a>
@@ -444,7 +445,7 @@ footer{border-top:1px solid #1E1E1E;padding:1.7rem 0 2.6rem;color:var(--muted);f
       <div class="wrap court__in">
         <h1>Open Play</h1>
         <p class="eyebrow" id="courtSub">Session results</p>
-        <p class="court__date" id="courtTitle"></p>
+        <p class="court__date" id="courtTitle">Loading…</p>
         <div class="podium" id="podium"></div>
       </div>
     </div>
@@ -577,9 +578,58 @@ footer{border-top:1px solid #1E1E1E;padding:1.7rem 0 2.6rem;color:var(--muted);f
 
 <script src="data.js"></script>
 <script>
+/* ---------- database (Supabase) ----------
+   Players and games now come from the database, which you fill in
+   from admin.html. If the database can't be reached for any reason,
+   the site quietly falls back to the PLAYERS and MATCHES lists in
+   data.js, so it never shows a blank page.
+
+   Everything else (words, sessions, FAQ, albums) still comes from
+   data.js exactly as before.                                        */
+const SUPABASE_URL = "https://wczulosdzoewznxlawfj.supabase.co";
+const SUPABASE_KEY = "sb_publishable_ZPRnMslT6BWplkRvVaiRXA_PUh-bQlO";
+
+let ROSTER = PLAYERS;
+let GAMES  = MATCHES;
+
+async function loadFromDatabase(){
+  const get = path => fetch(`${SUPABASE_URL}/rest/v1/${path}`, { headers: { apikey: SUPABASE_KEY } })
+    .then(r => { if (!r.ok) throw new Error("Database said " + r.status); return r.json(); });
+  const getAll = async path => {
+    let out = [], from = 0;
+    while (true){
+      const rows = await get(`${path}&limit=1000&offset=${from}`);
+      out = out.concat(rows);
+      if (rows.length < 1000) return out;
+      from += 1000;
+    }
+  };
+  try {
+    const [players, matches] = await Promise.all([
+      getAll("players?select=id,name,photo_url,organiser&order=id"),
+      getAll("matches?select=session_date,division,game,team1,team2,score1,score2&order=session_date,id")
+    ]);
+    /* keep anything extra from data.js, like a photo "focus" setting */
+    const extra = Object.fromEntries(PLAYERS.map(p => [p.id, p]));
+    ROSTER = players.map(p => ({
+      ...(extra[p.id] || {}),
+      id: p.id,
+      name: p.name,
+      photo: p.photo_url || (extra[p.id] && extra[p.id].photo) || "",
+      organiser: !!p.organiser
+    }));
+    GAMES = matches.map(m => ({
+      date: m.session_date, div: m.division, game: m.game,
+      team1: m.team1, team2: m.team2, score1: m.score1, score2: m.score2
+    }));
+  } catch (err){
+    console.warn("Could not reach the database — showing data.js instead.", err);
+  }
+}
+
 /* ---------- helpers ---------- */
 const $ = id => document.getElementById(id);
-const byId = Object.fromEntries(PLAYERS.map(p => [p.id, p]));
+let byId = {};
 const nameOf = id => (byId[id] ? byId[id].name : id);
 
 function fmtDate(iso){
@@ -594,9 +644,10 @@ function ordinal(n){
   return n + (s[(v - 20) % 10] || s[v] || s[0]);
 }
 
-/* Player photos: drop a file into the photos/ folder named after the
-   player id (photos/john.jpg). The site tries jpg, jpeg, png and webp,
-   and falls back to the player's initials if there's no file yet.      */
+/* Player photos: a photo uploaded in admin.html is used first. If
+   there isn't one, the site looks in the photos/ folder for a file
+   named after the player id (photos/john.jpg), trying jpg, jpeg, png
+   and webp, and falls back to the player's initials.                 */
 const PHOTO_EXTS = ["jpg","jpeg","png","webp"];
 
 function avatar(player, cls){
@@ -678,14 +729,10 @@ document.addEventListener("error", e => {
    below them moves up a place, and the organisers are added at
    the bottom with /O after their name.
 
-   To mark someone as an organiser, add  organiser: true  to
-   their line in data.js, like this:
-
-       { id: "paul", name: "Paul", photo: "", organiser: true },
-
-   Remove that and they go straight back into the rankings.     */
+   To mark someone as an organiser, tick "Organiser" when you edit
+   them in admin.html.                                           */
 function gamesOn(date, div){
-  return MATCHES.filter(m => m.date === date && (m.div || "regular") === div);
+  return GAMES.filter(m => m.date === date && (m.div || "regular") === div);
 }
 
 /* How many games in a row they've won or lost. Positive is a win
@@ -705,8 +752,8 @@ function standings(date, div){
   const seen = p => rows[p] || (rows[p] = { id:p, name:nameOf(p), wins:0, losses:0, diff:0, seq:[] });
 
   /* Always read the games in the order they were played, so the
-     streak is right even if the list in data.js is pasted in a
-     different order. Game 1 first, game 2 next, and so on.       */
+     streak is right even if they were entered in a different order.
+     Game 1 first, game 2 next, and so on.                         */
   gamesOn(date, div).slice().sort((a,b) => (a.game || 0) - (b.game || 0)).forEach(m => {
     const t1won = m.score1 > m.score2;
     const margin = m.score1 - m.score2;
@@ -738,8 +785,8 @@ function standings(date, div){
   return all;
 }
 
-const dates = [...new Set(MATCHES.map(m => m.date))].sort().reverse();
-let current = dates[0];
+let dates = [];
+let current;
 let currentDiv = DIVISIONS[0].id;
 const divName = id => (DIVISIONS.find(d => d.id === id) || {}).name || id;
 
@@ -752,7 +799,7 @@ function ensureDivision(){
 
 /* ---------- rendering ---------- */
 function renderRankings(){
-  /* No games in data.js yet — show a friendly placeholder instead. */
+  /* No games yet — show a friendly placeholder instead. */
   if (!current){
     $("courtSub").textContent = `${divName(currentDiv)} session results`;
     $("courtTitle").textContent = "No sessions recorded yet";
@@ -1051,8 +1098,6 @@ function renderFaq(){
 }
 
 /* ---------- date and division selectors ---------- */
-$("dateSelect").innerHTML = dates.map(d => `<option value="${d}">${fmtDate(d)}</option>`).join("");
-$("dateSelect").value = current;
 $("dateSelect").addEventListener("change", e => {
   current = e.target.value;
   ensureDivision();
@@ -1100,10 +1145,11 @@ function route(){
 }
 window.addEventListener("hashchange", route);
 
+/* ---------- start ----------
+   The pages made of words appear straight away. Rankings and games
+   fill in a moment later, once the database has answered.          */
 renderClub();
 renderHero();
-ensureDivision();
-refresh();
 renderAlbums();
 renderSessions();
 renderSchedule();
@@ -1112,6 +1158,17 @@ renderGallery();
 renderCommunity();
 renderFaq();
 route();
+
+(async function start(){
+  await loadFromDatabase();
+  byId = Object.fromEntries(ROSTER.map(p => [p.id, p]));
+  dates = [...new Set(GAMES.map(m => m.date))].sort().reverse();
+  current = dates[0];
+  $("dateSelect").innerHTML = dates.map(d => `<option value="${d}">${fmtDate(d)}</option>`).join("");
+  if (current) $("dateSelect").value = current;
+  ensureDivision();
+  refresh();
+})();
 </script>
 </body>
 </html>
