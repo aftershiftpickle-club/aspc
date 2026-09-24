@@ -189,7 +189,7 @@ const DIVS = {regular:'Regular', ascend:'Ascend'};
 /* ---------- state ---------- */
 let user=null, tab='rally', busy=false, channel=null;
 let players={}, priv={}, sessions=[], cur=null, roster={}, courts=[], matches=[];
-let autoFill=true, balance=true, poolDiv='all', poolShow='all', poolQ='';
+let autoFill=false, balance=true, poolDiv='all', poolShow='all', poolQ='';
 let modal=null, pendingPhoto=null, removePhoto=false;
 
 /* ---------- helpers ---------- */
@@ -267,7 +267,9 @@ async function upd(pid,patch){Object.assign(roster[pid],patch);
   need(await sb.from('session_players').update(patch).eq('session_id',cur).eq('player_id',pid));}
 async function fillCourt(c){
   const q=queueOf(c.division);if(q.length<4)return false;
-  const four=q.slice(0,4),[a,b]=pair(four),started=new Date().toISOString();
+  return seatFour(c,q.slice(0,4));}
+async function seatFour(c,four){
+  const [a,b]=pair(four),started=new Date().toISOString();
   four.forEach(id=>roster[id].status='court');
   Object.assign(c,{team_a:a,team_b:b,started_at:started});
   need(await sb.from('session_players').update({status:'court'}).eq('session_id',cur).in('player_id',four));
@@ -334,7 +336,7 @@ function sessBar(){
     ${s&&s.status!=='live'?`<button class="btn sm" data-act="goLive">▶ Go live</button>`:''}
     ${s&&s.status==='live'?`<button class="btn danger sm" data-act="endSession">🏁 End session</button>`:''}
     ${s?(s.published
-      ?`<span class="chip" style="color:#0A0A0A;background:var(--volt);border-color:var(--volt)">✓ On website</span><button class="btn quiet sm" data-act="unpublish">Unpublish</button>`
+      ?`<span class="chip" style="color:#0A0A0A;background:var(--volt);border-color:var(--volt)">✓ On website${s.status==='live'?' · updates after every game':''}</span><button class="btn quiet sm" data-act="unpublish">Unpublish</button>`
       :`<span class="chip" style="color:#e0a868;border-color:#6b4a22">Draft · not on website</span><button class="btn sm" data-act="publish">📣 Publish results</button>`):''}</div>`;
 }
 const noSession=()=>`<div class="empty"><p>No session selected yet.</p><button class="btn" data-act="newSession">+ Create your first session</button></div>`;
@@ -343,7 +345,7 @@ const noSession=()=>`<div class="empty"><p>No session selected yet.</p><button c
 function rallyView(){
   if(!cur) return noSession();
   return `<div class="rule"><b>How the order works:</b> everyone holds a “paddle-down” time — when they arrived, or when their last game ended. Earliest time plays next, so late arrivals never jump the line.
-    ▲ ▼ swap two neighbours, ⏭ puts someone on the next court — everyone else keeps their order.</div>
+    ▲ ▼ swap two neighbours, ⏭ puts someone on the next court — everyone else keeps their order. When a court is free, tap <b>Choose players</b> — the 4 who have waited longest are ticked for you, and you can swap anyone before seating them.</div>
     ${['regular','ascend'].map(rallyBlock).join('')}`;
 }
 function rallyBlock(d){
@@ -355,7 +357,7 @@ function rallyBlock(d){
     ${exp?`<button class="linkish" data-act="tab" data-tab="pool">${exp} registered, not arrived yet →</button>`:''}</div>
   <div class="agrid"><div class="box"><h3>Queue</h3><ol class="aq">
     ${q.map((id,i)=>`<li class="${i<4?'up':''}"><span class="qn">${i+1}</span>${av(id,28)}
-      <div class="qm"><b>${esc(P(id).name)}${P(id).organiser?' <span class="chip org">/O</span>':''}</b><small>${g(roster[id].games_played)} · in line since ${fmtTime(roster[id].queue_ticket)}</small></div>
+      <div class="qm"><b>${esc(P(id).name)}${P(id).organiser?' <span class="chip org">/O</span>':''}</b><small>🕒 Arrived ${fmtTime(roster[id].arrived_at)} · ${g(roster[id].games_played)}${roster[id].games_played?' · back in line '+fmtTime(roster[id].queue_ticket):''}</small></div>
       <span class="qa"><button title="Move up one" data-act="qup" data-id="${id}" ${i?'':'disabled'}>▲</button><button title="Move down one" data-act="qdown" data-id="${id}" ${i<q.length-1?'':'disabled'}>▼</button><button title="Play next" data-act="qtop" data-id="${id}" ${i?'':'disabled'}>⏭</button><button title="Sit out" data-act="qrest" data-id="${id}">💤</button></span></li>`).join('')||'<li class="dim">Nobody waiting</li>'}
   </ol>
   ${rest.length?`<h3 style="margin-top:1rem">Sitting out</h3><ul class="aq">${rest.map(id=>`<li>${av(id,28)}<div class="qm"><b>${esc(P(id).name)}</b><small>${g(roster[id].games_played)}</small></div>
@@ -366,11 +368,12 @@ function courtCard(c){
   if(!(c.team_a||[]).length){const n=queueOf(c.division).length;
     return `<article class="acourt free"><header><b>${esc(c.label)}</b><span class="dim">Free</span></header>
       <div class="free-msg">${n>=4?'The next four in the queue are ready.':'Need '+(4-n)+' more in the queue.'}</div>
-      <div class="ac-act"><button class="btn" data-act="fill" data-id="${c.id}" ${n>=4?'':'disabled'}>Put next 4 on court</button></div></article>`;}
+      <div class="ac-act"><button class="btn" data-act="pick" data-id="${c.id}" ${n>=4?'':'disabled'}>Choose players</button><button class="btn quiet" data-act="fill" data-id="${c.id}" ${n>=4?'':'disabled'} title="Seat the 4 who waited longest, without choosing">Next 4</button></div></article>`;}
   const t=ids=>ids.map(id=>`<span class="tp">${av(id,26)}${esc(P(id).name)}</span>`).join(''),r=remaining(c);
   return `<article class="acourt ${r===0?'done':''}"><header><b>${esc(c.label)}</b><span class="timer ${r===0?'up':''}" data-timer="${c.id}">${r===0?"TIME'S UP":fmt(r)}</span></header>
     <div class="ac-body"><div>${t(c.team_a)}</div><div class="vs">VS</div><div class="t2">${t(c.team_b)}</div></div>
-    <div class="ac-act"><button class="btn" data-act="record" data-id="${c.id}">Record result</button><button class="btn quiet" data-act="undo" data-id="${c.id}" title="Send these four back to their old places">↩ Undo</button></div></article>`;
+    <div class="ac-act" style="padding-bottom:0"><button class="btn quiet sm" data-act="tmin" data-id="${c.id}">−1 min</button><button class="btn quiet sm" data-act="trestart" data-id="${c.id}">↺ Restart</button><button class="btn quiet sm" data-act="tplus" data-id="${c.id}">+1 min</button></div>
+<div class="ac-act"><button class="btn" data-act="record" data-id="${c.id}">Record result</button><button class="btn quiet" data-act="undo" data-id="${c.id}" title="Send these four back to their old places">↩ Undo</button></div></article>`;
 }
 
 /* ---- Player pool ---- */
@@ -433,6 +436,16 @@ function openScore(kind,id){
     <div class="sidebox" id="sbB">${names(B)}<br><input type="number" id="sb" min="0" inputmode="numeric" value="${kind==='edit'?x.score2:''}"></div></div>
     <div class="mrow"><button class="btn quiet" data-act="closeModal">Cancel</button><button class="btn" data-act="saveScore" data-kind="${kind}" data-id="${id}">Confirm</button></div>`);
   $('#sa').focus();
+}
+function openPick(id){
+  const c=courts.find(x=>x.id===id);if(!c)return;
+  const q=queueOf(c.division),g=n=>(n||0)+' game'+(n===1?'':'s');
+  openModal('pick',`<h2>${esc(c.label)} · choose 4</h2>
+    <p>The 4 who have waited longest are ticked. Untick anyone and tick someone else if you like.</p>
+    <ul class="aq" style="max-height:55vh;overflow:auto">${q.map((pid,i)=>`<li class="${i<4?'up':''}"><label style="display:flex;align-items:center;gap:.55rem;flex:1;cursor:pointer">
+      <input type="checkbox" class="pk" value="${esc(pid)}" ${i<4?'checked':''} style="accent-color:var(--volt);width:20px;height:20px;flex:none">
+      <span class="qn">${i+1}</span>${av(pid,28)}<span class="qm"><b>${esc(P(pid).name)}</b><small>🕒 Arrived ${fmtTime(roster[pid].arrived_at)} · ${g(roster[pid].games_played)}</small></span></label></li>`).join('')}</ul>
+    <div class="mrow"><span class="grow dim" id="pkCount" style="font-size:.8rem">${Math.min(4,q.length)} of 4 selected</span><button class="btn quiet" data-act="closeModal">Cancel</button><button class="btn" data-act="seatPick" data-id="${c.id}">Put on court</button></div>`);
 }
 function readScores(){const a=parseInt($('#sa').value,10),b=parseInt($('#sb').value,10);
   if(isNaN(a)||isNaN(b)||a===b||a<0||b<0){toast('Enter two different scores',true);return null;}return [a,b];}
@@ -545,6 +558,16 @@ async function act(d,el,e){
       if(!confirm('Hide these results from the website? Nothing is deleted — you can publish again any time.'))break;
       need(await sb.from('sessions').update({published:false}).eq('id',cur));await loadAll();render();toast('Hidden from the website — nothing deleted');break;
     case 'fill': await fillCourt(court());render();break;
+case 'pick': openPick(Number(d.id));break;
+    case 'seatPick': {const c=court(),four=[...document.querySelectorAll('.pk:checked')].map(x=>x.value);
+      if(four.length!==4){toast('Pick exactly 4 players',true);break;}
+      await seatFour(c,four);closeModal();render();toast(c.label+': '+four.map(id=>P(id).name).join(', '));break;}
+    case 'tplus': case 'tmin': case 'trestart': {const c=court();if(!c||!c.started_at)break;
+      let t=d.act==='trestart'?Date.now():ms(c.started_at)+(d.act==='tplus'?60000:-60000);
+      if(d.act==='tplus'&&remaining(c)===0)t=Date.now()-(GAME_SECONDS-60)*1000;
+      const iso=new Date(t).toISOString();
+      need(await sb.from('courts').update({started_at:iso}).eq('id',c.id));c.started_at=iso;render();
+      toast(c.label+(d.act==='trestart'?' timer restarted':d.act==='tplus'?': +1 minute':': −1 minute'));break;}
     case 'undo': await undoCourt(court());render();toast('Game undone — those four are back in their old places');break;
     case 'record': openScore('record',Number(d.id));break;
     case 'editRes': openScore('edit',Number(d.id));break;
@@ -582,7 +605,10 @@ document.addEventListener('click',async e=>{
 document.addEventListener('change',async e=>{
   const t=e.target,a=t.dataset.act;
   try{
-    if(a==='poolToggle')await poolToggle(t.dataset.id,t.checked);
+    if(t.classList&&t.classList.contains('pk')){const n=document.querySelectorAll('.pk:checked').length;
+      if(n>4){t.checked=false;toast('A court takes 4 players',true);}
+      const pc=$('#pkCount');if(pc)pc.textContent=Math.min(n,4)+' of 4 selected';return;}
+if(a==='poolToggle')await poolToggle(t.dataset.id,t.checked);
     if(a==='autoFill'){autoFill=t.checked;await autoFillAll();render();}
     if(a==='balance'){balance=t.checked;toast(balance?'Teams balanced by DUPR':'Teams follow queue order (1+4 vs 2+3)');}
     if(a==='pickSession'){cur=Number(t.value);await loadSession();render();}
