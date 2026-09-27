@@ -30,6 +30,7 @@
   --accent:#B5C42F;      /* lime: buttons, highlights    */
   --accent-ink:#24211C;  /* text on lime                 */
   --accent-text:#66740F; /* lime used as TEXT (readable) */
+  --logo-lime:#A9BC2A;   /* ball + PICKLECLUB in the logo */
   --band:#24211C;        /* the "Join" band              */
   --band-ink:#F0EFEC;
   --band-muted:#C9C7C1;
@@ -59,6 +60,7 @@ html[data-theme="dark"]{
   --accent:#C2D437;
   --accent-ink:#171715;
   --accent-text:#C2D437;
+  --logo-lime:#C2D437;
   --band:#242320;
   --band-ink:#F0EFEC;
   --band-muted:#AEB876;
@@ -89,29 +91,22 @@ img{display:block;max-width:100%}
   font-size:.72rem;font-weight:700;letter-spacing:.28em;text-transform:uppercase;color:var(--ink)}
 .eyebrow::before,.eyebrow::after{content:"";height:2px;width:30px;background:var(--accent);flex:none}
 
-/* ---------- logos ----------
-   logo-light.png shows in light mode, logo-dark.png in dark mode.
-   Change the heights here to make the logo bigger or smaller.     */
-.logo-slot img{display:none;width:auto;object-fit:contain}
-html:not([data-theme="dark"]) .logo-slot img.logo-light,
-html[data-theme="dark"] .logo-slot img.logo-dark{display:block}
-html:not([data-theme="dark"]) .logo-slot img.logo-light{mix-blend-mode:multiply} /* hides a white/light background behind the logo */
-.brand .logo-slot img{height:60px;max-width:240px}
-.foot-logo img{height:48px;max-width:200px}
+/* ---------- LOGO ----------
+   One drawing, used in both modes — only the colours change.
+   Make it bigger or smaller by changing the heights below.     */
+.logo{display:block;width:auto;height:64px;overflow:visible}
+.lg-ink{fill:var(--ink)}
+.lg-lime{fill:var(--logo-lime)}
+.lg-hole{fill:var(--bg)}
+.lg-dash{stroke:var(--logo-lime);stroke-width:3;stroke-linecap:round}
+.lg-word{font-family:var(--sans);font-weight:800}
+.lg-sub{font-family:var(--sans);font-weight:700}
+.foot-logo .logo{height:56px}
 
 /* ---------- top bar ---------- */
 .topbar{position:sticky;top:0;z-index:20;background:var(--topbar);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
-.topbar__in{display:flex;align-items:center;gap:1rem;min-height:74px;flex-wrap:wrap}
-.brand{display:flex;align-items:center;gap:.7rem;text-decoration:none;margin-right:auto;padding:.4rem 0;color:var(--ink)}
-.brand svg{flex:none;display:block}
-.mk-bars{fill:var(--ink)}.mk-ball{fill:var(--accent)}.mk-holes{fill:var(--bg)}
-.brand .brand__mark{flex:none;display:flex;align-items:center;font-size:0}
-html:not([data-theme="dark"]) .brand.has-light svg,
-html[data-theme="dark"] .brand.has-dark svg{display:none}
-html:not([data-theme="dark"]) .brand.named-light #brandText,
-html[data-theme="dark"] .brand.named-dark #brandText{display:none}
-.brand b{font-size:1.15rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;line-height:1;display:block;color:var(--ink)}
-.brand #brandText span{font-size:.68rem;color:var(--accent-text);letter-spacing:.24em;text-transform:uppercase;font-weight:700;line-height:1.6;display:block}
+.topbar__in{display:flex;align-items:center;gap:1rem;min-height:78px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;text-decoration:none;margin-right:auto;padding:.45rem 0}
 .nav{display:flex;gap:.15rem;flex-wrap:wrap;align-items:center;padding-bottom:.3rem}
 .nav a{text-decoration:none;padding:.5rem .85rem;border-radius:999px;font-weight:600;font-size:.9rem;color:var(--muted)}
 .nav a:hover{color:var(--ink);background:var(--soft)}
@@ -319,7 +314,7 @@ footer a:hover{color:var(--accent-text)}
 /* ---------- responsive ---------- */
 @media (max-width:820px){
   .wrap{width:min(1100px,100% - 1.6rem)}
-  .brand .logo-slot img{height:52px}
+  .logo{height:56px}
   .court{padding:1.8rem 0 2.2rem}
   .court::before,.court::after{width:70px}
   .podium{grid-template-columns:1fr;gap:.8rem;align-items:stretch}
@@ -356,28 +351,25 @@ footer a:hover{color:var(--accent-text)}
 <header class="topbar">
   <div class="wrap topbar__in">
     <a class="brand" href="#/rankings">
-      <span class="brand__mark logo-slot" id="brandMark">
-        <svg width="104" height="40" viewBox="0 0 130 50" aria-hidden="true">
-          <g class="mk-bars">
-            <polygon points="23,18.2 57,16.7 57,20.3"/>
-            <polygon points="10.5,28.6 56.3,25.5 56.3,29.1"/>
-            <polygon points="24.6,37 56.6,33.3 56.6,36.6"/>
-          </g>
-          <circle class="mk-ball" cx="78" cy="25.3" r="15.2"/>
-          <g class="mk-holes">
-            <ellipse cx="73.6" cy="15.9" rx="3" ry="2.4" transform="rotate(-15 73.6 15.9)"/>
-            <ellipse cx="87.2" cy="20.2" rx="2.7" ry="2.2" transform="rotate(-15 87.2 20.2)"/>
-            <ellipse cx="78" cy="27.2" rx="3.1" ry="2.5" transform="rotate(-15 78 27.2)"/>
-            <ellipse cx="67.2" cy="23.2" rx="2.6" ry="2.1" transform="rotate(-15 67.2 23.2)"/>
-            <ellipse cx="69.6" cy="34.6" rx="2.8" ry="2.2" transform="rotate(-15 69.6 34.6)"/>
-            <ellipse cx="84.8" cy="34.4" rx="2.8" ry="2.2" transform="rotate(-15 84.8 34.4)"/>
-          </g>
-        </svg>
-      </span>
-      <span id="brandText">
-        <b id="brandName">Aftershift</b>
-        <span id="brandTag">Pickleclub</span>
-      </span>
+      <svg class="logo" viewBox="0 0 400 168" role="img" aria-label="Aftershift Pickleclub">
+        <g class="lg-ink">
+          <polygon points="150,22 200,17 200,26"/>
+          <polygon points="118,43 198,38 198,48"/>
+          <polygon points="146,64 202,58 202,67"/>
+        </g>
+        <circle class="lg-lime" cx="240" cy="40" r="34"/>
+        <g class="lg-hole">
+          <ellipse cx="232" cy="19" rx="6" ry="5"/>
+          <ellipse cx="258" cy="27" rx="5" ry="6" transform="rotate(20 258 27)"/>
+          <ellipse cx="218" cy="38" rx="5" ry="6" transform="rotate(-15 218 38)"/>
+          <circle cx="241" cy="45" r="6"/>
+          <ellipse cx="225" cy="60" rx="6" ry="5"/>
+          <ellipse cx="258" cy="57" rx="5" ry="6" transform="rotate(25 258 57)"/>
+        </g>
+        <text class="lg-ink lg-word" x="206" y="122" text-anchor="middle" font-size="31" letter-spacing="12">AFTERSHIFT</text>
+        <g class="lg-dash"><line x1="36" y1="153" x2="78" y2="153"/><line x1="334" y1="153" x2="376" y2="153"/></g>
+        <text class="lg-lime lg-sub" x="210" y="160" text-anchor="middle" font-size="19" letter-spacing="10">PICKLECLUB</text>
+      </svg>
     </a>
     <nav class="nav" id="nav" aria-label="Main">
       <a href="#/rankings">Rankings</a>
@@ -479,7 +471,7 @@ footer a:hover{color:var(--accent-text)}
   </section>
 </main>
 
-<footer class="wrap"><span class="logo-slot foot-logo"></span><span id="footText"></span><span id="footLinks"></span></footer>
+<footer class="wrap"><span class="foot-logo" id="footLogo"></span><span id="footText"></span><span id="footLinks"></span></footer>
 
 <script src="data.js"></script>
 <script>
@@ -778,40 +770,11 @@ function renderAlbums(){
     : `<div class="card empty">No albums added yet.</div>`;
 }
 
-/* ---------- LOGOS ----------
-   Put these next to index.html:
-     logo-light.png  → the logo with DARK lettering  (light mode)
-     logo-dark.png   → the logo with WHITE lettering (dark mode)
-   They appear in the header and the footer. If a file is missing,
-   the header shows the built-in Aftershift mark for that mode.     */
-function findFile(list, done, i = 0){
-  if (i >= list.length) return done(null);
-  const img = new Image();
-  img.onload = () => done(list[i]);
-  img.onerror = () => findFile(list, done, i + 1);
-  img.src = list[i];
-}
-function loadLogos(){
-  const brandEl = document.querySelector(".brand");
-  [["light", ["logo-light.png","logo-light.svg","logo-light.jpg","logo-light.webp"]],
-   ["dark",  ["logo-dark.png","logo-dark.svg","logo-dark.jpg","logo-dark.webp","logo.png","logo.svg"]]]
-  .forEach(([mode, list]) => findFile(list, src => {
-    if (!src) return;
-    document.querySelectorAll(".logo-slot").forEach(slot => {
-      const img = new Image();
-      img.src = src; img.alt = CLUB.name; img.className = "logo-" + mode;
-      slot.appendChild(img);
-    });
-    brandEl.classList.add("has-" + mode, "named-" + mode);
-  }));
-}
-
+/* ---------- header, footer, join band ---------- */
 function renderClub(){
   document.title = `${CLUB.name} — ${CLUB.tagline}`;
-  const parts = CLUB.name.split(" ");
-  $("brandName").textContent = parts[0];
-  $("brandTag").textContent = parts.slice(1).join(" ") || CLUB.tagline;
-  loadLogos();
+  /* the footer uses the same logo drawing as the header */
+  $("footLogo").innerHTML = document.querySelector(".brand .logo").outerHTML;
   $("footText").textContent = CLUB.established ? `${CLUB.name} — ${CLUB.established}` : CLUB.name;
   $("footLinks").innerHTML = SOCIAL.filter(s => s.url && /instagram/i.test(s.label))
     .map(s => `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.handle)}</a>`).join("");
