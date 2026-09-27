@@ -285,8 +285,8 @@ const ALBUMS = [
     cover: ""
   }, 
    {
-    date: "2026-09-27",
-    title: "Sept 27, 2026 Social Play",
+    date: "2026-09-26",
+    title: "Sept 26, 2026 Social Play",
     description: "Saturday Social Play",
     url: "https://drive.google.com/drive/folders/1OOym4ZyqgHOY7xzpLYn34d6Ux5dzzHsF?usp=sharing",
     cover: ""
