@@ -285,7 +285,7 @@ const ALBUMS = [
     cover: ""
   }, 
    {
-    date: "2026-09-28",
+    date: "2026-09-18",
     title: "Sept 18, 2026 Open Play",
     description: "Regular and Ascend",
     url: "https://drive.google.com/drive/folders/1GQ2BtIDvYe4MyJfbJzxsI4pzL-2vFItv?usp=sharing",
