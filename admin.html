@@ -87,6 +87,7 @@ footer{border-top:1px solid var(--line);padding:1.4rem 0 5rem;margin-top:2.5rem;
 .chip.live{color:#fff;background:var(--red);border-color:var(--red)}
 .chip.pub{color:var(--accent-ink);background:var(--accent);border-color:var(--accent)}
 .chip.draft{color:var(--asc);border-color:var(--line2);background:var(--asc-bg)}
+.chip.prep{color:var(--accent-text);border-color:var(--accent);background:var(--next)}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow)}
 .box{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:1rem;box-shadow:var(--shadow)}
 .box h3{margin:0 0 .75rem;font-size:.7rem;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--accent-text)}
@@ -127,8 +128,10 @@ footer{border-top:1px solid var(--line);padding:1.4rem 0 5rem;margin-top:2.5rem;
 .acourt{background:var(--card);border:1.5px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column}
 .acourt.done{border-color:var(--red)}
 .acourt.free{border-style:dashed;border-color:var(--line2);box-shadow:none;background:transparent}
+.acourt.prep{border-style:dashed;border-color:var(--accent);box-shadow:none}
 .acourt header{display:flex;justify-content:space-between;align-items:center;gap:.5rem;padding:.55rem .6rem .55rem 1rem;background:var(--soft);min-height:48px}
 .acourt.free header{background:transparent}
+.acourt.prep header{background:var(--next)}
 .acourt header>b{font-weight:800;text-transform:uppercase;letter-spacing:.08em;font-size:.85rem;color:var(--ink)}
 .hc{display:flex;align-items:center;gap:.35rem}
 .timer{font:800 1.2rem var(--sans);color:var(--accent-text);font-variant-numeric:tabular-nums;margin-right:.2rem}
@@ -155,6 +158,9 @@ footer{border-top:1px solid var(--line);padding:1.4rem 0 5rem;margin-top:2.5rem;
 .ac-act{display:flex;gap:.5rem;padding:0 .8rem .8rem;margin-top:auto}
 .ac-act .btn{flex:1}
 .offrow{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin-top:.8rem;font-size:.78rem;font-weight:700}
+.prep-head{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin:1.2rem 0 .7rem}
+.prep-head h3{margin:0;font-size:.7rem;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--accent-text)}
+.prep-hint{font-size:.82rem;margin:0}
 
 /* ---- waiting list ----
    Every row uses the SAME fixed column widths so the headings
@@ -166,6 +172,7 @@ footer{border-top:1px solid var(--line);padding:1.4rem 0 5rem;margin-top:2.5rem;
 .wr.head{background:none;border:0;font-size:.6rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;padding:0 .5rem}
 .wr.g1{border-color:var(--accent);background:var(--next)}
 .wr.g2{border-color:var(--line2);background:var(--then)}
+.wr.lined{border-style:dashed;border-color:var(--accent);opacity:.8}
 .wr.sel{box-shadow:0 0 0 3px var(--sel);border-color:var(--accent)}
 .wmain{display:flex;align-items:center;gap:.45rem;border:0;background:none;padding:0;text-align:left;min-width:0}
 .wmain b{color:var(--ink);font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -261,6 +268,7 @@ html[data-theme="dark"] .selbar b{color:var(--accent-text);filter:brightness(.55
 const SUPABASE_URL = 'https://wczulosdzoewznxlawfj.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_ZPRnMslT6BWplkRvVaiRXA_PUh-bQlO';
 const GAME_SECONDS = 600;   // 10-minute games
+const MAX_COURTS   = 6;     // real courts + prep courts, per session
 /* ==================================== */
 
 /* ---------- DEMO MODE ----------
@@ -282,13 +290,14 @@ function demoDB(){
   const matches=G.map(([court,m,team1,team2,score1,score2],i)=>({id:100+i,session_id:2,session_date:today,division:'social',game:i+1,court,team1,team2,score1,score2,created_at:iso(ago(m))}));
   [[['jelo','paul'],['david','hubert'],11,6],[['ejay','colleen'],['russel','karen'],11,5],[['jelo','russel'],['hubert','karen'],5,11]]
     .forEach(([team1,team2,score1,score2],i)=>matches.push({id:200+i,session_id:1,session_date:'2026-09-11',division:'regular',game:i+1,court:'Court '+(i%2+1),team1,team2,score1,score2,created_at:`2026-09-11T15:${10+i*12}:00.000Z`}));
-  const E={team_a:[],team_b:[],started_at:null,paused_at:null,active:true};
-  const courts=[{id:1,session_id:1,label:'Court 1',division:'regular',...E},{id:2,session_id:1,label:'Court 2',division:'regular',...E},{id:3,session_id:1,label:'Ascend Court',division:'ascend',...E},
+  const E={team_a:[],team_b:[],started_at:null,paused_at:null,active:true,standby:false};
+  const courts=[{id:1,session_id:1,label:'Court 1',division:'regular',...E},{id:2,session_id:1,label:'Court 2',division:'regular',...E},{id:3,session_id:1,label:'Court 3',division:'ascend',...E},
     {id:11,session_id:2,label:'Court 1',division:'social',...E,team_a:['jelo','sandy'],team_b:['david','mitch'],started_at:iso(ago(4))},
     {id:12,session_id:2,label:'Court 2',division:'social',...E,team_a:['paul','pj'],team_b:['colleen','justin'],started_at:iso(ago(9.6))},
-    {id:13,session_id:2,label:'Court 3',division:'social',...E},{id:14,session_id:2,label:'Court 4',division:'social',...E,active:false}];
-  const onCourt=['jelo','sandy','david','mitch','paul','pj','colleen','justin'];
-  const ids=[...onCourt,'hubert','karen','rocelyn','clark','ejay','warren','joy','janelle','emman','russel','marie','nique','gilbert'];
+    {id:13,session_id:2,label:'Court 3',division:'social',...E,team_a:['joy','emman'],team_b:['warren','janelle'],started_at:iso(ago(1))},
+    {id:14,session_id:2,label:'Prep 1',division:'social',...E,active:false,standby:true,team_a:['hubert','karen'],team_b:['rocelyn','clark']}];
+  const onCourt=['jelo','sandy','david','mitch','paul','pj','colleen','justin','joy','emman','warren','janelle'];
+  const ids=[...onCourt,'hubert','karen','rocelyn','clark','ejay','russel','marie','nique','gilbert','adrian','sam'];
   const session_players=ids.map((id,i)=>{const mine=matches.filter(m=>m.session_id===2&&[...m.team1,...m.team2].includes(id));
     const last=mine.length?Math.max(...mine.map(m=>Date.parse(m.created_at))):null,arr=ago(52-i);
     const status=onCourt.includes(id)?'court':id==='marie'?'resting':['nique','gilbert'].includes(id)?'expected':'queued';
@@ -362,7 +371,7 @@ let user=null,tab='rally',busy=false,channel=null;
 let players={},priv={},sessions=[],cur=null,roster={},courts=[],matches=[];
 let autoFill=false,poolDiv='all',poolShow='all',poolQ='';
 let modal=null,pendingPhoto=null,removePhoto=false,newType='social';
-let sel=null,ending=null,courtsPanel=false,ST={},lastSug={};
+let sel=null,ending=null,courtsPanel=false,ST={},lastPlan={};
 
 /* ---------- helpers ---------- */
 const $=s=>document.querySelector(s);
@@ -386,11 +395,19 @@ const mode=()=>(curS()&&MODES[curS().match_mode])?curS().match_mode:'rotation';
 const groups=()=>isSocial()?['social']:['regular','ascend'];
 const inGroup=(id,g)=>g==='social'||P(id).division===g;
 const groupOf=id=>isSocial()?'social':P(id).division;
-const isOn=c=>c.active!==false;
+/* A prep court is admin-only: never on the TV, no timer, players stay "waiting". */
+const isPrep=c=>!!c.standby;
+const isOn=c=>c.active!==false&&!isPrep(c);
+const statusFor=c=>isPrep(c)?'queued':'court';
 const slots=c=>[(c.team_a||[])[0]||'',(c.team_a||[])[1]||'',(c.team_b||[])[0]||'',(c.team_b||[])[1]||''];
 const filled=c=>slots(c).filter(Boolean).length;
 const courtById=id=>courts.find(c=>String(c.id)===String(id));
-const courtOf=id=>(courts.find(c=>slots(c).includes(id))||{}).label||'court';
+const courtOf=id=>(courts.find(c=>!isPrep(c)&&slots(c).includes(id))||{}).label||'court';
+function linedMap(){const m={};courts.filter(isPrep).forEach(c=>slots(c).forEach(id=>{if(id)m[id]=c;}));return m;}
+const fullPreps=g=>courts.filter(c=>isPrep(c)&&c.division===g&&filled(c)===4);
+const freeLive=g=>courts.filter(c=>isOn(c)&&c.division===g&&!filled(c));
+const liveLabel=()=>'Court '+(courts.filter(c=>!isPrep(c)).length+1);
+const prepLabel=()=>{const ns=courts.filter(isPrep).map(c=>parseInt(String(c.label).replace(/\D/g,''),10)||0);return 'Prep '+((ns.length?Math.max(...ns):0)+1);};
 function remaining(c){if(!c.started_at)return GAME_SECONDS;const end=c.paused_at?ms(c.paused_at):Date.now();
   return Math.max(0,GAME_SECONDS-Math.floor((end-ms(c.started_at))/1000));}
 const tText=c=>{const r=remaining(c);return r===0?"TIME'S UP":(c.paused_at?'⏸ ':'')+fmt(r);};
@@ -441,6 +458,8 @@ setInterval(()=>{if(user&&cur)refresh();},20000);
 function queueOf(g){
   return Object.values(roster).filter(e=>e.status==='queued'&&inGroup(e.player_id,g))
     .sort((a,b)=>ms(a.queue_ticket)-ms(b.queue_ticket)||a.player_id.localeCompare(b.player_id)).map(e=>e.player_id);}
+/* waiting players who are NOT already lined up on a prep court */
+function avail(g){const L=linedMap();return queueOf(g).filter(id=>!L[id]);}
 function stats(){const s={},g=id=>s[id]||(s[id]={w:0,l:0,last:0});
   matches.forEach(m=>{const aw=m.score1>m.score2,t=ms(m.created_at);
     (m.team1||[]).forEach(id=>{const x=g(id);aw?x.w++:x.l++;x.last=Math.max(x.last,t)});
@@ -472,7 +491,7 @@ function suggest(q,m=mode()){
     else{const ws=f.map(wr);const b=bestPairing(f,t=>Math.abs(sum(t[0],wr)-sum(t[1],wr)));t=b.teams;sc=(Math.max(...ws)-Math.min(...ws))*20+idx*.5;}
     if(sc<bs){bs=sc;best=t;}}
   return best;}
-function suggestionsFor(g){const q=queueOf(g),s1=suggest(q);
+function suggestionsFor(g){const q=avail(g),s1=suggest(q);
   const s2=s1?suggest(q.filter(id=>!s1.flat().includes(id))):null;return [s1,s2];}
 
 /* ================= COURT ACTIONS ================= */
@@ -481,22 +500,30 @@ async function upd(pid,patch){Object.assign(roster[pid],patch);
 async function setStatus(ids,status){ids=ids.filter(Boolean);if(!ids.length)return;
   ids.forEach(id=>{if(roster[id])roster[id].status=status;});
   need(await sb.from('session_players').update({status}).eq('session_id',cur).in('player_id',ids));}
-/* Saves a court's four spots. The timer starts by itself the moment all
-   four spots are filled, and stops if someone leaves the court.       */
+/* Saves a court's four spots. On a REAL court the timer starts by itself the
+   moment all four spots are filled. Prep courts never run a timer.       */
 async function writeSlots(c,s){
   const wasFull=filled(c)===4,isFull=s.every(Boolean),isEmpty=s.every(x=>!x);
   let started=c.started_at||null,paused=c.paused_at||null;
-  if(!isFull){started=null;paused=null;}else if(!wasFull||!started){started=new Date().toISOString();paused=null;}
+  if(isPrep(c)||!isFull){started=null;paused=null;}else if(!wasFull||!started){started=new Date().toISOString();paused=null;}
   const patch={team_a:isEmpty?[]:[s[0],s[1]],team_b:isEmpty?[]:[s[2],s[3]],started_at:started,paused_at:paused};
   Object.assign(c,patch);need(await sb.from('courts').update(patch).eq('id',c.id));}
-async function seat(c,teams){const four=teams.flat();await setStatus(four,'court');await writeSlots(c,four);}
+async function seat(c,teams){const four=teams.flat();await setStatus(four,statusFor(c));await writeSlots(c,four);}
+/* Move a lined-up prep match onto a real court (timer starts). */
+async function sendPrep(p,c){const four=slots(p);
+  await setStatus(four,'court');await writeSlots(c,four);await writeSlots(p,['','','','']);}
 async function fillCourt(c){
-  if(!isOn(c))return false;
-  const q=queueOf(c.division),s=slots(c),n=filled(c);
-  if(!n){let t=lastSug[c.id];if(!t||!t.flat().every(id=>q.includes(id)))t=suggest(q,mode()==='manual'?'rotation':mode());
+  if(!isOn(c)&&!isPrep(c))return false;
+  const q=avail(c.division),s=slots(c),n=filled(c);
+  if(!n){
+    if(!isPrep(c)){const pl=lastPlan[c.id],pp=pl&&pl.prep?courtById(pl.prep):null;
+      const fp=(pp&&filled(pp)===4)?pp:fullPreps(c.division)[0];
+      if(fp){await sendPrep(fp,c);return true;}}
+    let t=lastPlan[c.id]&&lastPlan[c.id].teams;
+    if(!t||!t.flat().every(id=>q.includes(id)))t=suggest(q,mode()==='manual'?'rotation':mode());
     if(!t)return false;await seat(c,t);return true;}
   let k=0;const add=[];const ns=s.map(x=>x||(q[k]?(add.push(q[k]),q[k++]):''));
-  if(!add.length)return false;await setStatus(add,'court');await writeSlots(c,ns);return true;}
+  if(!add.length)return false;await setStatus(add,statusFor(c));await writeSlots(c,ns);return true;}
 async function autoFillAll(){if(!autoFill||mode()==='manual')return;
   for(const c of courts)if(isOn(c)&&!filled(c))await fillCourt(c);}
 async function clearCourt(c){await setStatus(slots(c),'queued');await writeSlots(c,['','','','']);}
@@ -517,13 +544,14 @@ async function swapTickets(x,y){ // x is ahead of y; afterwards y is ahead of x
   await Promise.all([upd(x,{queue_ticket:nx}),upd(y,{queue_ticket:ny})]);}
 
 /* ---- tap-to-swap ----
-   Tap a player (on a court or waiting), then tap:
-   • another court spot → they swap (same court, other team or another court)
+   Tap a player (on a court, a prep court or waiting), then tap:
+   • another court spot → they swap (same court, other team, another court or prep court)
    • an empty spot      → they move there
-   • someone waiting    → the waiting player replaces them on court     */
+   • someone waiting    → the waiting player replaces them                 */
 const same=(a,b)=>a.k===b.k&&(a.k==='w'?a.id===b.id:String(a.c)===String(b.c)&&a.i===b.i);
 async function pickTarget(t){
   if(ending!=null)return;
+  if(t.k==='w'){const L=linedMap();if(L[t.id]){const c=L[t.id];t={k:'s',c:String(c.id),i:slots(c).indexOf(t.id)};}}
   if(!sel){sel=t;render();return;}
   if(same(sel,t)){sel=null;render();return;}
   const a=sel;sel=null;await doSwap(a,t);render();}
@@ -532,11 +560,14 @@ async function doSwap(a,b){
     await swapTickets(x,y);toast(`${P(a.id).name} and ${P(b.id).name} swapped places`);return;}
   if(a.k==='w')[a,b]=[b,a];
   if(b.k==='w'){const c=courtById(a.c),s=slots(c),old=s[a.i];s[a.i]=b.id;
-    await setStatus([b.id],'court');if(old)await setStatus([old],'queued');await writeSlots(c,s);
+    await setStatus([b.id],statusFor(c));if(old)await setStatus([old],'queued');await writeSlots(c,s);
     toast(old?`${P(b.id).name} in for ${P(old).name}`:`${P(b.id).name} on ${c.label}`);return;}
   const ca=courtById(a.c),cb=courtById(b.c);
   if(ca===cb){const s=slots(ca);[s[a.i],s[b.i]]=[s[b.i],s[a.i]];await writeSlots(ca,s);}
-  else{const sa=slots(ca),sc=slots(cb);[sa[a.i],sc[b.i]]=[sc[b.i],sa[a.i]];await writeSlots(ca,sa);await writeSlots(cb,sc);}
+  else{const sa=slots(ca),sc=slots(cb);[sa[a.i],sc[b.i]]=[sc[b.i],sa[a.i]];
+    await writeSlots(ca,sa);await writeSlots(cb,sc);
+    if(sa[a.i])await setStatus([sa[a.i]],statusFor(ca));
+    if(sc[b.i])await setStatus([sc[b.i]],statusFor(cb));}
   toast('Swapped');}
 
 /* ================= VIEWS ================= */
@@ -577,7 +608,7 @@ function sessBar(){
       <span class="chip ${s.status}">${s.status==='live'?'● Live':s.status==='ended'?'Ended':'Planned'}</span>`:''}
     <button class="btn quiet sm" data-act="newSession">+ New session</button><span class="grow"></span>
     ${tab==='rally'&&s?`<label class="mm">Matchmaking <select class="inp sm" data-act="mode">${Object.entries(MODES).map(([k,[l]])=>`<option value="${k}" ${mode()===k?'selected':''}>${l}</option>`).join('')}</select></label>
-      <label class="chk" title="Free courts fill with the suggested four as soon as they're free"><input type="checkbox" data-act="autoFill" ${autoFill?'checked':''}>Auto-assign</label>
+      <label class="chk" title="Free courts fill by themselves — lined-up prep matches first, then the suggested four"><input type="checkbox" data-act="autoFill" ${autoFill?'checked':''}>Auto-assign</label>
       <button class="btn quiet sm" data-act="courtsPanel" aria-pressed="${courtsPanel}">⚙ Courts</button>`:''}
     ${s&&s.status!=='live'?`<button class="btn sm" data-act="goLive">▶ Go live</button>`:''}
     ${s&&s.status==='live'?`<button class="btn danger sm" data-act="endSession">🏁 End session</button>`:''}
@@ -587,11 +618,12 @@ function sessBar(){
     ${tab==='rally'&&s&&courtsPanel?courtsPanelView():''}`;
 }
 function courtsPanelView(){
+  const live=courts.filter(c=>!isPrep(c)),room=courts.length<MAX_COURTS;
   return `<div class="box cpanel"><h3>Active courts for this session</h3>
-    <p class="dim" style="margin:0 0 .7rem;font-size:.82rem">Only active courts show on the TV. Turn extra courts on or off any time.</p>
-    <div class="cgrid">${courts.map(c=>`<label class="ctog ${isOn(c)?'on':''}"><input type="checkbox" data-act="courtActive" data-id="${c.id}" ${isOn(c)?'checked':''}>
+    <p class="dim" style="margin:0 0 .7rem;font-size:.82rem">Only active courts show on the TV. Turn extra courts on or off any time. Prep courts are added from the Rally page and never show on the TV.</p>
+    <div class="cgrid">${live.map(c=>`<label class="ctog ${isOn(c)?'on':''}"><input type="checkbox" data-act="courtActive" data-id="${c.id}" ${isOn(c)?'checked':''}>
       <span><b>${esc(c.label)}</b><small>${DIVS[c.division]||''}${filled(c)?' · in use':''}</small></span></label>`).join('')||'<span class="dim">No courts yet.</span>'}</div>
-    <div class="tools" style="margin-top:.8rem">${isSocial()
+    <div class="tools" style="margin-top:.8rem">${!room?`<span class="dim" style="font-size:.8rem">Maximum of ${MAX_COURTS} courts reached (including prep courts).</span>`:isSocial()
       ?`<button class="btn quiet sm" data-act="addCourt" data-div="social">+ Add court</button>`
       :`<button class="btn quiet sm" data-act="addCourt" data-div="regular">+ Regular court</button><button class="btn quiet sm" data-act="addCourt" data-div="ascend">+ Ascend court</button>`}
       <span class="grow"></span><button class="btn sm" data-act="courtsPanel">Done</button></div></div>`;
@@ -606,59 +638,87 @@ function rallyView(){
     ${groups().map(groupBlock).join('')}`;
 }
 function groupBlock(g){
-  const cs=courts.filter(c=>c.division===g),on=cs.filter(isOn),off=cs.filter(c=>!isOn(c));
-  const q=queueOf(g),sugs=suggestionsFor(g);
+  const cs=courts.filter(c=>c.division===g),on=cs.filter(isOn),off=cs.filter(c=>!isOn(c)&&!isPrep(c)),preps=cs.filter(isPrep);
+  const q=queueOf(g),sugs=suggestionsFor(g),full=preps.filter(p=>filled(p)===4);
   const exp=Object.values(roster).filter(e=>e.status==='expected'&&inGroup(e.player_id,g)).length;
-  let fi=0;lastSug={...lastSug};
-  const cards=on.map(c=>{let sg=null;if(!filled(c)){sg=sugs[fi++]||null;lastSug[c.id]=sg;}return courtCard(c,sg);}).join('');
-  const playing=on.filter(c=>filled(c)===4).length;
+  let pi=0,fi=0;lastPlan={...lastPlan};
+  const cards=on.map(c=>{let plan=null;
+    if(!filled(c)){if(full[pi])plan={prep:full[pi++].id};else if(sugs[fi])plan={teams:sugs[fi++]};lastPlan[c.id]=plan;}
+    return courtCard(c,plan);}).join('');
+  const playing=on.filter(c=>filled(c)===4).length,room=courts.length<MAX_COURTS;
   return `<div class="adiv"><div class="adiv-head"><h2>${g==='social'?'Social play':DIVS[g]}</h2>
       <span class="chip ${g}">${q.length} waiting</span><span class="chip plain">${playing}/${on.length} courts playing</span>
       ${exp?`<button class="linkish" data-act="tab" data-tab="pool">${exp} registered, not arrived yet →</button>`:''}</div>
     <div class="courts">${cards||'<p class="dim">No active courts — turn one on in ⚙ Courts.</p>'}</div>
     ${off.length?`<div class="offrow"><span class="dim">Inactive:</span>${off.map(c=>`<button class="btn quiet sm" data-act="courtOn" data-id="${c.id}">${esc(c.label)} · Turn on</button>`).join('')}</div>`:''}
+    <div class="prep-head"><h3>Line up next</h3><span class="chip prep">Not shown on TV</span>
+      ${room?`<button class="btn quiet sm" data-act="addPrep" data-div="${g}">+ Prep court</button>`:`<span class="dim" style="font-size:.78rem">Maximum ${MAX_COURTS} courts</span>`}</div>
+    ${preps.length?`<div class="courts">${preps.map(p=>prepCard(p,g)).join('')}</div>`
+      :`<p class="prep-hint dim">Add a prep court to plan the next match while games are still being played. Players stay in the waiting list until you send them to a real court.</p>`}
     ${waitingBox(g,sugs)}</div>`;
 }
-function courtCard(c,sug){
-  const s=slots(c),n=filled(c),isFull=n===4,r=remaining(c),ed=ending===c.id;
+/* the four player spots — used by real courts and prep courts */
+function teamsHTML(c,withScores){
+  const s=slots(c);
   const isSel=i=>sel&&sel.k==='s'&&String(sel.c)===String(c.id)&&sel.i===i;
   const slot=i=>s[i]
     ?`<button class="slot ${isSel(i)?'sel':''}" data-act="slot" data-c="${c.id}" data-i="${i}">${av(s[i],26)}<span>${esc(P(s[i]).name)}</span></button>`
     :`<button class="slot empty ${isSel(i)?'sel':''}" data-act="slot" data-c="${c.id}" data-i="${i}">+ Add player</button>`;
+  const team=(i0,side)=>`<div class="team ${side}">${slot(i0)}${slot(i0+1)}${withScores?`<input class="score-in" type="number" min="0" inputmode="numeric" id="sc${side}-${c.id}" placeholder="0" aria-label="Score">`:''}</div>`;
+  return `<div class="ac-body">${team(0,'t1')}<div class="vs">vs</div>${team(2,'t2')}</div>`;
+}
+function courtCard(c,plan){
+  const n=filled(c),isFull=n===4,r=remaining(c),ed=ending===c.id;
   const btn=(a,l,t)=>`<button class="icon-btn" data-act="${a}" data-id="${c.id}"${t?` title="${t}"`:''}>${l}</button>`;
   const state=!n?'<span class="dim" style="font-weight:700;font-size:.8rem">Free</span>'
     :!isFull?`<span class="dim" style="font-weight:700;font-size:.8rem">Needs ${4-n} more</span>`
     :`<span class="timer ${r===0?'up':''} ${c.paused_at?'paused':''}" data-timer="${c.id}">${tText(c)}</span>`;
   const ctl=isFull&&!ed?(!c.started_at?btn('tstart','▶ Start')
     :(c.paused_at?btn('tresume','▶ Resume'):btn('tpause','⏸ Pause'))+btn('trestart','↺','Restart the timer')):'';
-  const team=(i0,side)=>`<div class="team ${side}">${slot(i0)}${slot(i0+1)}${ed?`<input class="score-in" type="number" min="0" inputmode="numeric" id="sc${side}-${c.id}" placeholder="0" aria-label="Score">`:''}</div>`;
   let foot;
   if(ed) foot=`<div class="ac-act"><button class="btn" data-act="saveEnd" data-id="${c.id}">Save result</button>
       <button class="btn quiet" data-act="noScore" data-id="${c.id}" title="Everyone back in line, no score recorded">No score</button>
       <button class="btn quiet" style="flex:0 0 auto" data-act="cancelEnd" data-id="${c.id}">✕</button></div>`;
   else if(isFull) foot=`<div class="ac-act"><button class="btn" data-act="end" data-id="${c.id}">End match</button>
       <button class="btn quiet" style="flex:0 0 auto" data-act="clear" data-id="${c.id}" title="Send all four back to their old places in the queue">Clear</button></div>`;
-  else if(n) foot=`<div class="ac-act"><button class="btn" data-act="fillQ" data-id="${c.id}" ${queueOf(c.division).length>=4-n?'':'disabled'}>Fill from queue</button>
+  else if(n) foot=`<div class="ac-act"><button class="btn" data-act="fillQ" data-id="${c.id}" ${avail(c.division).length>=4-n?'':'disabled'}>Fill from queue</button>
       <button class="btn quiet" style="flex:0 0 auto" data-act="clear" data-id="${c.id}">Clear</button></div>`;
-  else foot=sug?`<div class="sugg">Suggested: <b>${names(sug[0])}</b> vs <b>${names(sug[1])}</b></div>
-      <div class="ac-act"><button class="btn" data-act="seat" data-id="${c.id}">▶ Put on court</button></div>`
-    :`<div class="free-msg">${mode()==='manual'?'Tap “+ Add player”, then tap someone waiting.':`Need ${Math.max(0,4-queueOf(c.division).length)} more in the queue.`}</div>`;
+  else if(plan&&plan.prep){const p=courtById(plan.prep),s=slots(p);
+    foot=`<div class="sugg">Lined up on <b>${esc(p.label)}</b>: <b>${names([s[0],s[1]])}</b> vs <b>${names([s[2],s[3]])}</b></div>
+      <div class="ac-act"><button class="btn" data-act="seat" data-id="${c.id}">▶ Send ${esc(p.label)} here</button></div>`;}
+  else if(plan&&plan.teams) foot=`<div class="sugg">Suggested: <b>${names(plan.teams[0])}</b> vs <b>${names(plan.teams[1])}</b></div>
+      <div class="ac-act"><button class="btn" data-act="seat" data-id="${c.id}">▶ Put on court</button></div>`;
+  else foot=`<div class="free-msg">${mode()==='manual'?'Tap “+ Add player”, then tap someone waiting.':`Need ${Math.max(0,4-avail(c.division).length)} more in the queue.`}</div>`;
   return `<article class="acourt ${!n?'free':''} ${isFull&&r===0?'done':''}" data-court="${c.id}"><header><b>${esc(c.label)}</b><span class="hc">${state}${ctl}</span></header>
-    <div class="ac-body">${team(0,'t1')}<div class="vs">vs</div>${team(2,'t2')}</div>${foot}</article>`;
+    ${teamsHTML(c,ed)}${foot}</article>`;
+}
+function prepCard(p,g){
+  const n=filled(p),free=freeLive(g)[0];
+  let foot;
+  if(n===4) foot=`<div class="ac-act">${free
+      ?`<button class="btn" data-act="sendPrep" data-id="${p.id}" data-to="${free.id}">▶ Send to ${esc(free.label)}</button>`
+      :`<button class="btn" disabled>Waiting for a free court</button>`}
+      <button class="btn quiet" style="flex:0 0 auto" data-act="clear" data-id="${p.id}" title="Empty this prep court — players stay in the waiting list">Clear</button></div>`;
+  else foot=`<div class="ac-act"><button class="btn" data-act="fillQ" data-id="${p.id}" ${avail(g).length>=4-n?'':'disabled'}>${n?'Fill from queue':'Fill suggested'}</button>
+      ${n?`<button class="btn quiet" style="flex:0 0 auto" data-act="clear" data-id="${p.id}">Clear</button>`:''}</div>`;
+  return `<article class="acourt prep"><header><b>${esc(p.label)}</b><span class="hc"><span class="dim" style="font-weight:700;font-size:.78rem">${n===4?'Ready':'Planning'} · no timer</span>
+      <button class="icon-btn" data-act="removePrep" data-id="${p.id}" title="Remove this prep court">✕</button></span></header>
+    ${teamsHTML(p,false)}${foot}</article>`;
 }
 function waitingBox(g,sugs){
-  const q=queueOf(g),now=Date.now();
+  const q=queueOf(g),now=Date.now(),L=linedMap();
   const rest=Object.values(roster).filter(e=>e.status==='resting'&&inGroup(e.player_id,g)).map(e=>e.player_id);
   const grp=id=>sugs.findIndex(t=>t&&t.flat().includes(id));
   const line=(t,l,c)=>t?`<div><span class="nx ${c}">${l}</span>${names(t[0])} <span class="dim">vs</span> ${names(t[1])}</div>`:'';
   return `<div class="box waitbox"><h3>Waiting · ${q.length}</h3>
     ${sugs[0]?`<div class="upnext">${line(sugs[0],'Next','n1')}${line(sugs[1],'Then','n2')}</div>`:''}
     ${q.length?`<ol class="wl"><li class="wr head"><span>Player</span><span class="wc">GP</span><span class="wc">W–L</span><span class="wc">Wait</span><span class="wc hide-md">Last game</span><span></span></li>
-    ${q.map((id,i)=>{const e=roster[id],st=ST[id]||{w:0,l:0,last:0},k=grp(id);
+    ${q.map((id,i)=>{const e=roster[id],st=ST[id]||{w:0,l:0,last:0},k=L[id]?-1:grp(id);
       const since=Math.max(ms(e.arrived_at),st.last),mins=since?Math.floor((now-since)/60000):0;
       const isS=sel&&sel.k==='w'&&sel.id===id;
-      return `<li class="wr ${k===0?'g1':k===1?'g2':''} ${isS?'sel':''}">
+      return `<li class="wr ${L[id]?'lined':k===0?'g1':k===1?'g2':''} ${isS?'sel':''}">
         <button class="wmain" data-act="wait" data-id="${esc(id)}" title="Tap to select, then tap a court spot"><span class="qn">${i+1}</span>${av(id,28)}<b>${esc(P(id).name)}</b>
+          ${L[id]?`<span class="chip prep">${esc(L[id].label)}</span>`:''}
           ${g==='social'?`<span class="chip ${P(id).division} hide-md">${DIVS[P(id).division].slice(0,3)}</span>`:''}${P(id).organiser?'<span class="chip org">/O</span>':''}</button>
         <span class="wc">${e.games_played||0}</span><span class="wc">${st.w}–${st.l}</span><span class="wc dim">${mins<1?'now':mins+'m'}</span>
         <span class="wc dim hide-md">${st.last?fmtTime(st.last):'—'}</span>
@@ -696,12 +756,14 @@ function poolGrid(){
   return list.length?list.map(poolCard).join(''):'<p class="dim">Nobody matches.</p>';
 }
 function poolCard(p){
-  const e=roster[p.id],st=e?e.status:null,inS=e&&st!=='left',d=dupr(p.id);
+  const e=roster[p.id],st=e?e.status:null,inS=e&&st!=='left',d=dupr(p.id),L=linedMap();
   let ctrl;
   if(!inS)ctrl=`<button class="btn quiet sm w" data-act="poolAdd" data-id="${p.id}">${st==='left'?'Re-add to session':'+ Add to session'}</button>`;
   else if(st==='expected')ctrl=`<div class="arr"><input type="time" class="inp" id="arr-${p.id}" value="${hhmm(new Date())}" aria-label="Arrival time"><button class="btn sm" data-act="arrive" data-id="${p.id}">Arrived</button></div>`;
   else ctrl=`<div class="arr"><span class="lbl2">Arrived</span><input type="time" class="inp" data-act="setArr" data-id="${p.id}" value="${e.arrived_at?hhmm(new Date(e.arrived_at)):''}" aria-label="Arrival time"></div>`;
-  const badge=!inS?'':st==='expected'?'<span class="st exp">Registered</span>':st==='queued'?`<span class="st q">In queue #${queueOf(groupOf(p.id)).indexOf(p.id)+1}</span>`:st==='court'?`<span class="st c">On ${esc(courtOf(p.id))}</span>`:'<span class="st r">Sitting out</span>';
+  const badge=!inS?'':st==='expected'?'<span class="st exp">Registered</span>'
+    :st==='queued'?(L[p.id]?`<span class="st q">Lined up · ${esc(L[p.id].label)}</span>`:`<span class="st q">In queue #${queueOf(groupOf(p.id)).indexOf(p.id)+1}</span>`)
+    :st==='court'?`<span class="st c">On ${esc(courtOf(p.id))}</span>`:'<span class="st r">Sitting out</span>';
   return `<div class="pc ${inS?'in':'out'}">
     <label class="pick" title="In this session"><input type="checkbox" data-act="poolToggle" data-id="${p.id}" ${inS?'checked':''}><span></span></label>
     <button class="edit" data-act="editPlayer" data-id="${p.id}">Edit</button>
@@ -784,15 +846,15 @@ async function savePlayer(id){
 function openNewSession(){
   const t=new Date(),iso=`${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;
   newType='social';
-  openModal('session',`<h2>New session</h2><p>You can turn courts on or off any time during the session.</p>
+  openModal('session',`<h2>New session</h2><p>You can turn courts on or off, and add prep courts, any time during the session.</p>
     <div class="field"><span class="flabel">Type</span><div class="seg" id="nType">
       <button data-act="nType" data-v="social" aria-pressed="true">Social play</button><button data-act="nType" data-v="structured" aria-pressed="false">Regular + Ascend</button></div></div>
     <div class="row2"><div class="field"><label for="nDate">Date</label><input class="inp" type="date" id="nDate" value="${iso}"></div>
     <div class="field"><label for="nLabel">Name</label><input class="inp" id="nLabel" placeholder="e.g. Tuesday social play"></div></div>
-    <div class="row2" id="nSoc"><div class="field"><label for="nCourts">Courts</label><input class="inp" type="number" id="nCourts" min="1" max="12" value="3"></div>
+    <div class="row2" id="nSoc"><div class="field"><label for="nCourts">Courts</label><input class="inp" type="number" id="nCourts" min="1" max="${MAX_COURTS}" value="3"></div>
       <p class="dim" style="font-size:.8rem;align-self:center;margin:0">Everyone shares one queue — Regular and Ascend mixed.</p></div>
-    <div class="row2" id="nStr" hidden><div class="field"><label for="nReg">Regular courts</label><input class="inp" type="number" id="nReg" min="0" max="8" value="2"></div>
-    <div class="field"><label for="nAsc">Ascend courts</label><input class="inp" type="number" id="nAsc" min="0" max="8" value="1"></div></div>
+    <div class="row2" id="nStr" hidden><div class="field"><label for="nReg">Regular courts</label><input class="inp" type="number" id="nReg" min="0" max="${MAX_COURTS}" value="2"></div>
+    <div class="field"><label for="nAsc">Ascend courts</label><input class="inp" type="number" id="nAsc" min="0" max="${MAX_COURTS}" value="1"></div></div>
     <div class="mrow"><button class="btn quiet" data-act="closeModal">Cancel</button><button class="btn" data-act="createSession">Create session</button></div>`);
 }
 async function createSession(){
@@ -800,13 +862,15 @@ async function createSession(){
   const [y,m,d]=date.split('-').map(Number),wd=new Date(y,m-1,d).toLocaleDateString('en-US',{weekday:'long'});
   const social=newType==='social';
   const label=$('#nLabel').value.trim()||wd+(social?' social play':' open play');
-  const s=need(await sb.from('sessions').insert({session_date:date,label,status:'planned',session_type:newType,match_mode:social?'roundrobin':'rotation'}).select().single());
   const rows=[];
-  if(social){const n=Math.max(1,parseInt($('#nCourts').value,10)||1);for(let i=1;i<=n;i++)rows.push({session_id:s.id,label:'Court '+i,division:'social',active:true});}
+  if(social){const n=Math.min(MAX_COURTS,Math.max(1,parseInt($('#nCourts').value,10)||1));
+    for(let i=1;i<=n;i++)rows.push({label:'Court '+i,division:'social',active:true});}
   else{const nr=Math.max(0,parseInt($('#nReg').value,10)||0),na=Math.max(0,parseInt($('#nAsc').value,10)||0);
-    for(let i=1;i<=nr;i++)rows.push({session_id:s.id,label:'Court '+i,division:'regular',active:true});
-    for(let i=1;i<=na;i++)rows.push({session_id:s.id,label:na===1?'Ascend Court':'Ascend Court '+i,division:'ascend',active:true});}
-  if(rows.length)need(await sb.from('courts').insert(rows));
+    if(nr+na>MAX_COURTS)return toast(`That's more than ${MAX_COURTS} courts`,true);
+    for(let i=1;i<=nr;i++)rows.push({label:'Court '+i,division:'regular',active:true});
+    for(let i=1;i<=na;i++)rows.push({label:'Court '+(nr+i),division:'ascend',active:true});}
+  const s=need(await sb.from('sessions').insert({session_date:date,label,status:'planned',session_type:newType,match_mode:social?'roundrobin':'rotation'}).select().single());
+  if(rows.length)need(await sb.from('courts').insert(rows.map(r=>({...r,session_id:s.id}))));
   cur=s.id;closeModal();await loadAll();tab='pool';render();toast(label+' created — now tick who is playing');
 }
 async function copyLast(){
@@ -825,11 +889,14 @@ async function poolToggle(id,on){
     need(await sb.from('session_players').upsert(row,{onConflict:'session_id,player_id'}));
     roster[id]={games_played:0,...(e||{}),...row};toast(P(id).name+' added — tap “Arrived” when they check in');}
   else{if(e&&e.status==='court'){render();return toast(P(id).name+' is on court — take them off the court first',true);}
+    const lp=linedMap()[id];if(lp){const s=slots(lp);s[s.indexOf(id)]='';await writeSlots(lp,s);}
     if(e&&e.games_played>0)await upd(id,{status:'left'});
     else{need(await sb.from('session_players').delete().eq('session_id',cur).eq('player_id',id));delete roster[id];}
     toast(P(id).name+' taken out of this session');}
   render();
 }
+/* take someone off any prep court they're lined up on */
+async function unlinePrep(id){const lp=linedMap()[id];if(lp){const s=slots(lp);s[s.indexOf(id)]='';await writeSlots(lp,s);}}
 
 /* ================= EVENTS ================= */
 async function act(d,el,e){
@@ -859,10 +926,18 @@ async function act(d,el,e){
       if(!confirm('Hide these results from the website? Nothing is deleted.'))break;
       need(await sb.from('sessions').update({published:false}).eq('id',cur));await loadAll();render();toast('Hidden from the website');break;
     case 'courtsPanel': courtsPanel=!courtsPanel;render();break;
-    case 'addCourt': {const dv=d.div,n=courts.filter(c=>c.division===dv).length+1;
-      const label=dv==='ascend'?'Ascend Court '+n:'Court '+(courts.filter(c=>c.division!=='ascend').length+1);
-      need(await sb.from('courts').insert({session_id:cur,label,division:dv,active:true}));await loadSession();render();toast(label+' added');break;}
+    case 'addCourt': {if(courts.length>=MAX_COURTS){toast(`Maximum of ${MAX_COURTS} courts`,true);break;}
+      const label=liveLabel();
+      need(await sb.from('courts').insert({session_id:cur,label,division:d.div,active:true,standby:false}));await loadSession();render();toast(label+' added');break;}
     case 'courtOn': {const c=court();need(await sb.from('courts').update({active:true}).eq('id',c.id));c.active=true;await autoFillAll();render();toast(c.label+' is on');break;}
+    /* prep courts — admin only, never on the TV */
+    case 'addPrep': {if(courts.length>=MAX_COURTS){toast(`Maximum of ${MAX_COURTS} courts`,true);break;}
+      const label=prepLabel();
+      need(await sb.from('courts').insert({session_id:cur,label,division:d.div,active:false,standby:true}));await loadSession();render();toast(label+' added — not shown on the TV');break;}
+    case 'removePrep': {const p=court();
+      need(await sb.from('courts').delete().eq('id',p.id));await loadSession();render();toast(p.label+' removed — its players are still waiting');break;}
+    case 'sendPrep': {const p=court(),c=courtById(d.to);if(!c||filled(c)){toast('That court is no longer free',true);render();break;}
+      await sendPrep(p,c);render();toast(p.label+' is on '+c.label+' — timer started');break;}
     /* courts */
     case 'slot': await pickTarget({k:'s',c:String(d.c),i:Number(d.i)});break;
     case 'wait': await pickTarget({k:'w',id:d.id});break;
@@ -871,8 +946,8 @@ async function act(d,el,e){
     case 'selWait': {const a=sel;sel=null;const c=courtById(a.c),s=slots(c),id=s[a.i];s[a.i]='';
       await setStatus([id],'queued');await writeSlots(c,s);render();toast(P(id).name+' back in line');break;}
     case 'seat': {const c=court();if(await fillCourt(c)){render();toast(c.label+' — timer started');}else toast('Not enough players waiting',true);break;}
-    case 'fillQ': {const c=court();await fillCourt(c);render();break;}
-    case 'clear': {const c=court();sel=null;await clearCourt(c);render();toast(c.label+' cleared — everyone back in their old places');break;}
+    case 'fillQ': {const c=court();if(!await fillCourt(c))toast('Not enough players waiting',true);render();break;}
+    case 'clear': {const c=court();sel=null;await clearCourt(c);render();toast(isPrep(c)?c.label+' emptied — players are still waiting':c.label+' cleared — everyone back in their old places');break;}
     case 'tstart': case 'trestart': {const c=court(),iso=new Date().toISOString();
       need(await sb.from('courts').update({started_at:iso,paused_at:null}).eq('id',c.id));Object.assign(c,{started_at:iso,paused_at:null});render();break;}
     case 'tpause': {const c=court(),iso=new Date().toISOString();
@@ -894,9 +969,9 @@ async function act(d,el,e){
     case 'qup': if(i>0){await swapTickets(q[i-1],d.id);render();}break;
     case 'qdown': if(i>-1&&i<q.length-1){await swapTickets(d.id,q[i+1]);render();}break;
     case 'qtop': if(i>0){await upd(d.id,{queue_ticket:new Date(ms(roster[q[0]].queue_ticket)-1).toISOString()});render();toast(P(d.id).name+' plays next');}break;
-    case 'qrest': if(sel&&sel.k==='w'&&sel.id===d.id)sel=null;await upd(d.id,{status:'resting'});render();toast(P(d.id).name+' is sitting out');break;
+    case 'qrest': if(sel&&sel.k==='w'&&sel.id===d.id)sel=null;await unlinePrep(d.id);await upd(d.id,{status:'resting'});render();toast(P(d.id).name+' is sitting out');break;
     case 'qback': await upd(d.id,{status:'queued',queue_ticket:new Date().toISOString()});await autoFillAll();render();toast(P(d.id).name+' is back — end of the line');break;
-    case 'qleave': await upd(d.id,{status:'left'});render();toast(P(d.id).name+' has left for the night');break;
+    case 'qleave': await unlinePrep(d.id);await upd(d.id,{status:'left'});render();toast(P(d.id).name+' has left for the night');break;
     /* pool */
     case 'poolAdd': await poolToggle(d.id,true);break;
     case 'arrive': {const v=($('#arr-'+d.id)||{}).value,t=v?onDate(v):new Date().toISOString();
@@ -926,7 +1001,7 @@ document.addEventListener('change',async e=>{
     if(a==='courtActive'){const c=courtById(t.dataset.id);
       if(!t.checked&&filled(c)){t.checked=true;return toast(c.label+' has players on it — clear it first',true);}
       need(await sb.from('courts').update({active:t.checked}).eq('id',c.id));c.active=t.checked;if(t.checked)await autoFillAll();render();}
-    if(a==='pickSession'){cur=Number(t.value);sel=null;ending=null;await loadSession();render();}
+    if(a==='pickSession'){cur=Number(t.value);sel=null;ending=null;lastPlan={};await loadSession();render();}
     if(a==='setArr'&&t.value){const id=t.dataset.id,e2=roster[id],v=onDate(t.value),patch={arrived_at:v};
       if(e2.status==='queued'&&!e2.games_played)patch.queue_ticket=v;
       await upd(id,patch);render();toast(patch.queue_ticket?'Arrival time changed — queue place adjusted':'Arrival time saved');}
@@ -949,7 +1024,7 @@ document.addEventListener('submit',async e=>{
 });
 
 /* timers tick every second; waiting times refresh every 30s */
-setInterval(()=>{courts.forEach(c=>{if(filled(c)<4||!c.started_at)return;const r=remaining(c);
+setInterval(()=>{courts.forEach(c=>{if(isPrep(c)||filled(c)<4||!c.started_at)return;const r=remaining(c);
   document.querySelectorAll(`[data-timer="${c.id}"]`).forEach(el=>{el.textContent=tText(c);el.classList.toggle('up',r===0);
     const card=el.closest('.acourt');if(card)card.classList.toggle('done',r===0);});});},1000);
 setInterval(()=>{if(user&&tab==='rally')safeRender();},30000);
