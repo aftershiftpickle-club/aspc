@@ -156,11 +156,13 @@ footer{border-top:1px solid var(--line);padding:1.4rem 0 5rem;margin-top:2.5rem;
 .ac-act .btn{flex:1}
 .offrow{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin-top:.8rem;font-size:.78rem;font-weight:700}
 
-/* ---- waiting list ---- */
+/* ---- waiting list ----
+   Every row uses the SAME fixed column widths so the headings
+   (GP, W–L, Wait, Last game) line up with the numbers below them. */
 .waitbox{margin-top:1rem}
 .upnext{display:grid;gap:.3rem;margin:0 0 .8rem;font-size:.85rem;color:var(--ink);font-weight:600}
 .wl{list-style:none;margin:0;padding:0;display:grid;gap:.3rem}
-.wr{display:grid;grid-template-columns:minmax(0,1fr) 38px 52px 60px 72px auto;align-items:center;gap:.5rem;padding:.3rem .5rem;border-radius:10px;background:var(--bg);border:1px solid var(--line)}
+.wr{display:grid;grid-template-columns:minmax(0,1fr) 38px 52px 60px 72px 124px;align-items:center;gap:.5rem;padding:.3rem .5rem;border-radius:10px;background:var(--bg);border:1px solid var(--line)}
 .wr.head{background:none;border:0;font-size:.6rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;padding:0 .5rem}
 .wr.g1{border-color:var(--accent);background:var(--next)}
 .wr.g2{border-color:var(--line2);background:var(--then)}
@@ -174,7 +176,7 @@ footer{border-top:1px solid var(--line);padding:1.4rem 0 5rem;margin-top:2.5rem;
 .wc.dim{color:var(--muted);font-weight:600}
 .nx{font-size:.58rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;border-radius:999px;padding:.12rem .45rem;margin-right:.35rem}
 .nx.n1{background:var(--accent);color:var(--accent-ink)}.nx.n2{background:var(--soft);color:var(--ink)}
-.qa{display:flex;gap:2px}
+.qa{display:flex;gap:2px;justify-content:flex-end}
 .qa button{border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:6px;min-width:28px;height:28px;font-size:.72rem;padding:0 .3rem}
 .qa button:hover:not(:disabled){background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .qa button:disabled{opacity:.3;cursor:default}
@@ -242,8 +244,11 @@ html[data-theme="dark"] .selbar b{color:var(--accent-text);filter:brightness(.55
 [hidden]{display:none!important}
 
 @media(max-width:900px){.rrow{grid-template-columns:1fr auto 1fr}.rrow>span:first-child,.rrow .acts{grid-column:1/-1}}
-@media(max-width:700px){.wr{grid-template-columns:minmax(0,1fr) 30px 46px 44px auto}.hide-md{display:none!important}.qa button{min-width:26px}.logo{height:44px}}
-@media(max-width:520px){.pform{grid-template-columns:1fr}.row2{grid-template-columns:1fr}.hide-sm{display:none}.courts{grid-template-columns:1fr}}
+@media(max-width:700px){.wr{grid-template-columns:minmax(0,1fr) 34px 48px 46px 116px}.hide-md{display:none!important}.qa button{min-width:26px}.logo{height:44px}}
+@media(max-width:520px){.pform{grid-template-columns:1fr}.row2{grid-template-columns:1fr}.hide-sm{display:none}.courts{grid-template-columns:1fr}
+  .wr{grid-template-columns:minmax(0,1fr) 34px 48px 46px;row-gap:.3rem}
+  .wr .qa{grid-column:1/-1}
+  .wr.head>span:last-child{display:none}}
 </style>
 </head>
 <body>
