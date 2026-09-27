@@ -210,4 +210,751 @@ select:hover{border-color:var(--accent)}
 /* ---------- table ---------- */
 table{width:100%;border-collapse:collapse}
 th,td{padding:.75rem .6rem;text-align:right;border-bottom:1px solid var(--line);color:var(--ink)}
-th{font-size:.68rem;font-weight:800;letter-spacing:.16em;text-transform:uppercas
+th{font-size:.68rem;font-weight:800;letter-spacing:.16em;text-transform:uppercase;background:var(--soft);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+th:first-child,td:first-child{padding-left:1rem;text-align:center;width:3.4rem}
+th:nth-child(2),td:nth-child(2){text-align:left;width:auto}
+th:last-child,td:last-child{padding-right:1rem}
+tbody tr:hover{background:var(--hover)}
+.rk{font:800 1.15rem var(--sans);color:var(--accent-text)}
+.who{display:flex;align-items:center;gap:.7rem;min-width:0}
+.who .avatar{width:38px;height:38px;flex:none;border-radius:50%;object-fit:cover;background:var(--soft);
+  border:1.5px solid var(--line);display:flex;align-items:center;justify-content:center;
+  font:800 .8rem var(--sans);color:var(--accent-text)}
+.who span{font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+td.w{color:var(--accent-text);font-weight:800}
+td.l{color:var(--muted)}
+.pct{font-weight:800;font-variant-numeric:tabular-nums}
+.diff{font-variant-numeric:tabular-nums;color:var(--muted)}
+.diff.up{color:var(--accent-text);font-weight:700}
+.strk{font-weight:800;font-variant-numeric:tabular-nums}
+.strk.sw{color:var(--accent-text)}
+.strk.sl{color:var(--muted)}
+tr.org td{background:var(--orgrow)}
+tr.org .rk{color:var(--loser);font-size:1rem}
+tr.org .who span{color:var(--muted)}
+.tag-o{font-style:normal;font-size:.58rem;font-weight:800;letter-spacing:.12em;color:var(--muted);
+  border:1px solid var(--line);background:var(--card);border-radius:999px;padding:.12rem .4rem;margin-left:.45rem;vertical-align:middle}
+
+/* ---------- games ---------- */
+.games{display:grid;gap:.6rem}
+.game{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);
+  display:grid;grid-template-columns:2.4rem 1fr auto 1fr;align-items:center;gap:.4rem 1rem;padding:.95rem 1.1rem}
+.game__no{font:800 1.15rem var(--sans);color:var(--loser)}
+.side{min-width:0}
+.side--b{text-align:right}
+.side p{margin:0;font-weight:600;line-height:1.3;color:var(--loser)}
+.side em{font-style:normal;font-size:.66rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:transparent}
+.side--won p{color:var(--ink);font-weight:800}
+.side--won em{color:var(--accent-text)}
+.score{font:800 1.35rem var(--sans);color:var(--ink);background:var(--bg);border:1px solid var(--line);
+  border-radius:10px;padding:.25rem .75rem;white-space:nowrap;font-variant-numeric:tabular-nums}
+.score .lo{color:var(--loser)}
+
+/* ---------- photos ---------- */
+.albums{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:1.1rem}
+.album{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow)}
+.album__cover{aspect-ratio:16/10;position:relative;display:grid;place-items:center;
+  background:radial-gradient(circle, var(--dots) 1.3px, transparent 1.5px) 0 0/15px 15px,
+    linear-gradient(135deg,var(--soft),var(--card))}
+.album__cover img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;z-index:1}
+.album__cover span{position:relative;font-family:var(--serif);color:var(--ink);font-size:1.3rem;text-align:center;padding:0 1rem}
+.album__cover:has(img)::after{content:"";position:absolute;inset:0;z-index:2;background:linear-gradient(to top,rgba(0,0,0,.7),transparent 55%)}
+.album__cover:has(img) span{position:absolute;left:14px;bottom:10px;z-index:3;color:#F0EFEC;padding:0;text-align:left}
+.album__body{padding:1.05rem 1.15rem 1.25rem;display:flex;flex-direction:column;gap:.4rem;flex:1}
+.album__body h3{font-size:1.02rem;font-weight:800}
+.album__body p{margin:0;color:var(--muted);font-size:.88rem}
+
+/* ---------- buttons ---------- */
+.btn{margin-top:auto;align-self:start;display:inline-block;text-decoration:none;
+  background:var(--accent);color:var(--accent-ink);font-weight:800;font-size:.76rem;letter-spacing:.12em;
+  text-transform:uppercase;padding:.7rem 1.15rem;border-radius:999px;transition:filter .2s,background .2s}
+.btn:hover{filter:brightness(1.08)}
+.btn--quiet{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--line)}
+.btn--quiet:hover{background:var(--soft);filter:none}
+
+/* ---------- join band under the standings ---------- */
+.hero{background:var(--band);margin-top:1rem}
+.hero__in{padding:2.8rem 0 2.6rem;display:grid;gap:.9rem;max-width:46rem}
+.hero .eyebrow{color:var(--accent)}
+.eyebrow--left{justify-content:flex-start}
+.eyebrow--left::after{display:none}
+.hero h2{font-family:var(--serif);font-weight:400;font-size:clamp(2.2rem,6.5vw,3.5rem);color:var(--band-ink)}
+.hero p{margin:0;color:var(--band-muted);max-width:56ch}
+.hero__cta{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.35rem}
+.hero__cta .btn{margin-top:0;align-self:center}
+.hero__cta .btn--quiet{color:var(--band-ink);box-shadow:inset 0 0 0 1.5px rgba(240,239,236,.35)}
+.hero__cta .btn--quiet:hover{background:transparent;box-shadow:inset 0 0 0 1.5px var(--accent)}
+
+/* ---------- join page ---------- */
+.stack{display:grid;gap:1.1rem}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.1rem}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:1.6rem;box-shadow:var(--shadow);display:flex;flex-direction:column}
+.panel > h3{font-family:var(--serif);font-weight:400;font-size:1.6rem}
+.panel__tag{font-size:.72rem;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--accent-text);margin:.45rem 0 0}
+.panel p{margin:.85rem 0 0;max-width:72ch}
+.panel .btn{margin-top:1.3rem}
+.kv{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem 1.4rem;
+  margin:1.1rem 0 0;padding-top:1.1rem;border-top:1px solid var(--line)}
+.kv dt{font-size:.68rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.kv dd{margin:.25rem 0 0;font-weight:700;color:var(--ink)}
+.jstep{position:relative;padding-top:1.4rem}
+.jstep__n{width:40px;height:40px;border-radius:50%;background:var(--accent);color:var(--accent-ink);
+  display:grid;place-items:center;font:800 1.05rem var(--sans);margin-bottom:.9rem}
+.jstep h3{font-family:var(--sans);font-weight:800;font-size:1.1rem}
+.jstep ul{list-style:none;padding:0;margin:.8rem 0 0;display:grid;gap:.35rem}
+.txtlink{color:var(--ink);font-weight:700;text-decoration-color:var(--accent);text-underline-offset:3px}
+.txtlink:hover{color:var(--accent-text)}
+.note{border-left:3px solid var(--accent);padding:.1rem 0 .1rem 1rem;margin-top:1.1rem}
+.note p{margin:0}
+.subhead{margin:2.6rem 0 1rem;font-family:var(--serif);font-weight:400;font-size:1.6rem;color:var(--ink)}
+
+footer{border-top:1px solid var(--line);padding:1.7rem 0 2.6rem;color:var(--muted);font-size:.78rem;
+  letter-spacing:.14em;text-transform:uppercase;font-weight:700;display:flex;gap:1rem 1.5rem;flex-wrap:wrap;align-items:center;justify-content:space-between}
+footer a{color:var(--ink);text-decoration:none}
+footer a:hover{color:var(--accent-text)}
+.empty{padding:2rem;text-align:center;color:var(--muted)}
+[hidden]{display:none !important}
+
+/* ---------- responsive ---------- */
+@media (max-width:820px){
+  .wrap{width:min(1100px,100% - 1.6rem)}
+  .brand .logo-slot img{height:52px}
+  .court{padding:1.8rem 0 2.2rem}
+  .court::before,.court::after{width:70px}
+  .podium{grid-template-columns:1fr;gap:.8rem;align-items:stretch}
+  .pod{display:grid;grid-template-columns:92px 1fr;grid-template-areas:"photo plate" "photo cyl";
+       align-items:center;gap:.5rem .85rem;text-align:left}
+  .pod--1{order:-1}
+  .pod__photo{grid-area:photo;width:64px !important;height:64px !important;font-size:1.2rem !important}
+  .pod__figure{grid-area:photo;width:92px !important;height:100% !important;min-height:132px;margin:0 !important;align-self:end}
+  .pod--1 .pod__figure,.pod--3 .pod__figure{height:100% !important}
+  .pod__cut{max-width:100%;height:100% !important}
+  .pod__plate{grid-area:plate}
+  .pod__cyl{grid-area:cyl;min-height:0 !important;padding:.6rem .85rem !important;border-radius:12px;
+    display:grid;grid-template-columns:auto 1fr 1fr;align-items:center;gap:.5rem}
+  .pod__cyl::before{display:none}
+  .pod__rank{margin:0;font-size:1.5rem !important;text-align:left;display:flex;align-items:baseline;gap:.4rem}
+  .pod__rank small{margin:0;font-size:.42em !important;line-height:1}
+  .pod__bar{font-size:.72rem;text-align:center}
+  .game{grid-template-columns:2rem 1fr;row-gap:.3rem;padding:.85rem 1rem}
+  .game__no{grid-row:span 2}
+  .side--b{text-align:left;order:3}
+  .score{order:2;justify-self:start;grid-column:2;font-size:1.15rem}
+  .hide-sm{display:none}
+  th,td{padding:.65rem .35rem}
+  th:first-child,td:first-child{padding-left:.7rem;width:2.6rem}
+  th:last-child,td:last-child{padding-right:.7rem}
+  .who .avatar{width:32px;height:32px}
+  .section__head h2{font-size:1.7rem}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap topbar__in">
+    <a class="brand" href="#/rankings">
+      <span class="brand__mark logo-slot" id="brandMark">
+        <svg width="104" height="40" viewBox="0 0 130 50" aria-hidden="true">
+          <g class="mk-bars">
+            <polygon points="23,18.2 57,16.7 57,20.3"/>
+            <polygon points="10.5,28.6 56.3,25.5 56.3,29.1"/>
+            <polygon points="24.6,37 56.6,33.3 56.6,36.6"/>
+          </g>
+          <circle class="mk-ball" cx="78" cy="25.3" r="15.2"/>
+          <g class="mk-holes">
+            <ellipse cx="73.6" cy="15.9" rx="3" ry="2.4" transform="rotate(-15 73.6 15.9)"/>
+            <ellipse cx="87.2" cy="20.2" rx="2.7" ry="2.2" transform="rotate(-15 87.2 20.2)"/>
+            <ellipse cx="78" cy="27.2" rx="3.1" ry="2.5" transform="rotate(-15 78 27.2)"/>
+            <ellipse cx="67.2" cy="23.2" rx="2.6" ry="2.1" transform="rotate(-15 67.2 23.2)"/>
+            <ellipse cx="69.6" cy="34.6" rx="2.8" ry="2.2" transform="rotate(-15 69.6 34.6)"/>
+            <ellipse cx="84.8" cy="34.4" rx="2.8" ry="2.2" transform="rotate(-15 84.8 34.4)"/>
+          </g>
+        </svg>
+      </span>
+      <span id="brandText">
+        <b id="brandName">Aftershift</b>
+        <span id="brandTag">Pickleclub</span>
+      </span>
+    </a>
+    <nav class="nav" id="nav" aria-label="Main">
+      <a href="#/rankings">Rankings</a>
+      <a href="tv.html" class="livelink"><i></i>Live</a>
+      <a href="#/games">Games</a>
+      <a href="#/photos">Photos</a>
+      <a href="#/join">Join</a>
+      <button class="theme-btn" id="themeBtn" type="button" aria-label="Switch between light and dark mode" title="Light / dark">◐</button>
+    </nav>
+  </div>
+</header>
+
+<div class="datebar" id="datebar">
+  <div class="wrap datebar__in">
+    <label for="dateSelect" id="dateLabel">Session</label>
+    <select id="dateSelect"></select>
+    <div class="seg" id="divSeg" role="group" aria-label="Division"></div>
+    <div class="chips" id="chips"></div>
+  </div>
+</div>
+
+<main>
+  <!-- RANKINGS -->
+  <section id="view-rankings">
+    <div class="court">
+      <div class="wrap court__in">
+        <h1>Open Play</h1>
+        <p class="eyebrow" id="courtSub">Session results</p>
+        <p class="court__date" id="courtTitle">Loading…</p>
+        <div class="podium" id="podium"></div>
+      </div>
+    </div>
+    <div class="wrap section">
+      <div class="section__head">
+        <h2 id="standingsHead">Standings</h2>
+        <p id="standingsNote"></p>
+      </div>
+      <div class="card">
+        <table>
+          <thead>
+            <tr><th>Rank</th><th>Player</th><th>W</th><th>L</th><th>GP</th><th>Win %</th><th class="hide-sm">Diff</th><th class="hide-sm">Streak</th></tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <section class="hero" id="hero" hidden>
+      <div class="wrap hero__in">
+        <p class="eyebrow eyebrow--left" id="heroEyebrow"></p>
+        <h2 id="heroHeadline"></h2>
+        <p id="heroText"></p>
+        <div class="hero__cta" id="heroCta"></div>
+      </div>
+    </section>
+  </section>
+
+  <!-- GAMES -->
+  <section id="view-games" hidden>
+    <div class="wrap section">
+      <div class="section__head">
+        <h2 id="gamesTitle">Games</h2>
+        <p>Every game played in this session. Winners are in bold.</p>
+      </div>
+      <div class="games" id="gamesList"></div>
+    </div>
+  </section>
+
+  <!-- PHOTOS -->
+  <section id="view-photos" hidden>
+    <div class="wrap section">
+      <div class="section__head">
+        <h2 id="galleryTitle">Photos</h2>
+      </div>
+      <div class="albums" id="albumList"></div>
+    </div>
+  </section>
+
+  <!-- JOIN -->
+  <section id="view-join" hidden>
+    <div class="wrap section">
+      <div class="section__head">
+        <h2>Join a session</h2>
+        <p id="joinIntro"></p>
+      </div>
+      <div class="cols" id="joinSteps"></div>
+
+      <h2 class="subhead">Sessions</h2>
+      <div class="cols" id="joinSessions"></div>
+
+      <div id="joinUpcomingWrap" hidden>
+        <h2 class="subhead">Coming up</h2>
+        <div class="cols" id="joinUpcoming"></div>
+      </div>
+
+      <h2 class="subhead">Where we play</h2>
+      <div class="cols" id="joinWhere"></div>
+    </div>
+  </section>
+</main>
+
+<footer class="wrap"><span class="logo-slot foot-logo"></span><span id="footText"></span><span id="footLinks"></span></footer>
+
+<script src="data.js"></script>
+<script>
+/* ---------- database (Supabase) ----------
+   Players and games come from the database (filled in from
+   admin.html). If it can't be reached, the site falls back to
+   PLAYERS and MATCHES in data.js, so it never shows a blank page. */
+const SUPABASE_URL = "https://wczulosdzoewznxlawfj.supabase.co";
+const SUPABASE_KEY = "sb_publishable_ZPRnMslT6BWplkRvVaiRXA_PUh-bQlO";
+
+let ROSTER = PLAYERS;
+let GAMES  = MATCHES;
+
+async function loadFromDatabase(){
+  const get = path => fetch(`${SUPABASE_URL}/rest/v1/${path}`, { headers: { apikey: SUPABASE_KEY } })
+    .then(r => { if (!r.ok) throw new Error("Database said " + r.status); return r.json(); });
+  const getAll = async path => {
+    let out = [], from = 0;
+    while (true){
+      const rows = await get(`${path}&limit=1000&offset=${from}`);
+      out = out.concat(rows);
+      if (rows.length < 1000) return out;
+      from += 1000;
+    }
+  };
+  try {
+    const [players, allMatches, published] = await Promise.all([
+      getAll("players?select=id,name,photo_url,organiser&order=id"),
+      getAll("matches?select=session_id,session_date,division,game,team1,team2,score1,score2&order=session_date,id"),
+      getAll("sessions?select=id&published=eq.true")
+    ]);
+    const pub = new Set(published.map(s => s.id));
+    const matches = allMatches.filter(m => pub.has(m.session_id));
+    const extra = Object.fromEntries(PLAYERS.map(p => [p.id, p]));
+    const fromDb = players.map(p => ({
+      ...(extra[p.id] || {}),
+      id: p.id,
+      name: p.name,
+      photo: p.photo_url || (extra[p.id] && extra[p.id].photo) || "",
+      organiser: (extra[p.id] && extra[p.id].organiser !== undefined)
+        ? extra[p.id].organiser : !!p.organiser
+    }));
+    const inDb = new Set(fromDb.map(p => p.id));
+    ROSTER = fromDb.concat(PLAYERS.filter(p => !inDb.has(p.id)));
+
+    const dbGames = matches.map(m => ({
+      date: m.session_date, div: m.division, game: m.game,
+      team1: m.team1, team2: m.team2, score1: m.score1, score2: m.score2
+    }));
+    /* SAFETY NET: sessions only in data.js still show. If a date is
+       in both, the database wins.                                   */
+    const dbDates = new Set(dbGames.map(g => g.date));
+    GAMES = dbGames.concat(MATCHES.filter(m => !dbDates.has(m.date)));
+  } catch (err){
+    console.warn("Could not reach the database — showing data.js instead.", err);
+  }
+}
+
+/* ---------- helpers ---------- */
+const $ = id => document.getElementById(id);
+let byId = {};
+const nameOf = id => (byId[id] ? byId[id].name : id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g,
+  c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;" }[c]));
+const isTba = v => !v || /^\s*tba\b/i.test(String(v));
+
+function fmtDate(iso){
+  const [y,m,d] = iso.split("-").map(Number);
+  return new Date(y, m-1, d).toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"});
+}
+function todayIso(){
+  const t = new Date();
+  return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,"0")}-${String(t.getDate()).padStart(2,"0")}`;
+}
+function initials(name){
+  return name.trim().split(/\s+/).slice(0,2).map(w => w[0].toUpperCase()).join("");
+}
+function ordinal(n){
+  const s = ["th","st","nd","rd"], v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
+}
+
+/* ---------- light / dark switch ---------- */
+$("themeBtn").addEventListener("click", () => {
+  const dark = document.documentElement.dataset.theme !== "dark";
+  document.documentElement.dataset.theme = dark ? "dark" : "light";
+  try { localStorage.setItem("aspc-theme", dark ? "dark" : "light"); } catch(e){}
+});
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", e => {
+  let saved; try { saved = localStorage.getItem("aspc-theme"); } catch(_){}
+  if (!saved) document.documentElement.dataset.theme = e.matches ? "dark" : "light";
+});
+
+/* Player photos: admin upload first, then photos/<id>.jpg/.jpeg/.png/.webp,
+   then initials. Add focus:"50% 20%" to a player in data.js to nudge
+   their photo inside the circle.                                        */
+const PHOTO_EXTS = ["jpg","jpeg","png","webp"];
+function avatar(player, cls){
+  const id = player.id || "";
+  const src = player.photo || (id ? `photos/${id}.${PHOTO_EXTS[0]}` : "");
+  const c = cls || "avatar";
+  if (!src) return `<div class="${c}" aria-hidden="true">${initials(player.name)}</div>`;
+  const focus = player.focus ? ` style="object-position:${player.focus}"` : "";
+  return `<img class="${c}" src="${src}" alt="${player.name}"${focus}
+    data-name="${player.name}" data-id="${id}" data-step="${player.photo ? "custom" : "0"}">`;
+}
+
+/* Podium: photos/cutouts/<id>.png if it exists, else round photo, else initials. */
+function podiumPhoto(player){
+  const id = player.id || "";
+  if (!id) return avatar(player, "pod__photo");
+  return `<span class="pod__figure">
+    <img class="pod__cut" src="photos/cutouts/${id}.png" alt="${player.name}"
+      data-name="${player.name}" data-id="${id}" data-step="cutout">
+  </span>`;
+}
+
+document.addEventListener("error", e => {
+  const el = e.target;
+  if (el.tagName !== "IMG") return;
+  if (el.classList.contains("album__img")) { el.remove(); return; }
+  if (el.classList.contains("pod__cut")){
+    const figure = el.closest(".pod__figure") || el;
+    const player = byId[el.dataset.id] || { id: el.dataset.id, name: el.dataset.name };
+    figure.outerHTML = avatar(player, "pod__photo");
+    return;
+  }
+  if (!el.classList.contains("avatar") && !el.classList.contains("pod__photo")) return;
+  const step = el.dataset.step, id = el.dataset.id, name = el.dataset.name || "";
+  const next = (step === "custom" || !id) ? PHOTO_EXTS.length : Number(step) + 1;
+  if (next < PHOTO_EXTS.length){
+    el.dataset.step = next;
+    el.src = `photos/${id}.${PHOTO_EXTS[next]}`;
+    return;
+  }
+  const box = document.createElement("div");
+  box.className = el.className;
+  box.textContent = initials(name);
+  box.setAttribute("aria-hidden","true");
+  el.replaceWith(box);
+}, true);
+
+/* ---------- ranking logic ----------
+   1. highest win %   2. best streak   3. best point difference
+   Organisers are listed at the bottom with /O, outside the ranking. */
+function gamesOn(date, div){
+  return GAMES.filter(m => m.date === date && (m.div || "regular") === div);
+}
+function streakOf(seq){
+  if (!seq.length) return 0;
+  const last = seq[seq.length - 1];
+  let n = 0;
+  for (let i = seq.length - 1; i >= 0 && seq[i] === last; i--) n++;
+  return last === "W" ? n : -n;
+}
+function streakText(s){ return s ? Math.abs(s) + (s > 0 ? "W" : "L") : "—"; }
+
+function standings(date, div){
+  const rows = {};
+  const seen = p => rows[p] || (rows[p] = { id:p, name:nameOf(p), wins:0, losses:0, diff:0, seq:[] });
+  gamesOn(date, div).slice().sort((a,b) => (a.game || 0) - (b.game || 0)).forEach(m => {
+    const t1won = m.score1 > m.score2;
+    const margin = m.score1 - m.score2;
+    m.team1.forEach(p => {
+      const r = seen(p); r.diff += margin; r.seq.push(t1won ? "W" : "L");
+      t1won ? r.wins++ : r.losses++;
+    });
+    m.team2.forEach(p => {
+      const r = seen(p); r.diff -= margin; r.seq.push(t1won ? "L" : "W");
+      t1won ? r.losses++ : r.wins++;
+    });
+  });
+  const list = Object.values(rows).map(r => {
+    const gp = r.wins + r.losses;
+    const player = byId[r.id] || { id:r.id, name:r.name, photo:"" };
+    return { ...r, gp, pct: gp ? Math.round(r.wins / gp * 100) : 0,
+             streak: streakOf(r.seq), player,
+             organiser: Array.isArray(player.organiser)
+               ? player.organiser.includes(div) : !!player.organiser };
+  });
+  const order = (a,b) => b.pct - a.pct || b.streak - a.streak
+                      || b.diff - a.diff || a.name.localeCompare(b.name);
+  const ranked     = list.filter(r => !r.organiser).sort(order);
+  const organisers = list.filter(r =>  r.organiser).sort(order);
+  const all = ranked.concat(organisers);
+  all.forEach((r,i) => r.rank = i + 1);
+  return all;
+}
+
+let dates = [];
+let current;
+let currentDiv = DIVISIONS[0].id;
+const divName = id => (DIVISIONS.find(d => d.id === id) || {}).name || id;
+
+function ensureDivision(){
+  if (gamesOn(current, currentDiv).length) return;
+  const played = DIVISIONS.find(d => gamesOn(current, d.id).length);
+  if (played) currentDiv = played.id;
+}
+
+/* ---------- rankings & games ---------- */
+function renderRankings(){
+  if (!current){
+    $("courtSub").textContent = `${divName(currentDiv)} session results`;
+    $("courtTitle").textContent = "No sessions recorded yet";
+    $("standingsHead").textContent = `${divName(currentDiv)} standings`;
+    $("standingsNote").textContent = "";
+    $("podium").innerHTML = `<p class="court__empty">No ${divName(currentDiv)} games recorded yet.</p>`;
+    $("tableBody").innerHTML = `<tr><td colspan="8" class="empty">No ${divName(currentDiv)} results yet.</td></tr>`;
+    $("chips").innerHTML = "";
+    return;
+  }
+  const list = standings(current, currentDiv);
+  const played = gamesOn(current, currentDiv).length;
+
+  $("courtSub").textContent = `${divName(currentDiv)} session results`;
+  $("courtTitle").textContent = fmtDate(current);
+  $("standingsHead").textContent = `${divName(currentDiv)} standings`;
+  $("standingsNote").textContent = list.length ? "Ranked by win %, then streak, then point difference" : "";
+
+  const podiumList = list.filter(r => !r.organiser);
+  const order = [1,0,2]; // 2nd, 1st, 3rd
+  $("podium").innerHTML = !podiumList.length
+    ? `<p class="court__empty">No ${divName(currentDiv)} games recorded for this session yet.</p>`
+    : order.map(i => {
+        const r = podiumList[i];
+        if (!r) return "";
+        return `<article class="pod pod--${i + 1}">
+          ${podiumPhoto(r.player)}
+          <div class="pod__plate">${r.name}</div>
+          <div class="pod__cyl">
+            <div class="pod__rank">${ordinal(r.rank)}<small>place</small></div>
+            <div class="pod__bar">Win rate: <b>${r.pct}%</b></div>
+            <div class="pod__bar">Win / loss: <b>${r.wins}&#8211;${r.losses}</b></div>
+          </div>
+        </article>`;
+      }).join("");
+
+  $("tableBody").innerHTML = list.length
+    ? list.map(r => `<tr class="${r.organiser ? "org" : ""}">
+        <td class="rk">${r.rank}</td>
+        <td><div class="who">${avatar(r.player)}<span>${r.name}${r.organiser ? `<i class="tag-o">/O</i>` : ""}</span></div></td>
+        <td class="w">${r.wins}</td>
+        <td class="l">${r.losses}</td>
+        <td>${r.gp}</td>
+        <td class="pct">${r.pct}%</td>
+        <td class="diff hide-sm ${r.diff > 0 ? "up" : ""}">${r.diff > 0 ? "+" + r.diff : r.diff}</td>
+        <td class="strk hide-sm ${r.streak > 0 ? "sw" : "sl"}">${streakText(r.streak)}</td>
+      </tr>`).join("")
+    : `<tr><td colspan="8" class="empty">No ${divName(currentDiv)} results for this session yet.</td></tr>`;
+
+  $("chips").innerHTML = list.length
+    ? `<span class="chip"><b>${list.length}</b> players</span>
+       <span class="chip"><b>${played}</b> games</span>`
+    : "";
+}
+
+function renderGames(){
+  const games = gamesOn(current, currentDiv).slice().sort((a,b) => a.game - b.game);
+  $("gamesTitle").textContent = `${divName(currentDiv)} games`;
+  $("gamesList").innerHTML = games.length
+    ? games.map(m => {
+        const t1won = m.score1 > m.score2;
+        const team = ids => ids.map(nameOf).join(" + ");
+        return `<article class="game">
+          <div class="game__no">${m.game}</div>
+          <div class="side ${t1won ? "side--won" : ""}">
+            <p>${team(m.team1)}</p>
+            <em>${t1won ? "Winner" : "&nbsp;"}</em>
+          </div>
+          <div class="score"><span>${m.score1}</span><span class="lo"> – </span><span>${m.score2}</span></div>
+          <div class="side side--b ${!t1won ? "side--won" : ""}">
+            <p>${team(m.team2)}</p>
+            <em>${!t1won ? "Winner" : "&nbsp;"}</em>
+          </div>
+        </article>`;
+      }).join("")
+    : `<div class="card empty">No ${divName(currentDiv)} games recorded for this session yet.</div>`;
+}
+
+function renderAlbums(){
+  $("galleryTitle").textContent = (typeof GALLERY !== "undefined" && GALLERY.title) || "Photos";
+  const list = [...ALBUMS].sort((a,b) => b.date.localeCompare(a.date));
+  $("albumList").innerHTML = list.length
+    ? list.map(a => `<article class="album">
+        <div class="album__cover">
+          <span>${fmtDate(a.date)}</span>
+          <img class="album__img" src="${a.cover || `photos/albums/${a.date}.jpg`}" alt="">
+        </div>
+        <div class="album__body">
+          <h3>${esc(a.title)}</h3>
+          <p>${esc(a.description || "")}</p>
+          <a class="btn" href="${esc(a.url)}" target="_blank" rel="noopener">View photos</a>
+        </div>
+      </article>`).join("")
+    : `<div class="card empty">No albums added yet.</div>`;
+}
+
+/* ---------- LOGOS ----------
+   Put these next to index.html:
+     logo-light.png  → the logo with DARK lettering  (light mode)
+     logo-dark.png   → the logo with WHITE lettering (dark mode)
+   They appear in the header and the footer. If a file is missing,
+   the header shows the built-in Aftershift mark for that mode.     */
+function findFile(list, done, i = 0){
+  if (i >= list.length) return done(null);
+  const img = new Image();
+  img.onload = () => done(list[i]);
+  img.onerror = () => findFile(list, done, i + 1);
+  img.src = list[i];
+}
+function loadLogos(){
+  const brandEl = document.querySelector(".brand");
+  [["light", ["logo-light.png","logo-light.svg","logo-light.jpg","logo-light.webp"]],
+   ["dark",  ["logo-dark.png","logo-dark.svg","logo-dark.jpg","logo-dark.webp","logo.png","logo.svg"]]]
+  .forEach(([mode, list]) => findFile(list, src => {
+    if (!src) return;
+    document.querySelectorAll(".logo-slot").forEach(slot => {
+      const img = new Image();
+      img.src = src; img.alt = CLUB.name; img.className = "logo-" + mode;
+      slot.appendChild(img);
+    });
+    brandEl.classList.add("has-" + mode, "named-" + mode);
+  }));
+}
+
+function renderClub(){
+  document.title = `${CLUB.name} — ${CLUB.tagline}`;
+  const parts = CLUB.name.split(" ");
+  $("brandName").textContent = parts[0];
+  $("brandTag").textContent = parts.slice(1).join(" ") || CLUB.tagline;
+  loadLogos();
+  $("footText").textContent = CLUB.established ? `${CLUB.name} — ${CLUB.established}` : CLUB.name;
+  $("footLinks").innerHTML = SOCIAL.filter(s => s.url && /instagram/i.test(s.label))
+    .map(s => `<a href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.handle)}</a>`).join("");
+}
+
+function renderHero(){
+  $("heroEyebrow").textContent = HERO.eyebrow;
+  $("heroHeadline").textContent = HERO.headline;
+  $("heroText").textContent = HERO.text;
+  $("heroCta").innerHTML =
+    `<a class="btn" href="${esc(REGISTRATION_FORM)}" target="_blank" rel="noopener">Register for a session</a>
+     <a class="btn btn--quiet" href="#/join">How to join</a>`;
+}
+
+/* ---------- JOIN page ----------
+   Built from data.js, so you still edit the words there.
+   Anything marked "TBA" is left out automatically.        */
+const kv = list => {
+  const shown = (list || []).filter(d => !isTba(d.value));
+  return shown.length
+    ? `<dl class="kv">${shown.map(d => `<div><dt>${esc(d.label)}</dt><dd>${esc(d.value)}</dd></div>`).join("")}</dl>`
+    : "";
+};
+const waList = people => `<ul>${people.map(p =>
+  `<li>${esc(p.name)} — <a class="txtlink" href="${esc(p.url)}" target="_blank" rel="noopener">${esc(p.label)}</a></li>`).join("")}</ul>`;
+
+function renderJoin(){
+  const A = ANNOUNCEMENTS;
+  $("joinIntro").textContent = "Three steps and you're on court.";
+
+  $("joinSteps").innerHTML = `
+    <article class="panel jstep">
+      <span class="jstep__n">1</span>
+      <h3>Register</h3>
+      <p>Fill in the ASPC form for the session you want. One form covers every session.</p>
+      <a class="btn" href="${esc(REGISTRATION_FORM)}" target="_blank" rel="noopener">Open the form</a>
+    </article>
+    <article class="panel jstep">
+      <span class="jstep__n">2</span>
+      <h3>Pay to confirm your slot</h3>
+      <p>Your place is confirmed once payment is done. Send the receipt to:</p>
+      ${waList(A.policy.payTo)}
+      <div class="note"><p>Same-day cancellations are non-refundable.</p></div>
+    </article>
+    <article class="panel jstep">
+      <span class="jstep__n">3</span>
+      <h3>Check in and play</h3>
+      <p>Arrive by 6:50 PM and check in with Bon or Jes. You join the queue and your name comes up on the Live screen.</p>
+      <a class="btn btn--quiet" href="tv.html">See the Live screen</a>
+    </article>`;
+
+  $("joinSessions").innerHTML = SESSIONS.filter(s => s.button && s.button.url).map(s => `
+    <article class="panel">
+      <h3>${esc(s.name)}</h3>
+      ${s.tagline ? `<p class="panel__tag">${esc(s.tagline)}</p>` : ""}
+      ${kv((s.details || []).filter(d => !/^(maximum players|courts|skill level)$/i.test(d.label)))}
+    </article>`).join("");
+
+  const upcoming = A.items.filter(i => i.date >= todayIso());
+  $("joinUpcomingWrap").hidden = !upcoming.length;
+  $("joinUpcoming").innerHTML = upcoming.map(i => `
+    <article class="panel">
+      <h3>${esc(i.name)}</h3>
+      <p class="panel__tag">${fmtDate(i.date)}</p>
+      ${kv([{ label: "Time", value: i.time }])}
+    </article>`).join("");
+
+  $("joinWhere").innerHTML = `
+    <article class="panel">
+      <h3>Venue</h3>
+      <p>${A.venue.lines.map(esc).join("<br>")}</p>
+      <a class="btn btn--quiet" href="${esc(A.venue.mapUrl)}" target="_blank" rel="noopener">Open in Google Maps</a>
+    </article>
+    <article class="panel">
+      <h3>Questions?</h3>
+      <p>Message an organiser on WhatsApp.</p>
+      ${waList(TEAM)}
+    </article>`;
+}
+
+/* ---------- date and division selectors ---------- */
+$("dateSelect").addEventListener("change", e => {
+  current = e.target.value;
+  ensureDivision();
+  refresh();
+});
+function renderDivisions(){
+  $("dateLabel").hidden = !dates.length;
+  $("dateSelect").hidden = !dates.length;
+  $("divSeg").hidden = DIVISIONS.length < 2;
+  $("divSeg").innerHTML = DIVISIONS.map(d => {
+    const empty = (dates.length && !gamesOn(current, d.id).length) ? ` data-empty="1"` : "";
+    return `<button type="button" data-div="${d.id}" aria-pressed="${d.id === currentDiv}"${empty}>${d.name}</button>`;
+  }).join("");
+}
+$("divSeg").addEventListener("click", e => {
+  const btn = e.target.closest("button[data-div]");
+  if (!btn) return;
+  currentDiv = btn.dataset.div;
+  refresh();
+});
+function refresh(){
+  renderDivisions();
+  renderRankings();
+  renderGames();
+}
+
+/* ---------- navigation ----------
+   Old links (#/sessions, #/schedule, #/about, #/faq) now open Join. */
+const views = ["rankings","games","photos","join"];
+const oldPages = ["sessions","schedule","about","faq"];
+function route(){
+  let name = (location.hash.replace("#/","") || "rankings").toLowerCase();
+  if (oldPages.includes(name)) name = "join";
+  const view = views.includes(name) ? name : "rankings";
+  views.forEach(v => $("view-" + v).hidden = (v !== view));
+  document.querySelectorAll("#nav a").forEach(a => {
+    if (a.getAttribute("href") === "#/" + view) a.setAttribute("aria-current","page");
+    else a.removeAttribute("aria-current");
+  });
+  $("datebar").hidden = !(view === "rankings" || view === "games");
+  $("hero").hidden = (view !== "rankings");
+  window.scrollTo(0,0);
+}
+window.addEventListener("hashchange", route);
+
+/* ---------- start ---------- */
+renderClub();
+renderHero();
+renderAlbums();
+renderJoin();
+route();
+
+(async function start(){
+  await loadFromDatabase();
+  byId = Object.fromEntries(ROSTER.map(p => [p.id, p]));
+  dates = [...new Set(GAMES.map(m => m.date))].sort().reverse();
+  current = dates[0];
+  $("dateSelect").innerHTML = dates.map(d => `<option value="${d}">${fmtDate(d)}</option>`).join("");
+  if (current) $("dateSelect").value = current;
+  ensureDivision();
+  refresh();
+})();
+</script>
+</body>
+</html>
