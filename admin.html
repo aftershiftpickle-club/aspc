@@ -5,168 +5,245 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <title>ASPC Admin</title>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Montserrat:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script>
+(function(){var t;try{t=localStorage.getItem('aspc-theme')}catch(e){}
+  var d=t?t==='dark':window.matchMedia('(prefers-color-scheme: dark)').matches;
+  document.documentElement.dataset.theme=d?'dark':'light';})();
+</script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-:root{--black:#0A0A0A;--panel:#131313;--panel2:#191919;--edge:#262626;--ink:#F4F5F0;--muted:#8E958A;--volt:#C7D92C;--volt2:#DCF23A;--red:#E2543B;--blue:#7FB0E0;--r:14px}
+/* ===== COLOURS — same as the website (light first, dark below) ===== */
+:root{
+  --bg:#EEEDEC;--card:#F7F6F4;--soft:#E1E0DE;--ink:#24211C;--muted:#6E733B;--line:#D7D5D1;--line2:#C4C1BA;
+  --accent:#B5C42F;--accent-ink:#24211C;--accent-text:#66740F;--logo-lime:#A9BC2A;
+  --red:#C4553F;--asc:#8A6A2E;--asc-bg:#F1EADB;--next:#EEF2D6;--then:#F3F2EF;--sel:rgba(181,196,47,.35);
+  --topbar:rgba(238,237,236,.92);--r:14px;
+  --shadow:0 1px 2px rgba(36,33,28,.05),0 10px 26px -20px rgba(36,33,28,.35);
+  --serif:"DM Serif Display",Georgia,serif;--sans:"Manrope",system-ui,sans-serif;
+}
+html[data-theme="dark"]{
+  --bg:#171715;--card:#242320;--soft:#2E2D29;--ink:#F0EFEC;--muted:#AEB876;--line:#393831;--line2:#4A4940;
+  --accent:#C2D437;--accent-ink:#171715;--accent-text:#C2D437;--logo-lime:#C2D437;
+  --red:#E0735C;--asc:#D9B45A;--asc-bg:#2E2A1F;--next:#2C3018;--then:#27261F;--sel:rgba(194,212,55,.3);
+  --topbar:rgba(23,23,21,.9);
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 12px 28px -18px rgba(0,0,0,.7);
+  color-scheme:dark;
+}
 *{box-sizing:border-box}
-body{margin:0;background:var(--black);color:var(--ink);font:400 15px/1.55 "Montserrat",system-ui,sans-serif}
+body{margin:0;background:var(--bg);color:var(--muted);font:400 15px/1.55 var(--sans);transition:background .25s,color .25s}
 button,input,select{font:inherit;color:inherit}
 button{cursor:pointer}
 .wrap{width:min(1180px,100% - 2rem);margin-inline:auto}
-:focus-visible{outline:2px solid var(--volt);outline-offset:2px}
-.dim{color:var(--muted)}
-.grow{flex:1}
-.loading{text-align:center;color:var(--muted);padding:4rem 1rem}
-.brand{display:flex;align-items:center;gap:.65rem;text-decoration:none;color:inherit}
-.ball{width:32px;height:32px;border-radius:50%;flex:none;background:radial-gradient(circle,#0A0A0A 20%,transparent 23%) 2px 2px/10px 10px,var(--volt)}
-.brand b{display:block;font-weight:800;letter-spacing:.16em;text-transform:uppercase;font-size:.95rem;line-height:1}
-.brand small{display:block;color:var(--volt);font-size:.6rem;font-weight:700;letter-spacing:.24em;text-transform:uppercase}
-.adm-badge{font-size:.6rem;font-weight:800;letter-spacing:.16em;background:var(--red);color:#fff;border-radius:6px;padding:.2rem .45rem}
-.atop{position:sticky;top:0;z-index:40;background:#0E0E0E;border-bottom:1px solid #1E1E1E}
-.atop-in{display:flex;align-items:center;gap:.7rem;min-height:60px;flex-wrap:wrap;padding:.4rem 0}
-.sync{display:flex;align-items:center;gap:.4rem;font-size:.74rem;font-weight:700;color:var(--volt);border:1px solid rgba(199,217,44,.35);border-radius:999px;padding:.28rem .65rem}
-.sync i{width:7px;height:7px;border-radius:50%;background:var(--volt);animation:pulse 1.4s infinite}
-.sync.off{color:var(--muted);border-color:#333}.sync.off i{background:var(--muted);animation:none}
-@keyframes pulse{50%{opacity:.3}}
-.atabs{border-bottom:1px solid #1E1E1E;background:#0B0B0B}
-.atabs button{border:0;background:none;color:var(--muted);font-weight:700;font-size:.86rem;padding:.85rem 1rem;border-bottom:2px solid transparent;white-space:nowrap}
-.atabs button[aria-current="page"]{color:#fff;border-color:var(--volt)}
-footer{border-top:1px solid #1E1E1E;padding:1.4rem 0 2.4rem;margin-top:2.5rem;color:var(--muted);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;font-weight:600}
+.grow{flex:1}.dim{color:var(--muted)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.loading{text-align:center;padding:4rem 1rem}
+.demo{background:var(--accent);color:var(--accent-ink);text-align:center;font-weight:800;font-size:.8rem;padding:.45rem 1rem}
 
-.btn{border:0;background:var(--volt);color:#0A0A0A;font-weight:800;font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;padding:.62rem 1rem;border-radius:999px;text-decoration:none;display:inline-block}
-.btn:hover{background:var(--volt2)}
-.btn:disabled{opacity:.35;cursor:not-allowed}
-.btn.quiet{background:transparent;color:#fff;box-shadow:inset 0 0 0 1.5px var(--edge)}
-.btn.quiet:hover{box-shadow:inset 0 0 0 1.5px var(--volt);color:var(--volt)}
-.btn.danger{background:transparent;color:var(--red);box-shadow:inset 0 0 0 1.5px rgba(226,84,59,.45)}
+/* logo — same drawing as the website */
+.logo{display:block;height:50px;width:auto;overflow:visible}
+.lg-ink{fill:var(--ink)}.lg-lime{fill:var(--logo-lime)}.lg-hole{fill:var(--bg)}
+.lg-dash{stroke:var(--logo-lime);stroke-width:3;stroke-linecap:round}
+.lg-word{font-family:var(--sans);font-weight:800}.lg-sub{font-family:var(--sans);font-weight:700}
+.brand{display:flex;align-items:center;text-decoration:none}
+.adm-badge{font-size:.6rem;font-weight:800;letter-spacing:.16em;background:var(--ink);color:var(--bg);border-radius:6px;padding:.2rem .45rem}
+
+.atop{position:sticky;top:0;z-index:40;background:var(--topbar);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.atop-in{display:flex;align-items:center;gap:.7rem;min-height:64px;flex-wrap:wrap;padding:.4rem 0}
+.sync{display:flex;align-items:center;gap:.4rem;font-size:.74rem;font-weight:700;color:var(--accent-text);border:1px solid var(--line2);background:var(--card);border-radius:999px;padding:.28rem .65rem}
+.sync i{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:pulse 1.4s infinite}
+.sync.off{color:var(--muted)}.sync.off i{background:var(--muted);animation:none}
+@keyframes pulse{50%{opacity:.3}}
+.ctl{width:34px;height:34px;border-radius:50%;border:1.5px solid var(--line);background:var(--card);color:var(--ink);font-size:.95rem;display:grid;place-items:center}
+.ctl:hover{border-color:var(--accent)}
+.atabs{border-bottom:1px solid var(--line);background:var(--card)}
+.atabs button{border:0;background:none;color:var(--muted);font-weight:700;font-size:.86rem;padding:.85rem 1rem;border-bottom:2px solid transparent;white-space:nowrap}
+.atabs button[aria-current="page"]{color:var(--ink);border-color:var(--accent)}
+footer{border-top:1px solid var(--line);padding:1.4rem 0 5rem;margin-top:2.5rem;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;font-weight:700}
+
+.btn{border:0;background:var(--accent);color:var(--accent-ink);font-weight:800;font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;padding:.62rem 1rem;border-radius:999px;text-decoration:none;display:inline-block;text-align:center}
+.btn:hover{filter:brightness(1.06)}
+.btn:disabled{opacity:.35;cursor:not-allowed;filter:none}
+.btn.quiet{background:var(--card);color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--line)}
+.btn.quiet:hover{box-shadow:inset 0 0 0 1.5px var(--accent);filter:none}
+.btn.danger{background:var(--card);color:var(--red);box-shadow:inset 0 0 0 1.5px var(--red)}
 .btn.sm{padding:.42rem .75rem;font-size:.66rem}
 .btn.w{width:100%}
 .field{display:grid;gap:.35rem;margin-bottom:.9rem}
-.field label{font-size:.66rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
-.inp{background:#161616;border:1.5px solid #333;border-radius:10px;padding:.62rem .8rem;color:#fff;width:100%;color-scheme:dark}
-.inp:focus{border-color:var(--volt);outline:0}
-.chk{display:flex;align-items:center;gap:.45rem;font-size:.8rem;font-weight:600;color:var(--muted);cursor:pointer}
-.chk input{accent-color:var(--volt);width:16px;height:16px}
-.seg{display:flex;gap:3px;background:#161616;border:1.5px solid var(--edge);border-radius:999px;padding:3px}
+.field label,.flabel{font-size:.66rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.inp{background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:.55rem .8rem;color:var(--ink);font-weight:600;width:100%}
+.inp:focus{border-color:var(--accent);outline:0}
+.inp.sm{width:auto;padding:.38rem .6rem;font-size:.82rem}
+.chk{display:flex;align-items:center;gap:.45rem;font-size:.8rem;font-weight:600;cursor:pointer;color:var(--ink)}
+.chk input{accent-color:var(--accent);width:16px;height:16px}
+.mm{display:flex;align-items:center;gap:.45rem;font-size:.8rem;font-weight:700;color:var(--ink)}
+.seg{display:flex;gap:3px;background:var(--soft);border-radius:999px;padding:3px;width:max-content}
 .seg button{border:0;background:none;color:var(--muted);font-weight:700;font-size:.78rem;padding:.42rem .9rem;border-radius:999px}
-.seg button[aria-pressed="true"]{background:var(--volt);color:#0A0A0A}
-.chip{font-size:.62rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;border-radius:999px;padding:.18rem .55rem;border:1px solid;white-space:nowrap}
-.chip.regular{color:var(--volt);border-color:rgba(199,217,44,.4)}
-.chip.ascend{color:var(--blue);border-color:rgba(127,176,224,.4)}
-.chip.org,.chip.ended,.chip.planned{color:var(--muted);border-color:#333}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.chip{font-size:.6rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;border-radius:999px;padding:.16rem .5rem;border:1px solid;white-space:nowrap;display:inline-block}
+.chip.regular{color:var(--accent-text);border-color:var(--line2);background:var(--next)}
+.chip.ascend{color:var(--asc);border-color:var(--line2);background:var(--asc-bg)}
+.chip.social{color:var(--bg);border-color:var(--ink);background:var(--ink)}
+.chip.org,.chip.ended,.chip.planned,.chip.plain{color:var(--muted);border-color:var(--line);background:var(--card)}
 .chip.live{color:#fff;background:var(--red);border-color:var(--red)}
-.chip.new{color:#0A0A0A;background:#fff;border-color:#fff}
-.card{background:var(--panel);border:1px solid var(--edge);border-radius:var(--r);overflow:hidden}
-.box{background:var(--panel);border:1px solid var(--edge);border-radius:var(--r);padding:1rem}
-.box h3{margin:0 0 .75rem;font-size:.7rem;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--volt)}
-.av{--s:36px;width:var(--s);height:var(--s);flex:none;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:#1A1A1A;border:1.5px solid #333;font-family:"Anton",Impact,sans-serif;color:var(--volt);font-size:calc(var(--s)*.4)}
-.av.ascend{color:var(--blue)}
-.av.ph{background-size:cover;background-position:center;background-color:#222}
-.av.big{border:3px solid var(--volt)}
+.chip.pub{color:var(--accent-ink);background:var(--accent);border-color:var(--accent)}
+.chip.draft{color:var(--asc);border-color:var(--line2);background:var(--asc-bg)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow)}
+.box{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:1rem;box-shadow:var(--shadow)}
+.box h3{margin:0 0 .75rem;font-size:.7rem;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--accent-text)}
+.av{--s:36px;width:var(--s);height:var(--s);flex:none;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:var(--soft);border:1.5px solid var(--line2);font:800 calc(var(--s)*.34) var(--sans);color:var(--accent-text)}
+.av.ascend{background:var(--asc-bg);color:var(--asc)}
+.av.ph{background-size:cover;background-position:center}
+.av.big{border-width:3px}
 
-.login{min-height:100vh;display:grid;place-items:center;padding:2rem 1rem;background:radial-gradient(50% 40% at 50% 100%,rgba(199,217,44,.14),transparent 70%)}
+.login{min-height:100vh;display:grid;place-items:center;padding:2rem 1rem;background:radial-gradient(50% 40% at 50% 100%,var(--sel),transparent 70%)}
 .login .card{width:min(400px,100%);padding:2rem;overflow:visible}
-.login h1{font-family:"Anton",Impact,sans-serif;font-weight:400;text-transform:uppercase;font-size:1.8rem;margin:1.2rem 0 .2rem}
-.login p{color:var(--muted);margin:0 0 1.3rem;font-size:.88rem}
+.login .logo{height:78px}
+.login h1{font-family:var(--serif);font-weight:400;font-size:2rem;color:var(--ink);margin:1.2rem 0 .2rem}
+.login p{margin:0 0 1.3rem;font-size:.88rem}
 
-.sessbar{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;background:var(--panel);border:1px solid var(--edge);border-radius:var(--r);padding:.8rem 1rem;margin-top:1.3rem}
-.sessbar .inp{width:auto;max-width:100%}
-.rule{margin-top:1rem;border-left:3px solid var(--volt);background:#111;padding:.7rem 1rem;border-radius:0 10px 10px 0;color:#B9BEB2;font-size:.84rem}
-.rule b{color:#fff}
-.empty{text-align:center;padding:3rem 1rem;color:var(--muted)}
+.sessbar{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:.8rem 1rem;margin-top:1.3rem;box-shadow:var(--shadow)}
+.sessbar>.inp{width:auto;max-width:100%}
+.cpanel{margin-top:.8rem}
+.cgrid{display:flex;gap:.5rem;flex-wrap:wrap}
+.ctog{display:flex;align-items:center;gap:.5rem;border:1.5px solid var(--line);border-radius:12px;padding:.45rem .7rem;cursor:pointer;background:var(--bg)}
+.ctog.on{border-color:var(--accent);background:var(--next)}
+.ctog input{accent-color:var(--accent);width:16px;height:16px}
+.ctog b{display:block;color:var(--ink);font-size:.85rem;line-height:1.1}
+.ctog small{font-size:.66rem;font-weight:700}
+.rule{margin-top:1rem;border-left:3px solid var(--accent);background:var(--card);padding:.65rem 1rem;border-radius:0 10px 10px 0;font-size:.84rem}
+.rule b{color:var(--ink)}
+.empty{text-align:center;padding:3rem 1rem}
 .sec-head{display:flex;align-items:flex-end;justify-content:space-between;gap:1rem;flex-wrap:wrap;margin:1.6rem 0 1rem}
-.sec-head h2{font-family:"Anton",Impact,sans-serif;font-weight:400;font-size:1.5rem;text-transform:uppercase;margin:0}
-.sec-head p{margin:.2rem 0 0;color:var(--muted);font-size:.86rem;max-width:62ch}
+.sec-head h2{font-family:var(--serif);font-weight:400;font-size:1.9rem;margin:0;color:var(--ink)}
+.sec-head p{margin:.2rem 0 0;font-size:.86rem;max-width:62ch}
 
-.adiv{margin-top:1.6rem}
-.adiv-head{display:flex;align-items:center;gap:.7rem;margin-bottom:.8rem;flex-wrap:wrap}
-.adiv-head h2{font-family:"Anton",Impact,sans-serif;font-weight:400;text-transform:uppercase;font-size:1.3rem;margin:0}
+/* ---- court cards ---- */
+.adiv{margin-top:1.8rem}
+.adiv-head{display:flex;align-items:center;gap:.6rem;margin-bottom:.8rem;flex-wrap:wrap}
+.adiv-head h2{font-family:var(--serif);font-weight:400;font-size:1.7rem;margin:0;color:var(--ink)}
 .linkish{border:0;background:none;color:var(--muted);font-weight:700;font-size:.8rem;margin-left:auto;text-decoration:underline;text-underline-offset:3px}
-.linkish:hover{color:var(--volt)}
-.agrid{display:grid;grid-template-columns:360px 1fr;gap:1rem;align-items:start}
-.aq{list-style:none;margin:0;padding:0;display:grid;gap:.35rem}
-.aq li{display:flex;align-items:center;gap:.5rem;padding:.4rem .5rem;border-radius:10px;background:#0F0F0F;border:1px solid #1e1e1e}
-.aq li.up{border-color:rgba(199,217,44,.35)}
-.qn{width:22px;height:22px;border-radius:50%;background:#222;color:var(--muted);font-size:.7rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex:none}
-.aq li.up .qn{background:var(--volt);color:#0A0A0A}
-.qm{min-width:0;flex:1;line-height:1.2}
-.qm b{display:block;font-size:.88rem}
-.qm small{color:var(--muted);font-size:.7rem;font-weight:600}
-.qa{display:flex;gap:2px}
-.qa button{border:0;background:#1b1b1b;color:#bbb;border-radius:6px;min-width:28px;height:28px;font-size:.74rem;padding:0 .3rem}
-.qa button:hover:not(:disabled){background:var(--volt);color:#0A0A0A}
-.qa button:disabled{opacity:.25;cursor:default}
-.qa button.txt{padding:0 .55rem;font-weight:700}
-.courts{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1rem}
-.acourt{background:var(--panel);border:1px solid var(--edge);border-radius:var(--r);overflow:hidden}
+.linkish:hover{color:var(--accent-text)}
+.courts{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1rem}
+.acourt{background:var(--card);border:1.5px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column}
 .acourt.done{border-color:var(--red)}
-.acourt.free{border-style:dashed}
-.acourt header{display:flex;justify-content:space-between;align-items:center;padding:.7rem 1rem;background:#0F0F0F;border-bottom:1px solid var(--edge)}
-.acourt header b{font-family:"Anton",Impact,sans-serif;font-weight:400;text-transform:uppercase;font-size:1.05rem}
-.timer{font-family:"Anton",Impact,sans-serif;font-size:1.25rem;color:var(--volt);font-variant-numeric:tabular-nums}
+.acourt.free{border-style:dashed;border-color:var(--line2);box-shadow:none;background:transparent}
+.acourt header{display:flex;justify-content:space-between;align-items:center;gap:.5rem;padding:.55rem .6rem .55rem 1rem;background:var(--soft);min-height:48px}
+.acourt.free header{background:transparent}
+.acourt header>b{font-weight:800;text-transform:uppercase;letter-spacing:.08em;font-size:.85rem;color:var(--ink)}
+.hc{display:flex;align-items:center;gap:.35rem}
+.timer{font:800 1.2rem var(--sans);color:var(--accent-text);font-variant-numeric:tabular-nums;margin-right:.2rem}
 .timer.up{color:var(--red)}
-.ac-body{display:grid;grid-template-columns:1fr auto 1fr;gap:.5rem;align-items:center;padding:1rem;font-weight:700}
-.vs{font-family:"Anton",Impact,sans-serif;color:#4a5040}
-.tp{display:flex;align-items:center;gap:.45rem;margin:.25rem 0}
-.t2 .tp{flex-direction:row-reverse;text-align:right}
-.free-msg{padding:1.3rem 1rem;text-align:center;color:var(--muted);font-weight:600}
-.ac-act{display:flex;gap:.5rem;padding:0 1rem 1rem}
+.timer.paused{color:var(--asc)}
+.icon-btn{border:1px solid var(--line);background:var(--card);border-radius:8px;height:30px;min-width:30px;padding:0 .55rem;font-size:.72rem;font-weight:800;color:var(--ink);white-space:nowrap}
+.icon-btn:hover{border-color:var(--accent)}
+.ac-body{display:grid;grid-template-columns:1fr auto 1fr;gap:.5rem;align-items:center;padding:.8rem}
+.team{display:grid;gap:.35rem;justify-items:stretch}
+.t2{justify-items:end}
+.vs{font-family:var(--serif);font-style:italic;color:var(--muted);font-size:1.1rem}
+.slot{display:flex;align-items:center;gap:.45rem;width:100%;border:1.5px solid transparent;background:var(--bg);border-radius:10px;padding:.3rem .45rem;font-weight:700;color:var(--ink);text-align:left;min-height:40px;font-size:.88rem}
+.slot span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.slot:hover{border-color:var(--line2)}
+.slot.sel{border-color:var(--accent);background:var(--next);box-shadow:0 0 0 3px var(--sel)}
+.slot.empty{border:1.5px dashed var(--line2);background:transparent;color:var(--muted);justify-content:center;font-weight:600;font-size:.8rem}
+.slot.empty.sel{border-style:solid;border-color:var(--accent)}
+.t2 .slot{flex-direction:row-reverse;text-align:right}
+.score-in{width:70px;text-align:center;font:800 1.3rem var(--sans);border:1.5px solid var(--accent);border-radius:10px;padding:.25rem;color:var(--ink);background:var(--card);justify-self:center}
+.t2 .score-in{justify-self:center}
+.sugg{margin:0 .8rem .6rem;padding:.55rem .75rem;border-radius:10px;background:var(--next);font-size:.82rem}
+.sugg b{color:var(--ink)}
+.free-msg{padding:0 1rem 1rem;text-align:center;font-weight:600;font-size:.84rem}
+.ac-act{display:flex;gap:.5rem;padding:0 .8rem .8rem;margin-top:auto}
 .ac-act .btn{flex:1}
+.offrow{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin-top:.8rem;font-size:.78rem;font-weight:700}
 
+/* ---- waiting list ---- */
+.waitbox{margin-top:1rem}
+.upnext{display:grid;gap:.3rem;margin:0 0 .8rem;font-size:.85rem;color:var(--ink);font-weight:600}
+.wl{list-style:none;margin:0;padding:0;display:grid;gap:.3rem}
+.wr{display:grid;grid-template-columns:minmax(0,1fr) 38px 52px 60px 72px auto;align-items:center;gap:.5rem;padding:.3rem .5rem;border-radius:10px;background:var(--bg);border:1px solid var(--line)}
+.wr.head{background:none;border:0;font-size:.6rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;padding:0 .5rem}
+.wr.g1{border-color:var(--accent);background:var(--next)}
+.wr.g2{border-color:var(--line2);background:var(--then)}
+.wr.sel{box-shadow:0 0 0 3px var(--sel);border-color:var(--accent)}
+.wmain{display:flex;align-items:center;gap:.45rem;border:0;background:none;padding:0;text-align:left;min-width:0}
+.wmain b{color:var(--ink);font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qn{width:22px;height:22px;border-radius:50%;background:var(--card);border:1px solid var(--line);font-size:.68rem;font-weight:800;color:var(--ink);display:flex;align-items:center;justify-content:center;flex:none}
+.g1 .qn{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.g2 .qn{background:var(--soft);border-color:var(--line2)}
+.wc{font-size:.8rem;font-weight:700;color:var(--ink);text-align:center;font-variant-numeric:tabular-nums}
+.wc.dim{color:var(--muted);font-weight:600}
+.nx{font-size:.58rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;border-radius:999px;padding:.12rem .45rem;margin-right:.35rem}
+.nx.n1{background:var(--accent);color:var(--accent-ink)}.nx.n2{background:var(--soft);color:var(--ink)}
+.qa{display:flex;gap:2px}
+.qa button{border:1px solid var(--line);background:var(--card);color:var(--muted);border-radius:6px;min-width:28px;height:28px;font-size:.72rem;padding:0 .3rem}
+.qa button:hover:not(:disabled){background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.qa button:disabled{opacity:.3;cursor:default}
+.qa button.txt{padding:0 .55rem;font-weight:700}
+.rest{list-style:none;margin:.5rem 0 0;padding:0;display:grid;gap:.3rem}
+.rest li{display:flex;align-items:center;gap:.5rem;padding:.3rem .5rem;border-radius:10px;border:1px dashed var(--line2)}
+.rest b{flex:1;color:var(--ink);font-size:.86rem}
+
+/* ---- selection bar ---- */
+.selbar{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);z-index:90;background:var(--ink);color:var(--bg);border-radius:14px;padding:.55rem .6rem .55rem 1rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;width:max-content;max-width:calc(100% - 2rem);box-shadow:0 14px 30px -10px rgba(0,0,0,.4);font-size:.84rem}
+.selbar b{color:var(--accent)}
+html[data-theme="dark"] .selbar b{color:var(--accent-text);filter:brightness(.55)}
+.selbar button{border:0;border-radius:999px;padding:.42rem .8rem;font-weight:800;font-size:.72rem;background:var(--accent);color:var(--accent-ink)}
+.selbar button:hover{filter:brightness(1.08)}
+
+/* ---- pool ---- */
 .tools{display:flex;gap:.7rem;flex-wrap:wrap;align-items:center}
-.search{background:#161616;border:1.5px solid #333;border-radius:10px;padding:.55rem .85rem;min-width:220px;color:#fff}
-.search:focus{border-color:var(--volt);outline:0}
-.stat{font-size:.78rem;color:var(--muted);border:1px solid var(--edge);border-radius:999px;padding:.3rem .7rem;font-weight:600}
-.stat b{color:var(--volt)}
+.search{background:var(--card);border:1.5px solid var(--line);border-radius:10px;padding:.55rem .85rem;min-width:220px;color:var(--ink)}
+.search:focus{border-color:var(--accent);outline:0}
+.stat{font-size:.78rem;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:.3rem .7rem;font-weight:600}
+.stat b{color:var(--accent-text)}
 .poolgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:.85rem;margin-top:1rem}
-.pc{position:relative;background:var(--panel);border:1.5px solid var(--edge);border-radius:var(--r);padding:1.2rem .9rem .9rem;display:flex;flex-direction:column;align-items:center;gap:.45rem;text-align:center}
-.pc.in{border-color:rgba(199,217,44,.55)}
-.pc.out{opacity:.6}
-.pc.out:hover{opacity:1}
+.pc{position:relative;background:var(--card);border:1.5px solid var(--line);border-radius:var(--r);padding:1.2rem .9rem .9rem;display:flex;flex-direction:column;align-items:center;gap:.45rem;text-align:center;box-shadow:var(--shadow)}
+.pc.in{border-color:var(--accent)}
+.pc.out{opacity:.6;box-shadow:none}.pc.out:hover{opacity:1}
+.pc>b{color:var(--ink)}
 .pick{position:absolute;top:.6rem;left:.6rem}
 .pick input{position:absolute;opacity:0;width:26px;height:26px;margin:0;cursor:pointer}
-.pick span{display:block;width:26px;height:26px;border-radius:7px;border:2px solid #444;pointer-events:none}
-.pick input:checked+span{background:var(--volt);border-color:var(--volt)}
-.pick input:checked+span::after{content:"✓";display:grid;place-items:center;color:#0A0A0A;font-weight:900;height:100%}
-.pick input:focus-visible+span{outline:2px solid var(--volt);outline-offset:2px}
+.pick span{display:block;width:26px;height:26px;border-radius:7px;border:2px solid var(--line2);background:var(--card);pointer-events:none}
+.pick input:checked+span{background:var(--accent);border-color:var(--accent)}
+.pick input:checked+span::after{content:"✓";display:grid;place-items:center;color:var(--accent-ink);font-weight:900;height:100%}
 .edit{position:absolute;top:.55rem;right:.55rem;border:0;background:none;color:var(--muted);font-size:.72rem;font-weight:700}
-.edit:hover{color:var(--volt)}
+.edit:hover{color:var(--accent-text)}
 .pc-photo{border:0;background:none;padding:0;position:relative}
-.addph{position:absolute;left:50%;bottom:-7px;transform:translateX(-50%);font-style:normal;font-size:.6rem;font-weight:800;background:#fff;color:#0A0A0A;border-radius:999px;padding:.1rem .45rem;white-space:nowrap}
+.addph{position:absolute;left:50%;bottom:-7px;transform:translateX(-50%);font-style:normal;font-size:.6rem;font-weight:800;background:var(--ink);color:var(--bg);border-radius:999px;padding:.1rem .45rem;white-space:nowrap}
 .pc-meta{display:flex;gap:.35rem;flex-wrap:wrap;justify-content:center}
-.dupr{font-size:.68rem;font-weight:800;border-radius:999px;padding:.18rem .55rem;background:#1f2410;color:var(--volt2)}
-.dupr.none{background:#1c1c1c;color:var(--muted)}
+.dupr{font-size:.68rem;font-weight:800;border-radius:999px;padding:.18rem .55rem;background:var(--next);color:var(--ink)}
+.dupr.none{background:var(--bg);color:var(--muted)}
 .st{font-size:.72rem;font-weight:800;border-radius:6px;padding:.15rem .5rem}
-.st.exp{background:#2a2a2a;color:#ddd}.st.q{background:var(--volt);color:#0A0A0A}.st.c{background:#16324a;color:var(--blue)}.st.r{background:#2a1f10;color:#e0a868}
+.st.exp{background:var(--soft);color:var(--muted)}.st.q{background:var(--accent);color:var(--accent-ink)}.st.c{background:var(--ink);color:var(--bg)}.st.r{background:var(--asc-bg);color:var(--asc)}
 .arr{display:flex;gap:.35rem;align-items:center;width:100%;margin-top:.2rem}
 .arr .inp{padding:.4rem .5rem;flex:1;min-width:0}
-.lbl2{font-size:.6rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.lbl2{font-size:.6rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
 
-.rrow{display:grid;grid-template-columns:110px 1fr auto 1fr auto;gap:.8rem;align-items:center;padding:.8rem 1rem;border-bottom:1px solid #1e1e1e;font-size:.88rem}
+/* ---- results ---- */
+.rrow{display:grid;grid-template-columns:120px 1fr auto 1fr auto;gap:.8rem;align-items:center;padding:.8rem 1rem;border-bottom:1px solid var(--line);font-size:.88rem}
 .rrow:last-child{border-bottom:0}
-.rrow .sc{font-family:"Anton",Impact,sans-serif;font-size:1.2rem;background:#0D0D0D;border:1px solid var(--edge);border-radius:8px;padding:.1rem .6rem}
-.rrow .won{font-weight:700}.rrow .lost{color:var(--muted)}.rrow .b{text-align:right}
+.rrow .sc{font:800 1.1rem var(--sans);color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:.1rem .6rem}
+.rrow .won{font-weight:800;color:var(--ink)}.rrow .lost{color:var(--muted)}.rrow .b{text-align:right}
 .rrow .acts{display:flex;gap:.35rem}
 
-.backdrop{position:fixed;inset:0;background:rgba(0,0,0,.72);display:grid;place-items:center;z-index:100;padding:1rem}
-.modal{background:var(--panel2);border:1px solid var(--edge);border-radius:16px;width:min(560px,100%);padding:1.4rem;max-height:92vh;overflow:auto}
-.modal h2{font-family:"Anton",Impact,sans-serif;font-weight:400;text-transform:uppercase;margin:0 0 .2rem}
-.modal p{color:var(--muted);margin:0 0 1rem;font-size:.85rem}
+/* ---- modal / toast ---- */
+.backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);display:grid;place-items:center;z-index:100;padding:1rem}
+.modal{background:var(--card);border:1px solid var(--line);border-radius:16px;width:min(560px,100%);padding:1.4rem;max-height:92vh;overflow:auto;box-shadow:0 30px 60px -20px rgba(0,0,0,.45)}
+.modal h2{font-family:var(--serif);font-weight:400;font-size:1.7rem;color:var(--ink);margin:0 0 .2rem}
+.modal p{margin:0 0 1rem;font-size:.85rem}
 .pform{display:grid;grid-template-columns:auto 1fr;gap:1.2rem;align-items:start}
 .phpick{display:flex;flex-direction:column;align-items:center;gap:.45rem;cursor:pointer}
-.phpick small{color:var(--muted);font-size:.7rem;font-weight:700;text-align:center;max-width:110px}
+.phpick small{font-size:.7rem;font-weight:700;text-align:center;max-width:110px}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
-.sides{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:1.1rem}
-.sidebox{background:#0F0F0F;border:1.5px solid var(--edge);border-radius:12px;padding:.9rem;text-align:center;font-weight:700}
-.sidebox input{margin-top:.6rem;width:74px;text-align:center;font-family:"Anton",Impact,sans-serif;font-size:1.5rem;background:#161616;border:1.5px solid #333;border-radius:10px;padding:.3rem;color:#fff}
-.sidebox.win{border-color:var(--volt)}
 .mrow{display:flex;justify-content:flex-end;gap:.5rem;align-items:center;margin-top:.4rem}
-.toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,20px);background:var(--volt);color:#0A0A0A;font-weight:800;font-size:.86rem;padding:.75rem 1.1rem;border-radius:12px;opacity:0;transition:.25s;z-index:200;pointer-events:none;max-width:90vw;text-align:center}
+.toast{position:fixed;left:50%;top:78px;transform:translate(-50%,-10px);background:var(--ink);color:var(--bg);font-weight:800;font-size:.86rem;padding:.7rem 1.1rem;border-radius:12px;opacity:0;transition:.25s;z-index:200;pointer-events:none;max-width:90vw;text-align:center}
 .toast.err{background:var(--red);color:#fff}
 .toast.show{opacity:1;transform:translate(-50%,0)}
+[hidden]{display:none!important}
 
-@media(max-width:900px){.agrid{grid-template-columns:1fr}.rrow{grid-template-columns:1fr auto 1fr}.rrow>span:first-child,.rrow .acts{grid-column:1/-1}}
-@media(max-width:520px){.pform{grid-template-columns:1fr}.row2{grid-template-columns:1fr}.hide-sm{display:none}}
+@media(max-width:900px){.rrow{grid-template-columns:1fr auto 1fr}.rrow>span:first-child,.rrow .acts{grid-column:1/-1}}
+@media(max-width:700px){.wr{grid-template-columns:minmax(0,1fr) 30px 46px 44px auto}.hide-md{display:none!important}.qa button{min-width:26px}.logo{height:44px}}
+@media(max-width:520px){.pform{grid-template-columns:1fr}.row2{grid-template-columns:1fr}.hide-sm{display:none}.courts{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -175,50 +252,155 @@ footer{border-top:1px solid #1E1E1E;padding:1.4rem 0 2.4rem;margin-top:2.5rem;co
 <div class="toast" id="toast"></div>
 
 <script type="module">
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-
-/* ====== YOUR SUPABASE PROJECT (safe to be public) ====== */
+/* ====== YOUR SUPABASE PROJECT ====== */
 const SUPABASE_URL = 'https://wczulosdzoewznxlawfj.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_ZPRnMslT6BWplkRvVaiRXA_PUh-bQlO';
 const GAME_SECONDS = 600;   // 10-minute games
-/* ======================================================= */
+/* ==================================== */
 
-const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
-const DIVS = {regular:'Regular', ascend:'Ascend'};
+/* ---------- DEMO MODE ----------
+   Opens with sample data (nothing saved) when the address ends in
+   ?demo, or when Supabase can't be reached. A lime banner says so. */
+function demoDB(){
+  const now=Date.now(),iso=t=>new Date(t).toISOString(),ago=m=>now-m*60000,p2=n=>String(n).padStart(2,'0');
+  const t=new Date(),today=`${t.getFullYear()}-${p2(t.getMonth()+1)}-${p2(t.getDate())}`;
+  const REG=['bon','clark','colleen','david','ejay','hubert','janelle','jared','jelo','karen','paul','russel','warren'];
+  const ASC=['adrian','christian','emman','gilbert','joy','julian','justin','marie','maryan','mitch','nique','pj','rocelyn','sam','sandy'];
+  const cap=s=>s==='pj'?'PJ':s[0].toUpperCase()+s.slice(1);
+  const players=[...REG.map(id=>({id,name:cap(id),division:'regular',organiser:['bon','jared','paul'].includes(id),photo_url:null})),
+                 ...ASC.map(id=>({id,name:cap(id),division:'ascend',organiser:false,photo_url:null}))];
+  const D={bon:3.6,clark:3.3,colleen:3.45,david:3.6,ejay:3.4,hubert:3.35,janelle:3.1,jared:3.7,jelo:3.2,karen:3.25,paul:3.8,warren:3.1,pj:2.6,rocelyn:2.9,sandy:2.8,mitch:2.7,justin:2.75};
+  const G=[['Court 1',40,['jelo','hubert'],['karen','rocelyn'],11,7],['Court 2',38,['david','clark'],['ejay','sandy'],9,11],
+    ['Court 3',30,['paul','warren'],['pj','joy'],11,5],['Court 1',26,['mitch','colleen'],['janelle','emman'],11,8],
+    ['Court 2',18,['justin','russel'],['hubert','karen'],6,11],['Court 3',14,['rocelyn','clark'],['ejay','warren'],11,9],
+    ['Court 1',12,['joy','janelle'],['emman','russel'],7,11]];
+  const matches=G.map(([court,m,team1,team2,score1,score2],i)=>({id:100+i,session_id:2,session_date:today,division:'social',game:i+1,court,team1,team2,score1,score2,created_at:iso(ago(m))}));
+  [[['jelo','paul'],['david','hubert'],11,6],[['ejay','colleen'],['russel','karen'],11,5],[['jelo','russel'],['hubert','karen'],5,11]]
+    .forEach(([team1,team2,score1,score2],i)=>matches.push({id:200+i,session_id:1,session_date:'2026-09-11',division:'regular',game:i+1,court:'Court '+(i%2+1),team1,team2,score1,score2,created_at:`2026-09-11T15:${10+i*12}:00.000Z`}));
+  const E={team_a:[],team_b:[],started_at:null,paused_at:null,active:true};
+  const courts=[{id:1,session_id:1,label:'Court 1',division:'regular',...E},{id:2,session_id:1,label:'Court 2',division:'regular',...E},{id:3,session_id:1,label:'Ascend Court',division:'ascend',...E},
+    {id:11,session_id:2,label:'Court 1',division:'social',...E,team_a:['jelo','sandy'],team_b:['david','mitch'],started_at:iso(ago(4))},
+    {id:12,session_id:2,label:'Court 2',division:'social',...E,team_a:['paul','pj'],team_b:['colleen','justin'],started_at:iso(ago(9.6))},
+    {id:13,session_id:2,label:'Court 3',division:'social',...E},{id:14,session_id:2,label:'Court 4',division:'social',...E,active:false}];
+  const onCourt=['jelo','sandy','david','mitch','paul','pj','colleen','justin'];
+  const ids=[...onCourt,'hubert','karen','rocelyn','clark','ejay','warren','joy','janelle','emman','russel','marie','nique','gilbert'];
+  const session_players=ids.map((id,i)=>{const mine=matches.filter(m=>m.session_id===2&&[...m.team1,...m.team2].includes(id));
+    const last=mine.length?Math.max(...mine.map(m=>Date.parse(m.created_at))):null,arr=ago(52-i);
+    const status=onCourt.includes(id)?'court':id==='marie'?'resting':['nique','gilbert'].includes(id)?'expected':'queued';
+    return {session_id:2,player_id:id,status,games_played:mine.length,arrived_at:status==='expected'?null:iso(arr),queue_ticket:status==='expected'?null:iso(last?last+i:arr)};});
+  return {players,player_private:Object.entries(D).map(([player_id,dupr])=>({player_id,dupr})),
+    sessions:[{id:1,session_date:'2026-09-11',label:'Friday open play',status:'ended',published:true,session_type:'structured',match_mode:'rotation'},
+              {id:2,session_date:today,label:'Social play',status:'live',published:false,session_type:'social',match_mode:'roundrobin'}],
+    courts,matches,session_players};
+}
+function fakeClient(DB){
+  let nextId=1000;const clone=x=>JSON.parse(JSON.stringify(x));
+  class Q{
+    constructor(t){this.t=t;this.f=[];this.op='select';this.one=false;this.lim=null;this.ord=null;}
+    select(){return this}
+    insert(r){this.op='insert';this.rows=[].concat(r);return this}
+    update(p){this.op='update';this.patch=p;return this}
+    delete(){this.op='delete';return this}
+    upsert(r,o={}){this.op='upsert';this.rows=[].concat(r);this.keys=(o.onConflict||'id').split(',');return this}
+    eq(c,v){this.f.push(r=>r[c]==v);return this}
+    neq(c,v){this.f.push(r=>r[c]!=v);return this}
+    in(c,a){this.f.push(r=>a.includes(r[c]));return this}
+    order(c,o={}){this.ord=[c,o.ascending!==false];return this}
+    limit(n){this.lim=n;return this}
+    single(){this.one=true;return this}
+    then(res){try{res({data:this.run(),error:null})}catch(e){res({data:null,error:e})}}
+    run(){const T=DB[this.t]||(DB[this.t]=[]),ok=r=>this.f.every(f=>f(r));
+      if(this.op==='insert'){const out=this.rows.map(r=>{const x=clone(r);if(['sessions','courts','matches'].includes(this.t)&&x.id==null)x.id=nextId++;
+        if(this.t==='matches'&&!x.created_at)x.created_at=new Date().toISOString();T.push(x);return clone(x)});return this.one?out[0]:out;}
+      if(this.op==='update'){const m=T.filter(ok);m.forEach(r=>Object.assign(r,clone(this.patch)));return clone(m)}
+      if(this.op==='delete'){DB[this.t]=T.filter(r=>!ok(r));return []}
+      if(this.op==='upsert'){this.rows.forEach(r=>{const e=T.find(x=>this.keys.every(k=>x[k]==r[k]));e?Object.assign(e,clone(r)):T.push(clone(r))});return clone(this.rows)}
+      let out=T.filter(ok);if(this.ord){const[c,a]=this.ord;out=[...out].sort((x,y)=>(x[c]>y[c]?1:x[c]<y[c]?-1:0)*(a?1:-1))}
+      if(this.lim!=null)out=out.slice(0,this.lim);out=clone(out);return this.one?out[0]:out;}
+  }
+  const user={email:'demo@aftershift.club'};
+  return {from:t=>new Q(t),
+    auth:{getSession:async()=>({data:{session:{user}}}),signInWithPassword:async()=>({data:{user}}),signOut:async()=>({})},
+    storage:{from:()=>({upload:async()=>({data:{},error:null}),getPublicUrl:()=>({data:{publicUrl:''}})})},
+    channel:()=>{const ch={on:()=>ch,subscribe:cb=>{cb&&cb('SUBSCRIBED');return ch}};return ch},removeChannel:()=>{}};
+}
+
+let sb=null;
+if(!new URLSearchParams(location.search).has('demo')){
+  try{const m=await Promise.race([import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'),new Promise((_,r)=>setTimeout(()=>r(new Error('timeout')),6000))]);
+    sb=m.createClient(SUPABASE_URL,SUPABASE_KEY);}catch(e){console.warn('Supabase unavailable — demo mode',e);}
+}
+const demo=!sb;
+if(demo) sb=fakeClient(demoDB());
+
+/* logo — same drawing as the website; only the colours change */
+const LOGO=`<svg class="logo" viewBox="0 0 400 168" role="img" aria-label="Aftershift Pickleclub">
+  <g class="lg-ink"><polygon points="150,22 200,17 200,26"/><polygon points="118,43 198,38 198,48"/><polygon points="146,64 202,58 202,67"/></g>
+  <circle class="lg-lime" cx="240" cy="40" r="34"/>
+  <g class="lg-hole"><ellipse cx="232" cy="19" rx="6" ry="5"/><ellipse cx="258" cy="27" rx="5" ry="6" transform="rotate(20 258 27)"/>
+    <ellipse cx="218" cy="38" rx="5" ry="6" transform="rotate(-15 218 38)"/><circle cx="241" cy="45" r="6"/>
+    <ellipse cx="225" cy="60" rx="6" ry="5"/><ellipse cx="258" cy="57" rx="5" ry="6" transform="rotate(25 258 57)"/></g>
+  <text class="lg-ink lg-word" x="206" y="122" text-anchor="middle" font-size="31" letter-spacing="12">AFTERSHIFT</text>
+  <g class="lg-dash"><line x1="36" y1="153" x2="78" y2="153"/><line x1="334" y1="153" x2="376" y2="153"/></g>
+  <text class="lg-lime lg-sub" x="210" y="160" text-anchor="middle" font-size="19" letter-spacing="10">PICKLECLUB</text></svg>`;
+
+const DIVS={regular:'Regular',ascend:'Ascend',social:'Social'};
+const MODES={
+  rotation:['Queue rotation','The four who have waited longest play next. Teams are 1st + 4th vs 2nd + 3rd.'],
+  roundrobin:['Round robin','Mixes in new partners and opponents. The longest-waiting player is always included.'],
+  balanced:['Balanced','The four who have waited longest play next, split into the fairest teams by DUPR.'],
+  result:['Result based','Players with similar records tonight play each other, starting with the longest-waiting player.'],
+  manual:['Manual','No suggestions. Tap “+ Add player” on a court, then tap someone waiting.']};
 
 /* ---------- state ---------- */
-let user=null, tab='rally', busy=false, channel=null;
-let players={}, priv={}, sessions=[], cur=null, roster={}, courts=[], matches=[];
-let autoFill=false, balance=true, poolDiv='all', poolShow='all', poolQ='';
-let modal=null, pendingPhoto=null, removePhoto=false;
+let user=null,tab='rally',busy=false,channel=null;
+let players={},priv={},sessions=[],cur=null,roster={},courts=[],matches=[];
+let autoFill=false,poolDiv='all',poolShow='all',poolQ='';
+let modal=null,pendingPhoto=null,removePhoto=false,newType='social';
+let sel=null,ending=null,courtsPanel=false,ST={},lastSug={};
 
 /* ---------- helpers ---------- */
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const P=id=>players[id]||{id,name:id,division:'regular'};
-const ini=n=>n.length<=2?n.toUpperCase():n.trim().split(/\s+/).slice(0,2).map(w=>w[0].toUpperCase()).join('');
+const ini=n=>n.length<=2?n.toUpperCase():n.trim().split(/\s+/).slice(0,2).map(w=>w[0].toUpperCase()).join('').padEnd(2,n[1]?n[1].toUpperCase():'');
 function av(id,s=36,cls=''){const p=P(id);
   return p.photo_url?`<span class="av ph ${cls}" style="--s:${s}px;background-image:url('${esc(p.photo_url)}')"></span>`
                     :`<span class="av ${p.division} ${cls}" style="--s:${s}px">${esc(ini(p.name))}</span>`;}
-const names=ids=>(ids||[]).map(id=>esc(P(id).name)).join(' & ');
-const ms=t=>t?new Date(t).getTime():0;
+const names=ids=>(ids||[]).filter(Boolean).map(id=>esc(P(id).name)).join(' & ');
+const ms=t=>t?(typeof t==='number'?t:new Date(t).getTime()):0;
 const fmtTime=t=>t?new Date(t).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'}):'—';
 const hhmm=d=>String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
 const fmt=t=>String(Math.floor(t/60)).padStart(2,'0')+':'+String(t%60).padStart(2,'0');
 function fmtDate(iso){const [y,m,d]=iso.split('-').map(Number);return new Date(y,m-1,d).toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});}
 const curS=()=>sessions.find(s=>s.id===cur);
 const onDate=t=>new Date(`${curS().session_date}T${t}:00`).toISOString();
-const remaining=c=>c.started_at?Math.max(0,GAME_SECONDS-Math.floor((Date.now()-ms(c.started_at))/1000)):GAME_SECONDS;
 const dupr=id=>priv[id]&&priv[id].dupr!=null?Number(priv[id].dupr):null;
-function toast(msg,err){const t=$('#toast');t.textContent=msg;t.className='toast show'+(err?' err':'');clearTimeout(t._h);t._h=setTimeout(()=>t.className='toast',err?5000:2800);}
+const isSocial=()=>!!curS()&&curS().session_type==='social';
+const mode=()=>(curS()&&MODES[curS().match_mode])?curS().match_mode:'rotation';
+const groups=()=>isSocial()?['social']:['regular','ascend'];
+const inGroup=(id,g)=>g==='social'||P(id).division===g;
+const groupOf=id=>isSocial()?'social':P(id).division;
+const isOn=c=>c.active!==false;
+const slots=c=>[(c.team_a||[])[0]||'',(c.team_a||[])[1]||'',(c.team_b||[])[0]||'',(c.team_b||[])[1]||''];
+const filled=c=>slots(c).filter(Boolean).length;
+const courtById=id=>courts.find(c=>String(c.id)===String(id));
+const courtOf=id=>(courts.find(c=>slots(c).includes(id))||{}).label||'court';
+function remaining(c){if(!c.started_at)return GAME_SECONDS;const end=c.paused_at?ms(c.paused_at):Date.now();
+  return Math.max(0,GAME_SECONDS-Math.floor((end-ms(c.started_at))/1000));}
+const tText=c=>{const r=remaining(c);return r===0?"TIME'S UP":(c.paused_at?'⏸ ':'')+fmt(r);};
+function toast(msg,err){const t=$('#toast');t.textContent=msg;t.className='toast show'+(err?' err':'');clearTimeout(t._h);t._h=setTimeout(()=>t.className='toast',err?5000:2400);}
 function fail(e){console.error(e);toast('Something went wrong: '+(e?.message||e),true);}
 function need(res){if(res.error)throw res.error;return res.data;}
+function toggleTheme(){const dark=document.documentElement.dataset.theme!=='dark';
+  document.documentElement.dataset.theme=dark?'dark':'light';try{localStorage.setItem('aspc-theme',dark?'dark':'light')}catch(_){}}
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',e=>{
+  let saved;try{saved=localStorage.getItem('aspc-theme')}catch(_){}
+  if(!saved)document.documentElement.dataset.theme=e.matches?'dark':'light';});
 
 /* ---------- loading ---------- */
 async function loadAll(){
-  const [p,pp,s]=await Promise.all([
-    sb.from('players').select('*').order('name'),
-    sb.from('player_private').select('*'),
+  const [p,pp,s]=await Promise.all([sb.from('players').select('*').order('name'),sb.from('player_private').select('*'),
     sb.from('sessions').select('*').order('session_date',{ascending:false})]);
   players=Object.fromEntries(need(p).map(x=>[x.id,x]));
   priv=Object.fromEntries(need(pp).map(x=>[x.player_id,x]));
@@ -228,95 +410,152 @@ async function loadAll(){
 }
 async function loadSession(){
   if(!cur){roster={};courts=[];matches=[];return;}
-  const [r,c,m]=await Promise.all([
-    sb.from('session_players').select('*').eq('session_id',cur),
+  const [r,c,m]=await Promise.all([sb.from('session_players').select('*').eq('session_id',cur),
     sb.from('courts').select('*').eq('session_id',cur).order('id'),
     sb.from('matches').select('*').eq('session_id',cur).order('created_at',{ascending:false})]);
-  roster=Object.fromEntries(need(r).map(x=>[x.player_id,x]));
-  courts=need(c); matches=need(m);
+  roster=Object.fromEntries(need(r).map(x=>[x.player_id,x]));courts=need(c);matches=need(m);
 }
 
-/* ---------- live sync between organisers' phones ---------- */
+/* ---------- live sync ---------- */
 function debounce(f,t){let h;return()=>{clearTimeout(h);h=setTimeout(f,t);};}
-const refresh=debounce(async()=>{try{await loadSession();safeRender();}catch(e){console.error(e);}},400);
+const refresh=debounce(async()=>{try{await loadAll();safeRender();}catch(e){console.error(e);}},400);
 function subscribe(){
-  if(channel) return;
+  if(channel)return;
   channel=sb.channel('aspc-admin')
     .on('postgres_changes',{event:'*',schema:'public',table:'session_players'},refresh)
     .on('postgres_changes',{event:'*',schema:'public',table:'courts'},refresh)
+    .on('postgres_changes',{event:'*',schema:'public',table:'matches'},refresh)
+    .on('postgres_changes',{event:'*',schema:'public',table:'sessions'},refresh)
     .subscribe(st=>{const el=$('#sync');if(el)el.classList.toggle('off',st!=='SUBSCRIBED');});
 }
 function safeRender(){const a=document.activeElement;
-  if(modal||(a&&a.closest&&a.closest('#app')&&/INPUT|SELECT/.test(a.tagName)&&a.type!=='checkbox'))return;render();}
+  if(modal||ending!=null||(a&&a.closest&&a.closest('#app')&&/INPUT|SELECT/.test(a.tagName)&&a.type!=='checkbox'))return;render();}
 setInterval(()=>{if(user&&cur)refresh();},20000);
 
-/* ================= QUEUE LOGIC =================
-   Each waiting player holds a "paddle-down" time (queue_ticket):
-   arrival time for their first game, then the time their last game ended.
-   Earliest time plays next.                                          */
-function queueOf(div){
-  return Object.values(roster).filter(e=>e.status==='queued'&&P(e.player_id).division===div)
+/* ================= QUEUE + STATS ================= */
+function queueOf(g){
+  return Object.values(roster).filter(e=>e.status==='queued'&&inGroup(e.player_id,g))
     .sort((a,b)=>ms(a.queue_ticket)-ms(b.queue_ticket)||a.player_id.localeCompare(b.player_id)).map(e=>e.player_id);}
+function stats(){const s={},g=id=>s[id]||(s[id]={w:0,l:0,last:0});
+  matches.forEach(m=>{const aw=m.score1>m.score2,t=ms(m.created_at);
+    (m.team1||[]).forEach(id=>{const x=g(id);aw?x.w++:x.l++;x.last=Math.max(x.last,t)});
+    (m.team2||[]).forEach(id=>{const x=g(id);aw?x.l++:x.w++;x.last=Math.max(x.last,t)});});return s;}
+const pk=(a,b)=>a<b?a+'|'+b:b+'|'+a;
+function history(){const p={},o={};matches.forEach(m=>{const A=m.team1||[],B=m.team2||[];
+  [A,B].forEach(T=>{if(T.length===2)p[pk(T[0],T[1])]=(p[pk(T[0],T[1])]||0)+1;});
+  A.forEach(x=>B.forEach(y=>{o[pk(x,y)]=(o[pk(x,y)]||0)+1;}));});return {p,o};}
+
+/* ================= MATCHMAKING ================= */
+const PAIRS=[[[0,1],[2,3]],[[0,2],[1,3]],[[0,3],[1,2]]];
+const teamsOf=(f,p)=>[[f[p[0][0]],f[p[0][1]]],[f[p[1][0]],f[p[1][1]]]];
+const sum=(a,f)=>a.reduce((s,x)=>s+f(x),0);
 function rating(id){const d=dupr(id);if(d)return d;
   const ds=Object.keys(players).filter(x=>players[x].division===P(id).division&&dupr(x)).map(dupr);
   return ds.length?ds.reduce((a,b)=>a+b,0)/ds.length:3;}
-function pair(four){if(!balance)return [[four[0],four[3]],[four[1],four[2]]];
-  const s=[...four].sort((a,b)=>rating(b)-rating(a));return [[s[0],s[3]],[s[1],s[2]]];}
-const courtOf=id=>(courts.find(c=>(c.team_a||[]).includes(id)||(c.team_b||[]).includes(id))||{}).label||'court';
+const wr=id=>{const x=ST[id];return x&&(x.w+x.l)?x.w/(x.w+x.l):.5;};
+function repeatCost(t,H){const [a,b]=t;
+  return (H.p[pk(a[0],a[1])]||0)*3+(H.p[pk(b[0],b[1])]||0)*3+a.reduce((s,x)=>s+b.reduce((u,y)=>u+(H.o[pk(x,y)]||0),0),0);}
+function bestPairing(f,cost){let best=null,bc=Infinity;PAIRS.forEach(p=>{const t=teamsOf(f,p),c=cost(t);if(c<bc-1e-9){bc=c;best=t;}});return {teams:best,cost:bc};}
+function suggest(q,m=mode()){
+  if(q.length<4||m==='manual')return null;
+  if(m==='rotation')return teamsOf(q.slice(0,4),PAIRS[2]);
+  if(m==='balanced')return bestPairing(q.slice(0,4),t=>Math.abs(sum(t[0],rating)-sum(t[1],rating))).teams;
+  const H=history(),W=q.slice(0,8),first=W[0];let best=null,bs=Infinity;
+  for(let i=1;i<W.length;i++)for(let j=i+1;j<W.length;j++)for(let l=j+1;l<W.length;l++){
+    const f=[first,W[i],W[j],W[l]],idx=i+j+l;let sc,t;
+    if(m==='roundrobin'){const b=bestPairing(f,t=>repeatCost(t,H)+Math.abs(sum(t[0],rating)-sum(t[1],rating))*.3);t=b.teams;sc=b.cost*4+idx*.5;}
+    else{const ws=f.map(wr);const b=bestPairing(f,t=>Math.abs(sum(t[0],wr)-sum(t[1],wr)));t=b.teams;sc=(Math.max(...ws)-Math.min(...ws))*20+idx*.5;}
+    if(sc<bs){bs=sc;best=t;}}
+  return best;}
+function suggestionsFor(g){const q=queueOf(g),s1=suggest(q);
+  const s2=s1?suggest(q.filter(id=>!s1.flat().includes(id))):null;return [s1,s2];}
+
+/* ================= COURT ACTIONS ================= */
 async function upd(pid,patch){Object.assign(roster[pid],patch);
   need(await sb.from('session_players').update(patch).eq('session_id',cur).eq('player_id',pid));}
+async function setStatus(ids,status){ids=ids.filter(Boolean);if(!ids.length)return;
+  ids.forEach(id=>{if(roster[id])roster[id].status=status;});
+  need(await sb.from('session_players').update({status}).eq('session_id',cur).in('player_id',ids));}
+/* Saves a court's four spots. The timer starts by itself the moment all
+   four spots are filled, and stops if someone leaves the court.       */
+async function writeSlots(c,s){
+  const wasFull=filled(c)===4,isFull=s.every(Boolean),isEmpty=s.every(x=>!x);
+  let started=c.started_at||null,paused=c.paused_at||null;
+  if(!isFull){started=null;paused=null;}else if(!wasFull||!started){started=new Date().toISOString();paused=null;}
+  const patch={team_a:isEmpty?[]:[s[0],s[1]],team_b:isEmpty?[]:[s[2],s[3]],started_at:started,paused_at:paused};
+  Object.assign(c,patch);need(await sb.from('courts').update(patch).eq('id',c.id));}
+async function seat(c,teams){const four=teams.flat();await setStatus(four,'court');await writeSlots(c,four);}
 async function fillCourt(c){
-  const q=queueOf(c.division);if(q.length<4)return false;
-  return seatFour(c,q.slice(0,4));}
-async function seatFour(c,four){
-  const [a,b]=pair(four),started=new Date().toISOString();
-  four.forEach(id=>roster[id].status='court');
-  Object.assign(c,{team_a:a,team_b:b,started_at:started});
-  need(await sb.from('session_players').update({status:'court'}).eq('session_id',cur).in('player_id',four));
-  need(await sb.from('courts').update({team_a:a,team_b:b,started_at:started}).eq('id',c.id));
-  return true;}
-async function autoFillAll(){if(!autoFill)return;for(const c of courts)if(!(c.team_a||[]).length)await fillCourt(c);}
-async function undoCourt(c){
-  const four=[...(c.team_a||[]),...(c.team_b||[])];
-  four.forEach(id=>{if(roster[id])roster[id].status='queued';});   // their old paddle-down times are untouched
-  need(await sb.from('session_players').update({status:'queued'}).eq('session_id',cur).in('player_id',four));
-  need(await sb.from('courts').update({team_a:[],team_b:[],started_at:null}).eq('id',c.id));
-  Object.assign(c,{team_a:[],team_b:[],started_at:null});}
-async function swap(x,y){ // x is ahead of y; afterwards y is ahead of x
-  const tx=roster[x].queue_ticket,ty=roster[y].queue_ticket;
-  let nx=ty,ny=tx; if(ms(tx)===ms(ty)) ny=new Date(ms(tx)-1).toISOString();
-  await Promise.all([upd(x,{queue_ticket:nx}),upd(y,{queue_ticket:ny})]);}
-async function recordResult(c,s1,s2){
-  const aWon=s1>s2,W=aWon?c.team_a:c.team_b,L=aWon?c.team_b:c.team_a;
-  const game=matches.filter(m=>m.division===c.division).length+1;
-  need(await sb.from('matches').insert({session_id:cur,session_date:curS().session_date,division:c.division,game,
-    court:c.label,team1:c.team_a,team2:c.team_b,score1:s1,score2:s2}));
-  const now=Date.now();
+  if(!isOn(c))return false;
+  const q=queueOf(c.division),s=slots(c),n=filled(c);
+  if(!n){let t=lastSug[c.id];if(!t||!t.flat().every(id=>q.includes(id)))t=suggest(q,mode()==='manual'?'rotation':mode());
+    if(!t)return false;await seat(c,t);return true;}
+  let k=0;const add=[];const ns=s.map(x=>x||(q[k]?(add.push(q[k]),q[k++]):''));
+  if(!add.length)return false;await setStatus(add,'court');await writeSlots(c,ns);return true;}
+async function autoFillAll(){if(!autoFill||mode()==='manual')return;
+  for(const c of courts)if(isOn(c)&&!filled(c))await fillCourt(c);}
+async function clearCourt(c){await setStatus(slots(c),'queued');await writeSlots(c,['','','','']);}
+async function endMatch(c,scores){
+  const s=slots(c),A=[s[0],s[1]],B=[s[2],s[3]];let W=A,L=B;
+  if(scores){const [s1,s2]=scores;if(s2>s1){W=B;L=A;}
+    const game=Math.max(0,...matches.filter(m=>m.division===c.division).map(m=>m.game||0))+1;
+    need(await sb.from('matches').insert({session_id:cur,session_date:curS().session_date,division:c.division,game,
+      court:c.label,team1:A,team2:B,score1:s1,score2:s2}));}
+  const now=Date.now();   // winners go back in line first
   await Promise.all([...W,...L].map((id,i)=>roster[id]?upd(id,{status:'queued',games_played:(roster[id].games_played||0)+1,
     queue_ticket:new Date(now+i).toISOString()}):null));
-  need(await sb.from('courts').update({team_a:[],team_b:[],started_at:null}).eq('id',c.id));
-  Object.assign(c,{team_a:[],team_b:[],started_at:null});
-  await autoFillAll();
-}
+  await writeSlots(c,['','','','']);ending=null;
+  await loadSession();ST=stats();await autoFillAll();}
+async function swapTickets(x,y){ // x is ahead of y; afterwards y is ahead of x
+  const tx=roster[x].queue_ticket,ty=roster[y].queue_ticket;
+  let nx=ty,ny=tx;if(ms(tx)===ms(ty))ny=new Date(ms(tx)-1).toISOString();
+  await Promise.all([upd(x,{queue_ticket:nx}),upd(y,{queue_ticket:ny})]);}
+
+/* ---- tap-to-swap ----
+   Tap a player (on a court or waiting), then tap:
+   • another court spot → they swap (same court, other team or another court)
+   • an empty spot      → they move there
+   • someone waiting    → the waiting player replaces them on court     */
+const same=(a,b)=>a.k===b.k&&(a.k==='w'?a.id===b.id:String(a.c)===String(b.c)&&a.i===b.i);
+async function pickTarget(t){
+  if(ending!=null)return;
+  if(!sel){sel=t;render();return;}
+  if(same(sel,t)){sel=null;render();return;}
+  const a=sel;sel=null;await doSwap(a,t);render();}
+async function doSwap(a,b){
+  if(a.k==='w'&&b.k==='w'){const q=queueOf(groupOf(a.id));const [x,y]=q.indexOf(a.id)<q.indexOf(b.id)?[a.id,b.id]:[b.id,a.id];
+    await swapTickets(x,y);toast(`${P(a.id).name} and ${P(b.id).name} swapped places`);return;}
+  if(a.k==='w')[a,b]=[b,a];
+  if(b.k==='w'){const c=courtById(a.c),s=slots(c),old=s[a.i];s[a.i]=b.id;
+    await setStatus([b.id],'court');if(old)await setStatus([old],'queued');await writeSlots(c,s);
+    toast(old?`${P(b.id).name} in for ${P(old).name}`:`${P(b.id).name} on ${c.label}`);return;}
+  const ca=courtById(a.c),cb=courtById(b.c);
+  if(ca===cb){const s=slots(ca);[s[a.i],s[b.i]]=[s[b.i],s[a.i]];await writeSlots(ca,s);}
+  else{const sa=slots(ca),sc=slots(cb);[sa[a.i],sc[b.i]]=[sc[b.i],sa[a.i]];await writeSlots(ca,sa);await writeSlots(cb,sc);}
+  toast('Swapped');}
 
 /* ================= VIEWS ================= */
 function render(){
   if(!user){$('#app').innerHTML=loginView();return;}
+  ST=stats();
   const body={rally:rallyView,pool:poolView,results:resultsView}[tab]();
   const tabs=[['rally','🎾 Rally'],['pool','👥 Player pool'],['results','📋 Results']];
-  $('#app').innerHTML=`<header class="atop"><div class="wrap atop-in">
-      <a class="brand" href="./"><span class="ball"></span><span><b>Aftershift</b><small>Pickleclub</small></span></a><span class="adm-badge">ADMIN</span>
+  $('#app').innerHTML=`${demo?'<div class="demo">Demo mode — sample data, nothing is saved</div>':''}
+    <header class="atop"><div class="wrap atop-in">
+      <a class="brand" href="./">${LOGO}</a><span class="adm-badge">ADMIN</span>
       <span class="grow"></span><span class="sync" id="sync"><i></i>Live sync</span>
       <a class="btn quiet sm" href="tv.html" target="_blank" rel="noopener">📺 TV screen</a>
       <a class="btn quiet sm hide-sm" href="./" target="_blank" rel="noopener">View site ↗</a>
+      <button class="ctl" data-act="theme" title="Light / dark" aria-label="Switch between light and dark mode">◐</button>
       <button class="btn quiet sm" data-act="signout">Sign out</button></div></header>
     <nav class="atabs"><div class="wrap" style="display:flex;gap:.2rem;overflow-x:auto">${tabs.map(([k,l])=>`<button data-act="tab" data-tab="${k}" ${tab===k?'aria-current="page"':''}>${l}</button>`).join('')}</div></nav>
     <main class="wrap">${sessBar()}${body}</main>
-    <footer class="wrap">ASPC Admin · Signed in as ${esc(user.email)}</footer>`;
+    <footer class="wrap">ASPC Admin · Signed in as ${esc(user.email)}</footer>${selBar()}`;
 }
 function loginView(){
   return `<div class="login"><div class="card">
-    <div style="display:flex;align-items:center;gap:.6rem"><span class="brand"><span class="ball"></span><span><b>Aftershift</b><small>Pickleclub</small></span></span><span class="adm-badge">ADMIN</span></div>
+    <div style="display:flex;align-items:center;gap:.6rem"><span class="brand">${LOGO}</span><span class="grow"></span><span class="adm-badge">ADMIN</span>
+      <button class="ctl" data-act="theme" type="button" title="Light / dark" aria-label="Switch between light and dark mode">◐</button></div>
     <h1>Organiser sign in</h1><p>You'll stay signed in on this device until you tap Sign out.</p>
     <form id="loginForm">
       <div class="field"><label for="em">Email</label><input class="inp" id="em" type="email" autocomplete="username" required></div>
@@ -326,61 +565,118 @@ function loginView(){
 }
 function sessBar(){
   const s=curS();
-  const opts=sessions.map(x=>`<option value="${x.id}" ${x.id===cur?'selected':''}>${fmtDate(x.session_date)} · ${esc(x.label||'Session')}${x.status==='live'?' · LIVE':x.status==='ended'?' · ended':''}</option>`).join('');
+  const opts=sessions.map(x=>`<option value="${x.id}" ${x.id===cur?'selected':''}>${fmtDate(x.session_date)} · ${esc(x.label||'Session')}${x.session_type==='social'?' · Social':''}${x.status==='live'?' · LIVE':x.status==='ended'?' · ended':''}</option>`).join('');
   return `<div class="sessbar">
     ${sessions.length?`<select class="inp" data-act="pickSession" aria-label="Session">${opts}</select>`:''}
-    ${s?`<span class="chip ${s.status}">${s.status==='live'?'● Live':s.status==='ended'?'Ended':'Planned'}</span>`:''}
+    ${s?`<span class="chip ${s.session_type==='social'?'social':'plain'}">${s.session_type==='social'?'Social play':'Regular + Ascend'}</span>
+      <span class="chip ${s.status}">${s.status==='live'?'● Live':s.status==='ended'?'Ended':'Planned'}</span>`:''}
     <button class="btn quiet sm" data-act="newSession">+ New session</button><span class="grow"></span>
-    ${tab==='rally'&&s?`<label class="chk"><input type="checkbox" data-act="autoFill" ${autoFill?'checked':''}>Auto-fill courts</label>
-      <label class="chk"><input type="checkbox" data-act="balance" ${balance?'checked':''}>Balance by DUPR</label>`:''}
+    ${tab==='rally'&&s?`<label class="mm">Matchmaking <select class="inp sm" data-act="mode">${Object.entries(MODES).map(([k,[l]])=>`<option value="${k}" ${mode()===k?'selected':''}>${l}</option>`).join('')}</select></label>
+      <label class="chk" title="Free courts fill with the suggested four as soon as they're free"><input type="checkbox" data-act="autoFill" ${autoFill?'checked':''}>Auto-assign</label>
+      <button class="btn quiet sm" data-act="courtsPanel" aria-pressed="${courtsPanel}">⚙ Courts</button>`:''}
     ${s&&s.status!=='live'?`<button class="btn sm" data-act="goLive">▶ Go live</button>`:''}
     ${s&&s.status==='live'?`<button class="btn danger sm" data-act="endSession">🏁 End session</button>`:''}
     ${s?(s.published
-      ?`<span class="chip" style="color:#0A0A0A;background:var(--volt);border-color:var(--volt)">✓ On website${s.status==='live'?' · updates after every game':''}</span><button class="btn quiet sm" data-act="unpublish">Unpublish</button>`
-      :`<span class="chip" style="color:#e0a868;border-color:#6b4a22">Draft · not on website</span><button class="btn sm" data-act="publish">📣 Publish results</button>`):''}</div>`;
+      ?`<span class="chip pub">✓ On website</span><button class="btn quiet sm" data-act="unpublish">Unpublish</button>`
+      :`<span class="chip draft">Draft</span><button class="btn sm" data-act="publish">📣 Publish</button>`):''}</div>
+    ${tab==='rally'&&s&&courtsPanel?courtsPanelView():''}`;
+}
+function courtsPanelView(){
+  return `<div class="box cpanel"><h3>Active courts for this session</h3>
+    <p class="dim" style="margin:0 0 .7rem;font-size:.82rem">Only active courts show on the TV. Turn extra courts on or off any time.</p>
+    <div class="cgrid">${courts.map(c=>`<label class="ctog ${isOn(c)?'on':''}"><input type="checkbox" data-act="courtActive" data-id="${c.id}" ${isOn(c)?'checked':''}>
+      <span><b>${esc(c.label)}</b><small>${DIVS[c.division]||''}${filled(c)?' · in use':''}</small></span></label>`).join('')||'<span class="dim">No courts yet.</span>'}</div>
+    <div class="tools" style="margin-top:.8rem">${isSocial()
+      ?`<button class="btn quiet sm" data-act="addCourt" data-div="social">+ Add court</button>`
+      :`<button class="btn quiet sm" data-act="addCourt" data-div="regular">+ Regular court</button><button class="btn quiet sm" data-act="addCourt" data-div="ascend">+ Ascend court</button>`}
+      <span class="grow"></span><button class="btn sm" data-act="courtsPanel">Done</button></div></div>`;
 }
 const noSession=()=>`<div class="empty"><p>No session selected yet.</p><button class="btn" data-act="newSession">+ Create your first session</button></div>`;
 
 /* ---- Rally ---- */
 function rallyView(){
-  if(!cur) return noSession();
-  return `<div class="rule"><b>How the order works:</b> everyone holds a “paddle-down” time — when they arrived, or when their last game ended. Earliest time plays next, so late arrivals never jump the line.
-    ▲ ▼ swap two neighbours, ⏭ puts someone on the next court — everyone else keeps their order. When a court is free, tap <b>Choose players</b> — the 4 who have waited longest are ticked for you, and you can swap anyone before seating them.</div>
-    ${['regular','ascend'].map(rallyBlock).join('')}`;
+  if(!cur)return noSession();
+  const [ml,md]=MODES[mode()];
+  return `<div class="rule"><b>${ml}:</b> ${md} <span class="hide-sm">· <b>Tap a player</b>, then tap another player, an empty spot or someone waiting to swap them.</span></div>
+    ${groups().map(groupBlock).join('')}`;
 }
-function rallyBlock(d){
-  const q=queueOf(d),cs=courts.filter(c=>c.division===d);
-  const rest=Object.values(roster).filter(e=>e.status==='resting'&&P(e.player_id).division===d).map(e=>e.player_id);
-  const exp=Object.values(roster).filter(e=>e.status==='expected'&&P(e.player_id).division===d).length;
-  const g=n=>(n||0)+' game'+(n===1?'':'s');
-  return `<div class="adiv"><div class="adiv-head"><h2>${DIVS[d]}</h2><span class="chip ${d}">${q.length} waiting</span>
-    ${exp?`<button class="linkish" data-act="tab" data-tab="pool">${exp} registered, not arrived yet →</button>`:''}</div>
-  <div class="agrid"><div class="box"><h3>Queue</h3><ol class="aq">
-    ${q.map((id,i)=>`<li class="${i<4?'up':''}"><span class="qn">${i+1}</span>${av(id,28)}
-      <div class="qm"><b>${esc(P(id).name)}${P(id).organiser?' <span class="chip org">/O</span>':''}</b><small>🕒 Arrived ${fmtTime(roster[id].arrived_at)} · ${g(roster[id].games_played)}${roster[id].games_played?' · back in line '+fmtTime(roster[id].queue_ticket):''}</small></div>
-      <span class="qa"><button title="Move up one" data-act="qup" data-id="${id}" ${i?'':'disabled'}>▲</button><button title="Move down one" data-act="qdown" data-id="${id}" ${i<q.length-1?'':'disabled'}>▼</button><button title="Play next" data-act="qtop" data-id="${id}" ${i?'':'disabled'}>⏭</button><button title="Sit out" data-act="qrest" data-id="${id}">💤</button></span></li>`).join('')||'<li class="dim">Nobody waiting</li>'}
-  </ol>
-  ${rest.length?`<h3 style="margin-top:1rem">Sitting out</h3><ul class="aq">${rest.map(id=>`<li>${av(id,28)}<div class="qm"><b>${esc(P(id).name)}</b><small>${g(roster[id].games_played)}</small></div>
-    <span class="qa"><button class="txt" data-act="qback" data-id="${id}">Back in line</button><button title="Gone for the night" data-act="qleave" data-id="${id}">✕</button></span></li>`).join('')}</ul>`:''}
-  </div><div class="courts">${cs.map(courtCard).join('')||'<p class="dim">No courts for this division in this session.</p>'}</div></div></div>`;
+function groupBlock(g){
+  const cs=courts.filter(c=>c.division===g),on=cs.filter(isOn),off=cs.filter(c=>!isOn(c));
+  const q=queueOf(g),sugs=suggestionsFor(g);
+  const exp=Object.values(roster).filter(e=>e.status==='expected'&&inGroup(e.player_id,g)).length;
+  let fi=0;lastSug={...lastSug};
+  const cards=on.map(c=>{let sg=null;if(!filled(c)){sg=sugs[fi++]||null;lastSug[c.id]=sg;}return courtCard(c,sg);}).join('');
+  const playing=on.filter(c=>filled(c)===4).length;
+  return `<div class="adiv"><div class="adiv-head"><h2>${g==='social'?'Social play':DIVS[g]}</h2>
+      <span class="chip ${g}">${q.length} waiting</span><span class="chip plain">${playing}/${on.length} courts playing</span>
+      ${exp?`<button class="linkish" data-act="tab" data-tab="pool">${exp} registered, not arrived yet →</button>`:''}</div>
+    <div class="courts">${cards||'<p class="dim">No active courts — turn one on in ⚙ Courts.</p>'}</div>
+    ${off.length?`<div class="offrow"><span class="dim">Inactive:</span>${off.map(c=>`<button class="btn quiet sm" data-act="courtOn" data-id="${c.id}">${esc(c.label)} · Turn on</button>`).join('')}</div>`:''}
+    ${waitingBox(g,sugs)}</div>`;
 }
-function courtCard(c){
-  if(!(c.team_a||[]).length){const n=queueOf(c.division).length;
-    return `<article class="acourt free"><header><b>${esc(c.label)}</b><span class="dim">Free</span></header>
-      <div class="free-msg">${n>=4?'The next four in the queue are ready.':'Need '+(4-n)+' more in the queue.'}</div>
-      <div class="ac-act"><button class="btn" data-act="pick" data-id="${c.id}" ${n>=4?'':'disabled'}>Choose players</button><button class="btn quiet" data-act="fill" data-id="${c.id}" ${n>=4?'':'disabled'} title="Seat the 4 who waited longest, without choosing">Next 4</button></div></article>`;}
-  const t=ids=>ids.map(id=>`<span class="tp">${av(id,26)}${esc(P(id).name)}</span>`).join(''),r=remaining(c);
-  return `<article class="acourt ${r===0?'done':''}"><header><b>${esc(c.label)}</b><span class="timer ${r===0?'up':''}" data-timer="${c.id}">${r===0?"TIME'S UP":fmt(r)}</span></header>
-    <div class="ac-body"><div>${t(c.team_a)}</div><div class="vs">VS</div><div class="t2">${t(c.team_b)}</div></div>
-    <div class="ac-act" style="padding-bottom:0"><button class="btn quiet sm" data-act="tmin" data-id="${c.id}">−1 min</button><button class="btn quiet sm" data-act="trestart" data-id="${c.id}">↺ Restart</button><button class="btn quiet sm" data-act="tplus" data-id="${c.id}">+1 min</button></div>
-<div class="ac-act"><button class="btn" data-act="record" data-id="${c.id}">Record result</button><button class="btn quiet" data-act="undo" data-id="${c.id}" title="Send these four back to their old places">↩ Undo</button></div></article>`;
+function courtCard(c,sug){
+  const s=slots(c),n=filled(c),isFull=n===4,r=remaining(c),ed=ending===c.id;
+  const isSel=i=>sel&&sel.k==='s'&&String(sel.c)===String(c.id)&&sel.i===i;
+  const slot=i=>s[i]
+    ?`<button class="slot ${isSel(i)?'sel':''}" data-act="slot" data-c="${c.id}" data-i="${i}">${av(s[i],26)}<span>${esc(P(s[i]).name)}</span></button>`
+    :`<button class="slot empty ${isSel(i)?'sel':''}" data-act="slot" data-c="${c.id}" data-i="${i}">+ Add player</button>`;
+  const btn=(a,l,t)=>`<button class="icon-btn" data-act="${a}" data-id="${c.id}"${t?` title="${t}"`:''}>${l}</button>`;
+  const state=!n?'<span class="dim" style="font-weight:700;font-size:.8rem">Free</span>'
+    :!isFull?`<span class="dim" style="font-weight:700;font-size:.8rem">Needs ${4-n} more</span>`
+    :`<span class="timer ${r===0?'up':''} ${c.paused_at?'paused':''}" data-timer="${c.id}">${tText(c)}</span>`;
+  const ctl=isFull&&!ed?(!c.started_at?btn('tstart','▶ Start')
+    :(c.paused_at?btn('tresume','▶ Resume'):btn('tpause','⏸ Pause'))+btn('trestart','↺','Restart the timer')):'';
+  const team=(i0,side)=>`<div class="team ${side}">${slot(i0)}${slot(i0+1)}${ed?`<input class="score-in" type="number" min="0" inputmode="numeric" id="sc${side}-${c.id}" placeholder="0" aria-label="Score">`:''}</div>`;
+  let foot;
+  if(ed) foot=`<div class="ac-act"><button class="btn" data-act="saveEnd" data-id="${c.id}">Save result</button>
+      <button class="btn quiet" data-act="noScore" data-id="${c.id}" title="Everyone back in line, no score recorded">No score</button>
+      <button class="btn quiet" style="flex:0 0 auto" data-act="cancelEnd" data-id="${c.id}">✕</button></div>`;
+  else if(isFull) foot=`<div class="ac-act"><button class="btn" data-act="end" data-id="${c.id}">End match</button>
+      <button class="btn quiet" style="flex:0 0 auto" data-act="clear" data-id="${c.id}" title="Send all four back to their old places in the queue">Clear</button></div>`;
+  else if(n) foot=`<div class="ac-act"><button class="btn" data-act="fillQ" data-id="${c.id}" ${queueOf(c.division).length>=4-n?'':'disabled'}>Fill from queue</button>
+      <button class="btn quiet" style="flex:0 0 auto" data-act="clear" data-id="${c.id}">Clear</button></div>`;
+  else foot=sug?`<div class="sugg">Suggested: <b>${names(sug[0])}</b> vs <b>${names(sug[1])}</b></div>
+      <div class="ac-act"><button class="btn" data-act="seat" data-id="${c.id}">▶ Put on court</button></div>`
+    :`<div class="free-msg">${mode()==='manual'?'Tap “+ Add player”, then tap someone waiting.':`Need ${Math.max(0,4-queueOf(c.division).length)} more in the queue.`}</div>`;
+  return `<article class="acourt ${!n?'free':''} ${isFull&&r===0?'done':''}" data-court="${c.id}"><header><b>${esc(c.label)}</b><span class="hc">${state}${ctl}</span></header>
+    <div class="ac-body">${team(0,'t1')}<div class="vs">vs</div>${team(2,'t2')}</div>${foot}</article>`;
+}
+function waitingBox(g,sugs){
+  const q=queueOf(g),now=Date.now();
+  const rest=Object.values(roster).filter(e=>e.status==='resting'&&inGroup(e.player_id,g)).map(e=>e.player_id);
+  const grp=id=>sugs.findIndex(t=>t&&t.flat().includes(id));
+  const line=(t,l,c)=>t?`<div><span class="nx ${c}">${l}</span>${names(t[0])} <span class="dim">vs</span> ${names(t[1])}</div>`:'';
+  return `<div class="box waitbox"><h3>Waiting · ${q.length}</h3>
+    ${sugs[0]?`<div class="upnext">${line(sugs[0],'Next','n1')}${line(sugs[1],'Then','n2')}</div>`:''}
+    ${q.length?`<ol class="wl"><li class="wr head"><span>Player</span><span class="wc">GP</span><span class="wc">W–L</span><span class="wc">Wait</span><span class="wc hide-md">Last game</span><span></span></li>
+    ${q.map((id,i)=>{const e=roster[id],st=ST[id]||{w:0,l:0,last:0},k=grp(id);
+      const since=Math.max(ms(e.arrived_at),st.last),mins=since?Math.floor((now-since)/60000):0;
+      const isS=sel&&sel.k==='w'&&sel.id===id;
+      return `<li class="wr ${k===0?'g1':k===1?'g2':''} ${isS?'sel':''}">
+        <button class="wmain" data-act="wait" data-id="${esc(id)}" title="Tap to select, then tap a court spot"><span class="qn">${i+1}</span>${av(id,28)}<b>${esc(P(id).name)}</b>
+          ${g==='social'?`<span class="chip ${P(id).division} hide-md">${DIVS[P(id).division].slice(0,3)}</span>`:''}${P(id).organiser?'<span class="chip org">/O</span>':''}</button>
+        <span class="wc">${e.games_played||0}</span><span class="wc">${st.w}–${st.l}</span><span class="wc dim">${mins<1?'now':mins+'m'}</span>
+        <span class="wc dim hide-md">${st.last?fmtTime(st.last):'—'}</span>
+        <span class="qa"><button title="Move up one" data-act="qup" data-id="${esc(id)}" ${i?'':'disabled'}>▲</button><button title="Move down one" data-act="qdown" data-id="${esc(id)}" ${i<q.length-1?'':'disabled'}>▼</button><button title="Play next" data-act="qtop" data-id="${esc(id)}" ${i?'':'disabled'}>⏭</button><button title="Sit out" data-act="qrest" data-id="${esc(id)}">💤</button></span></li>`;}).join('')}</ol>`
+      :'<p class="dim" style="margin:0">Nobody waiting.</p>'}
+    ${rest.length?`<h3 style="margin-top:1rem">Sitting out</h3><ul class="rest">${rest.map(id=>`<li>${av(id,26)}<b>${esc(P(id).name)}</b>
+      <span class="qa"><button class="txt" data-act="qback" data-id="${esc(id)}">Back in line</button><button title="Gone for the night" data-act="qleave" data-id="${esc(id)}">✕</button></span></li>`).join('')}</ul>`:''}
+  </div>`;
+}
+function selBar(){
+  if(!sel||tab!=='rally')return '';
+  if(sel.k==='w')return `<div class="selbar"><span><b>${esc(P(sel.id).name)}</b> — tap a court spot to put them on, or another waiting player to swap places.</span><button data-act="selCancel">Cancel</button></div>`;
+  const c=courtById(sel.c),id=slots(c)[sel.i];
+  if(!id)return `<div class="selbar"><span>Empty spot on <b>${esc(c.label)}</b> — tap someone waiting or a player on another court.</span><button data-act="selCancel">Cancel</button></div>`;
+  return `<div class="selbar"><span><b>${esc(P(id).name)}</b> — tap a player, empty spot or someone waiting to swap.</span>
+    <button data-act="selSide">⇄ Other team</button><button data-act="selWait">↩ To waiting</button><button data-act="selCancel">Cancel</button></div>`;
 }
 
 /* ---- Player pool ---- */
 function poolView(){
-  if(!cur) return noSession();
+  if(!cur)return noSession();
   const ids=Object.values(roster).filter(e=>e.status!=='left'),arrived=ids.filter(e=>e.status!=='expected').length;
-  return `<div class="sec-head"><div><h2>Player pool</h2><p>Tick who's in this session. Nobody is ever deleted, so everyone's here next week. DUPR is only visible to organisers.</p></div>
+  return `<div class="sec-head"><div><h2>Player pool</h2><p>Tick who's in this session. Nobody is ever deleted, so everyone's here next week. DUPR is only visible to organisers.${isSocial()?' In Social play, Regular and Ascend players share one queue.':''}</p></div>
       <button class="btn" data-act="newPlayer">+ New player</button></div>
     <div class="tools" style="margin-bottom:.8rem"><span class="stat">In session <b>${ids.length}</b></span><span class="stat">Arrived <b>${arrived}</b></span><span class="stat">Not arrived <b>${ids.length-arrived}</b></span>
       <span class="grow"></span><button class="btn quiet sm" data-act="copyLast">⧉ Copy last session's list</button></div>
@@ -397,10 +693,10 @@ function poolGrid(){
 function poolCard(p){
   const e=roster[p.id],st=e?e.status:null,inS=e&&st!=='left',d=dupr(p.id);
   let ctrl;
-  if(!inS) ctrl=`<button class="btn quiet sm w" data-act="poolAdd" data-id="${p.id}">${st==='left'?'Re-add to session':'+ Add to session'}</button>`;
-  else if(st==='expected') ctrl=`<div class="arr"><input type="time" class="inp" id="arr-${p.id}" value="${hhmm(new Date())}" aria-label="Arrival time"><button class="btn sm" data-act="arrive" data-id="${p.id}">Arrived</button></div>`;
+  if(!inS)ctrl=`<button class="btn quiet sm w" data-act="poolAdd" data-id="${p.id}">${st==='left'?'Re-add to session':'+ Add to session'}</button>`;
+  else if(st==='expected')ctrl=`<div class="arr"><input type="time" class="inp" id="arr-${p.id}" value="${hhmm(new Date())}" aria-label="Arrival time"><button class="btn sm" data-act="arrive" data-id="${p.id}">Arrived</button></div>`;
   else ctrl=`<div class="arr"><span class="lbl2">Arrived</span><input type="time" class="inp" data-act="setArr" data-id="${p.id}" value="${e.arrived_at?hhmm(new Date(e.arrived_at)):''}" aria-label="Arrival time"></div>`;
-  const badge=!inS?'':st==='expected'?'<span class="st exp">Registered</span>':st==='queued'?`<span class="st q">In queue #${queueOf(p.division).indexOf(p.id)+1}</span>`:st==='court'?`<span class="st c">On ${esc(courtOf(p.id))}</span>`:'<span class="st r">Sitting out</span>';
+  const badge=!inS?'':st==='expected'?'<span class="st exp">Registered</span>':st==='queued'?`<span class="st q">In queue #${queueOf(groupOf(p.id)).indexOf(p.id)+1}</span>`:st==='court'?`<span class="st c">On ${esc(courtOf(p.id))}</span>`:'<span class="st r">Sitting out</span>';
   return `<div class="pc ${inS?'in':'out'}">
     <label class="pick" title="In this session"><input type="checkbox" data-act="poolToggle" data-id="${p.id}" ${inS?'checked':''}><span></span></label>
     <button class="edit" data-act="editPlayer" data-id="${p.id}">Edit</button>
@@ -412,9 +708,10 @@ function poolCard(p){
 
 /* ---- Results ---- */
 function resultsView(){
-  if(!cur) return noSession();
-  return `<div class="sec-head"><div><h2>Results · ${fmtDate(curS().session_date)}</h2><p>${curS().published?'✓ Published — these are showing on the website podium and standings.':'Draft — only organisers can see these. Check every score, fix anything with Edit, then publish.'}</p></div>
-    ${curS().published?'':'<button class="btn" data-act="publish">📣 Publish results</button>'}</div>
+  if(!cur)return noSession();
+  const s=curS();
+  return `<div class="sec-head"><div><h2>Results · ${fmtDate(s.session_date)}</h2><p>${s.published?'✓ Published — these are showing on the website.':'Draft — only organisers can see these. Check every score, fix anything with Edit, then publish.'}</p></div>
+    ${s.published?'':'<button class="btn" data-act="publish">📣 Publish results</button>'}</div>
   <div class="card">${matches.map(m=>{const aw=m.score1>m.score2;
     return `<div class="rrow"><span class="dim" style="font-size:.78rem">${fmtTime(m.created_at)}<br><span class="chip ${m.division}">${esc(m.court||DIVS[m.division])} · G${m.game??''}</span></span>
       <span class="${aw?'won':'lost'}">${aw?'🏆 ':''}${names(m.team1)}</span><span class="sc">${m.score1}–${m.score2}</span>
@@ -426,29 +723,16 @@ function resultsView(){
 /* ================= MODALS ================= */
 function openModal(kind,html){modal=kind;$('#modalRoot').innerHTML=`<div class="backdrop" data-act="closeModal"><div class="modal" data-stop>${html}</div></div>`;}
 function closeModal(){modal=null;pendingPhoto=null;removePhoto=false;$('#modalRoot').innerHTML='';}
-
-function openScore(kind,id){
-  const x=kind==='record'?courts.find(c=>c.id===id):matches.find(m=>m.id===id);
-  const A=kind==='record'?x.team_a:x.team1,B=kind==='record'?x.team_b:x.team2;
-  openModal(kind,`<h2>${kind==='record'?esc(x.label)+' result':'Edit score'}</h2>
-    <p>${kind==='record'?'Type both scores — the higher one wins. All four go back into the queue, winners first.':'The website standings update straight away.'}</p>
-    <div class="sides"><div class="sidebox" id="sbA">${names(A)}<br><input type="number" id="sa" min="0" inputmode="numeric" value="${kind==='edit'?x.score1:''}"></div>
-    <div class="sidebox" id="sbB">${names(B)}<br><input type="number" id="sb" min="0" inputmode="numeric" value="${kind==='edit'?x.score2:''}"></div></div>
-    <div class="mrow"><button class="btn quiet" data-act="closeModal">Cancel</button><button class="btn" data-act="saveScore" data-kind="${kind}" data-id="${id}">Confirm</button></div>`);
+function openEditScore(id){
+  const m=matches.find(x=>x.id===id);if(!m)return;
+  openModal('edit',`<h2>Edit score</h2><p>The website standings update straight away.</p>
+    <div class="row2" style="margin-bottom:1rem"><div class="field"><label>${names(m.team1)}</label><input class="inp" type="number" id="sa" min="0" value="${m.score1}"></div>
+    <div class="field"><label>${names(m.team2)}</label><input class="inp" type="number" id="sb" min="0" value="${m.score2}"></div></div>
+    <div class="mrow"><button class="btn quiet" data-act="closeModal">Cancel</button><button class="btn" data-act="saveEdit" data-id="${id}">Save</button></div>`);
   $('#sa').focus();
 }
-function openPick(id){
-  const c=courts.find(x=>x.id===id);if(!c)return;
-  const q=queueOf(c.division),g=n=>(n||0)+' game'+(n===1?'':'s');
-  openModal('pick',`<h2>${esc(c.label)} · choose 4</h2>
-    <p>The 4 who have waited longest are ticked. Untick anyone and tick someone else if you like.</p>
-    <ul class="aq" style="max-height:55vh;overflow:auto">${q.map((pid,i)=>`<li class="${i<4?'up':''}"><label style="display:flex;align-items:center;gap:.55rem;flex:1;cursor:pointer">
-      <input type="checkbox" class="pk" value="${esc(pid)}" ${i<4?'checked':''} style="accent-color:var(--volt);width:20px;height:20px;flex:none">
-      <span class="qn">${i+1}</span>${av(pid,28)}<span class="qm"><b>${esc(P(pid).name)}</b><small>🕒 Arrived ${fmtTime(roster[pid].arrived_at)} · ${g(roster[pid].games_played)}</small></span></label></li>`).join('')}</ul>
-    <div class="mrow"><span class="grow dim" id="pkCount" style="font-size:.8rem">${Math.min(4,q.length)} of 4 selected</span><button class="btn quiet" data-act="closeModal">Cancel</button><button class="btn" data-act="seatPick" data-id="${c.id}">Put on court</button></div>`);
-}
-function readScores(){const a=parseInt($('#sa').value,10),b=parseInt($('#sb').value,10);
-  if(isNaN(a)||isNaN(b)||a===b||a<0||b<0){toast('Enter two different scores',true);return null;}return [a,b];}
+const readPair=(a,b)=>{const x=parseInt(a,10),y=parseInt(b,10);
+  if(isNaN(x)||isNaN(y)||x===y||x<0||y<0){toast('Enter two different scores',true);return null;}return [x,y];};
 
 function photoPrev(url,name){return url?`<span class="av ph big" style="--s:96px;background-image:url('${esc(url)}')"></span>`
   :`<span class="av big" style="--s:96px">${name?esc(ini(name)):'📷'}</span>`;}
@@ -460,7 +744,7 @@ function openPlayer(id){
     <div class="pform"><label class="phpick" for="phFile"><span id="phWrap">${photoPrev(p.photo_url,p.name)}</span><small id="phHint">Tap to ${p.photo_url?'change':'add'} photo</small></label>
       <input type="file" accept="image/*" id="phFile" hidden>
       <div><div class="field"><label for="fName">Name</label><input class="inp" id="fName" value="${esc(p.name)}" placeholder="e.g. Maria Santos"></div>
-        <div class="row2"><div class="field"><label for="fDiv">Division</label><select class="inp" id="fDiv">${Object.keys(DIVS).map(k=>`<option value="${k}" ${p.division===k?'selected':''}>${DIVS[k]}</option>`).join('')}</select></div>
+        <div class="row2"><div class="field"><label for="fDiv">Division</label><select class="inp" id="fDiv">${['regular','ascend'].map(k=>`<option value="${k}" ${p.division===k?'selected':''}>${DIVS[k]}</option>`).join('')}</select></div>
         <div class="field"><label for="fDupr">DUPR (optional)</label><input class="inp" id="fDupr" type="number" step="0.01" min="1" max="8" inputmode="decimal" value="${d??''}" placeholder="e.g. 3.25"></div></div>
         <label class="chk" style="margin-bottom:.5rem"><input type="checkbox" id="fOrg" ${p.organiser?'checked':''}>Organiser (shown, not ranked)</label>
         ${!id&&cur?`<label class="chk"><input type="checkbox" id="fAdd" checked>Add to ${fmtDate(curS().session_date)} session</label>`:''}</div></div>
@@ -486,28 +770,37 @@ async function savePlayer(id){
     need(await sb.storage.from('player-photos').upload(path,pendingPhoto,{contentType:'image/jpeg',upsert:true}));
     const url=sb.storage.from('player-photos').getPublicUrl(path).data.publicUrl;
     need(await sb.from('players').update({photo_url:url}).eq('id',pid));}
-  else if(removePhoto) need(await sb.from('players').update({photo_url:null}).eq('id',pid));
+  else if(removePhoto)need(await sb.from('players').update({photo_url:null}).eq('id',pid));
   need(await sb.from('player_private').upsert({player_id:pid,dupr:d},{onConflict:'player_id'}));
-  if(addNow) need(await sb.from('session_players').insert({session_id:cur,player_id:pid,status:'expected'}));
-  closeModal();await loadAll();render();
-  toast(id?name+' updated':name+' added'+(addNow?' to this session':'')+(pendingPhoto?'':' — add a photo any time'));
+  if(addNow)need(await sb.from('session_players').insert({session_id:cur,player_id:pid,status:'expected'}));
+  const had=!!pendingPhoto;closeModal();await loadAll();render();
+  toast(id?name+' updated':name+' added'+(addNow?' to this session':'')+(had?'':' — add a photo any time'));
 }
 function openNewSession(){
   const t=new Date(),iso=`${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;
-  openModal('session',`<h2>New session</h2><p>Courts can be different every week, so set them here.</p>
+  newType='social';
+  openModal('session',`<h2>New session</h2><p>You can turn courts on or off any time during the session.</p>
+    <div class="field"><span class="flabel">Type</span><div class="seg" id="nType">
+      <button data-act="nType" data-v="social" aria-pressed="true">Social play</button><button data-act="nType" data-v="structured" aria-pressed="false">Regular + Ascend</button></div></div>
     <div class="row2"><div class="field"><label for="nDate">Date</label><input class="inp" type="date" id="nDate" value="${iso}"></div>
-    <div class="field"><label for="nLabel">Name</label><input class="inp" id="nLabel" placeholder="e.g. Friday open play"></div></div>
-    <div class="row2"><div class="field"><label for="nReg">Regular courts</label><input class="inp" type="number" id="nReg" min="0" max="8" value="2"></div>
+    <div class="field"><label for="nLabel">Name</label><input class="inp" id="nLabel" placeholder="e.g. Tuesday social play"></div></div>
+    <div class="row2" id="nSoc"><div class="field"><label for="nCourts">Courts</label><input class="inp" type="number" id="nCourts" min="1" max="12" value="3"></div>
+      <p class="dim" style="font-size:.8rem;align-self:center;margin:0">Everyone shares one queue — Regular and Ascend mixed.</p></div>
+    <div class="row2" id="nStr" hidden><div class="field"><label for="nReg">Regular courts</label><input class="inp" type="number" id="nReg" min="0" max="8" value="2"></div>
     <div class="field"><label for="nAsc">Ascend courts</label><input class="inp" type="number" id="nAsc" min="0" max="8" value="1"></div></div>
     <div class="mrow"><button class="btn quiet" data-act="closeModal">Cancel</button><button class="btn" data-act="createSession">Create session</button></div>`);
 }
 async function createSession(){
   const date=$('#nDate').value;if(!date)return toast('Pick a date',true);
   const [y,m,d]=date.split('-').map(Number),wd=new Date(y,m-1,d).toLocaleDateString('en-US',{weekday:'long'});
-  const label=$('#nLabel').value.trim()||wd+' open play',nr=Math.max(0,parseInt($('#nReg').value,10)||0),na=Math.max(0,parseInt($('#nAsc').value,10)||0);
-  const s=need(await sb.from('sessions').insert({session_date:date,label,status:'planned'}).select().single());
-  const rows=[];for(let i=1;i<=nr;i++)rows.push({session_id:s.id,label:'Court '+i,division:'regular'});
-  for(let i=1;i<=na;i++)rows.push({session_id:s.id,label:na===1?'Ascend Court':'Ascend Court '+i,division:'ascend'});
+  const social=newType==='social';
+  const label=$('#nLabel').value.trim()||wd+(social?' social play':' open play');
+  const s=need(await sb.from('sessions').insert({session_date:date,label,status:'planned',session_type:newType,match_mode:social?'roundrobin':'rotation'}).select().single());
+  const rows=[];
+  if(social){const n=Math.max(1,parseInt($('#nCourts').value,10)||1);for(let i=1;i<=n;i++)rows.push({session_id:s.id,label:'Court '+i,division:'social',active:true});}
+  else{const nr=Math.max(0,parseInt($('#nReg').value,10)||0),na=Math.max(0,parseInt($('#nAsc').value,10)||0);
+    for(let i=1;i<=nr;i++)rows.push({session_id:s.id,label:'Court '+i,division:'regular',active:true});
+    for(let i=1;i<=na;i++)rows.push({session_id:s.id,label:na===1?'Ascend Court':'Ascend Court '+i,division:'ascend',active:true});}
   if(rows.length)need(await sb.from('courts').insert(rows));
   cur=s.id;closeModal();await loadAll();tab='pool';render();toast(label+' created — now tick who is playing');
 }
@@ -526,7 +819,7 @@ async function poolToggle(id,on){
   if(on){const row={session_id:cur,player_id:id,status:'expected',arrived_at:null,queue_ticket:null};
     need(await sb.from('session_players').upsert(row,{onConflict:'session_id,player_id'}));
     roster[id]={games_played:0,...(e||{}),...row};toast(P(id).name+' added — tap “Arrived” when they check in');}
-  else{if(e&&e.status==='court'){render();return toast(P(id).name+' is on court — record or undo that game first',true);}
+  else{if(e&&e.status==='court'){render();return toast(P(id).name+' is on court — take them off the court first',true);}
     if(e&&e.games_played>0)await upd(id,{status:'left'});
     else{need(await sb.from('session_players').delete().eq('session_id',cur).eq('player_id',id));delete roster[id];}
     toast(P(id).name+' taken out of this session');}
@@ -535,58 +828,75 @@ async function poolToggle(id,on){
 
 /* ================= EVENTS ================= */
 async function act(d,el,e){
-  const q=d.id&&players[d.id]?queueOf(P(d.id).division):[],i=q.indexOf(d.id);
-  const court=()=>courts.find(c=>String(c.id)===d.id);
+  const q=d.id&&players[d.id]?queueOf(groupOf(d.id)):[],i=q.indexOf(d.id);
+  const court=()=>courtById(d.id);
   switch(d.act){
-    case 'tab': tab=d.tab;render();scrollTo(0,0);break;
+    case 'theme': toggleTheme();break;
+    case 'tab': tab=d.tab;sel=null;render();scrollTo(0,0);break;
     case 'signout': await sb.auth.signOut();if(channel){sb.removeChannel(channel);channel=null;}user=null;render();break;
     case 'closeModal': if(e.target===el||el.tagName==='BUTTON')closeModal();break;
     case 'newSession': openNewSession();break;
+    case 'nType': newType=d.v;document.querySelectorAll('#nType button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===newType));
+      $('#nSoc').hidden=newType!=='social';$('#nStr').hidden=newType==='social';break;
     case 'createSession': await createSession();break;
     case 'goLive':
       need(await sb.from('sessions').update({status:'ended'}).eq('status','live').neq('id',cur));
       need(await sb.from('sessions').update({status:'live'}).eq('id',cur));
-      await loadAll();render();toast('Live! The TV and website now show this session');break;
+      await loadAll();render();toast('Live! The TV now shows this session');break;
     case 'endSession':
-      if(!confirm('End this session? Results are saved as a draft — check them in the Results tab, then tap Publish.'))break;
+      if(!confirm('End this session? Results are saved as a draft — check them in Results, then Publish.'))break;
       need(await sb.from('sessions').update({status:'ended'}).eq('id',cur));await loadAll();tab='results';render();scrollTo(0,0);
-      toast('Session ended — check the scores, then tap 📣 Publish results');break;
+      toast('Session ended — check the scores, then tap 📣 Publish');break;
     case 'publish':
-      if(!confirm('Publish these results? The podium and standings on the website will update for everyone.'))break;
-      need(await sb.from('sessions').update({published:true}).eq('id',cur));await loadAll();render();toast('Published ✓ The website now shows this session');break;
+      if(!confirm('Publish these results? The website will update for everyone.'))break;
+      need(await sb.from('sessions').update({published:true}).eq('id',cur));await loadAll();render();toast('Published ✓');break;
     case 'unpublish':
-      if(!confirm('Hide these results from the website? Nothing is deleted — you can publish again any time.'))break;
-      need(await sb.from('sessions').update({published:false}).eq('id',cur));await loadAll();render();toast('Hidden from the website — nothing deleted');break;
-    case 'fill': await fillCourt(court());render();break;
-case 'pick': openPick(Number(d.id));break;
-    case 'seatPick': {const c=court(),four=[...document.querySelectorAll('.pk:checked')].map(x=>x.value);
-      if(four.length!==4){toast('Pick exactly 4 players',true);break;}
-      await seatFour(c,four);closeModal();render();toast(c.label+': '+four.map(id=>P(id).name).join(', '));break;}
-    case 'tplus': case 'tmin': case 'trestart': {const c=court();if(!c||!c.started_at)break;
-      let t=d.act==='trestart'?Date.now():ms(c.started_at)+(d.act==='tplus'?60000:-60000);
-      if(d.act==='tplus'&&remaining(c)===0)t=Date.now()-(GAME_SECONDS-60)*1000;
-      const iso=new Date(t).toISOString();
-      need(await sb.from('courts').update({started_at:iso}).eq('id',c.id));c.started_at=iso;render();
-      toast(c.label+(d.act==='trestart'?' timer restarted':d.act==='tplus'?': +1 minute':': −1 minute'));break;}
-    case 'undo': await undoCourt(court());render();toast('Game undone — those four are back in their old places');break;
-    case 'record': openScore('record',Number(d.id));break;
-    case 'editRes': openScore('edit',Number(d.id));break;
-    case 'saveScore': {const s=readScores();if(!s)break;
-      if(d.kind==='record'){const c=courts.find(x=>x.id===Number(d.id));await recordResult(c,s[0],s[1]);closeModal();await loadSession();render();toast('Saved ✓ Website updated');}
-      else{need(await sb.from('matches').update({score1:s[0],score2:s[1]}).eq('id',Number(d.id)));closeModal();await loadSession();render();toast('Score updated');}
-      break;}
+      if(!confirm('Hide these results from the website? Nothing is deleted.'))break;
+      need(await sb.from('sessions').update({published:false}).eq('id',cur));await loadAll();render();toast('Hidden from the website');break;
+    case 'courtsPanel': courtsPanel=!courtsPanel;render();break;
+    case 'addCourt': {const dv=d.div,n=courts.filter(c=>c.division===dv).length+1;
+      const label=dv==='ascend'?'Ascend Court '+n:'Court '+(courts.filter(c=>c.division!=='ascend').length+1);
+      need(await sb.from('courts').insert({session_id:cur,label,division:dv,active:true}));await loadSession();render();toast(label+' added');break;}
+    case 'courtOn': {const c=court();need(await sb.from('courts').update({active:true}).eq('id',c.id));c.active=true;await autoFillAll();render();toast(c.label+' is on');break;}
+    /* courts */
+    case 'slot': await pickTarget({k:'s',c:String(d.c),i:Number(d.i)});break;
+    case 'wait': await pickTarget({k:'w',id:d.id});break;
+    case 'selCancel': sel=null;render();break;
+    case 'selSide': {const a=sel;sel=null;await doSwap(a,{k:'s',c:a.c,i:(a.i+2)%4});render();break;}
+    case 'selWait': {const a=sel;sel=null;const c=courtById(a.c),s=slots(c),id=s[a.i];s[a.i]='';
+      await setStatus([id],'queued');await writeSlots(c,s);render();toast(P(id).name+' back in line');break;}
+    case 'seat': {const c=court();if(await fillCourt(c)){render();toast(c.label+' — timer started');}else toast('Not enough players waiting',true);break;}
+    case 'fillQ': {const c=court();await fillCourt(c);render();break;}
+    case 'clear': {const c=court();sel=null;await clearCourt(c);render();toast(c.label+' cleared — everyone back in their old places');break;}
+    case 'tstart': case 'trestart': {const c=court(),iso=new Date().toISOString();
+      need(await sb.from('courts').update({started_at:iso,paused_at:null}).eq('id',c.id));Object.assign(c,{started_at:iso,paused_at:null});render();break;}
+    case 'tpause': {const c=court(),iso=new Date().toISOString();
+      need(await sb.from('courts').update({paused_at:iso}).eq('id',c.id));c.paused_at=iso;render();break;}
+    case 'tresume': {const c=court(),st=new Date(ms(c.started_at)+(Date.now()-ms(c.paused_at))).toISOString();
+      need(await sb.from('courts').update({started_at:st,paused_at:null}).eq('id',c.id));Object.assign(c,{started_at:st,paused_at:null});render();break;}
+    case 'end': sel=null;ending=court().id;render();{const f=document.getElementById('sct1-'+d.id);if(f)f.focus();}break;
+    case 'cancelEnd': ending=null;render();break;
+    case 'saveEnd': {const c=court(),s=readPair($('#sct1-'+c.id).value,$('#sct2-'+c.id).value);if(!s)break;
+      await endMatch(c,s);render();toast('Saved ✓ Everyone back in line');break;}
+    case 'noScore': {const c=court();await endMatch(c,null);render();toast(c.label+' ended — everyone back in line');break;}
+    /* results */
+    case 'editRes': openEditScore(Number(d.id));break;
+    case 'saveEdit': {const s=readPair($('#sa').value,$('#sb').value);if(!s)break;
+      need(await sb.from('matches').update({score1:s[0],score2:s[1]}).eq('id',Number(d.id)));closeModal();await loadSession();render();toast('Score updated');break;}
     case 'delRes': if(!confirm('Delete this game? It will disappear from the standings.'))break;
       need(await sb.from('matches').delete().eq('id',Number(d.id)));await loadSession();render();toast('Game deleted');break;
-    case 'qup': if(i>0){await swap(q[i-1],d.id);render();}break;
-    case 'qdown': if(i>-1&&i<q.length-1){await swap(d.id,q[i+1]);render();}break;
-    case 'qtop': if(i>0){await upd(d.id,{queue_ticket:new Date(ms(roster[q[0]].queue_ticket)-1).toISOString()});render();toast(P(d.id).name+' plays next — everyone else keeps their order');}break;
-    case 'qrest': await upd(d.id,{status:'resting'});render();toast(P(d.id).name+' is sitting out');break;
-    case 'qback': await upd(d.id,{status:'queued',queue_ticket:new Date().toISOString()});await autoFillAll();render();toast(P(d.id).name+' is back — joins the end of the line');break;
+    /* queue */
+    case 'qup': if(i>0){await swapTickets(q[i-1],d.id);render();}break;
+    case 'qdown': if(i>-1&&i<q.length-1){await swapTickets(d.id,q[i+1]);render();}break;
+    case 'qtop': if(i>0){await upd(d.id,{queue_ticket:new Date(ms(roster[q[0]].queue_ticket)-1).toISOString()});render();toast(P(d.id).name+' plays next');}break;
+    case 'qrest': if(sel&&sel.k==='w'&&sel.id===d.id)sel=null;await upd(d.id,{status:'resting'});render();toast(P(d.id).name+' is sitting out');break;
+    case 'qback': await upd(d.id,{status:'queued',queue_ticket:new Date().toISOString()});await autoFillAll();render();toast(P(d.id).name+' is back — end of the line');break;
     case 'qleave': await upd(d.id,{status:'left'});render();toast(P(d.id).name+' has left for the night');break;
+    /* pool */
     case 'poolAdd': await poolToggle(d.id,true);break;
     case 'arrive': {const v=($('#arr-'+d.id)||{}).value,t=v?onDate(v):new Date().toISOString();
       await upd(d.id,{status:'queued',arrived_at:t,queue_ticket:t});await autoFillAll();render();
-      toast(P(d.id).name+' checked in at '+fmtTime(t)+' — now on the TV');break;}
+      toast(P(d.id).name+' checked in at '+fmtTime(t));break;}
     case 'poolDiv': poolDiv=d.v;render();break;
     case 'poolShow': poolShow=d.v;render();break;
     case 'copyLast': await copyLast();break;
@@ -600,18 +910,18 @@ document.addEventListener('click',async e=>{
   if(e.target.closest('[data-stop]')&&!e.target.closest('[data-act]:not(.backdrop)'))return;
   const el=e.target.closest('[data-act]');if(!el||el.tagName==='INPUT'||el.tagName==='SELECT')return;
   if(busy&&el.dataset.act!=='closeModal')return;
-  busy=true;try{await act(el.dataset,el,e);}catch(err){fail(err);await loadSession().catch(()=>{});render();}finally{busy=false;}
+  busy=true;try{await act(el.dataset,el,e);}catch(err){fail(err);sel=null;await loadSession().catch(()=>{});render();}finally{busy=false;}
 });
 document.addEventListener('change',async e=>{
   const t=e.target,a=t.dataset.act;
   try{
-    if(t.classList&&t.classList.contains('pk')){const n=document.querySelectorAll('.pk:checked').length;
-      if(n>4){t.checked=false;toast('A court takes 4 players',true);}
-      const pc=$('#pkCount');if(pc)pc.textContent=Math.min(n,4)+' of 4 selected';return;}
-if(a==='poolToggle')await poolToggle(t.dataset.id,t.checked);
+    if(a==='poolToggle')await poolToggle(t.dataset.id,t.checked);
     if(a==='autoFill'){autoFill=t.checked;await autoFillAll();render();}
-    if(a==='balance'){balance=t.checked;toast(balance?'Teams balanced by DUPR':'Teams follow queue order (1+4 vs 2+3)');}
-    if(a==='pickSession'){cur=Number(t.value);await loadSession();render();}
+    if(a==='mode'){need(await sb.from('sessions').update({match_mode:t.value}).eq('id',cur));curS().match_mode=t.value;render();toast(MODES[t.value][0]+' on');}
+    if(a==='courtActive'){const c=courtById(t.dataset.id);
+      if(!t.checked&&filled(c)){t.checked=true;return toast(c.label+' has players on it — clear it first',true);}
+      need(await sb.from('courts').update({active:t.checked}).eq('id',c.id));c.active=t.checked;if(t.checked)await autoFillAll();render();}
+    if(a==='pickSession'){cur=Number(t.value);sel=null;ending=null;await loadSession();render();}
     if(a==='setArr'&&t.value){const id=t.dataset.id,e2=roster[id],v=onDate(t.value),patch={arrived_at:v};
       if(e2.status==='queued'&&!e2.games_played)patch.queue_ticket=v;
       await upd(id,patch);render();toast(patch.queue_ticket?'Arrival time changed — queue place adjusted':'Arrival time saved');}
@@ -619,14 +929,11 @@ if(a==='poolToggle')await poolToggle(t.dataset.id,t.checked);
       $('#phWrap').innerHTML=photoPrev(URL.createObjectURL(pendingPhoto));$('#phHint').textContent='Tap to change photo';}
   }catch(err){fail(err);await loadSession().catch(()=>{});render();}
 });
-document.addEventListener('input',e=>{
-  if(e.target.id==='poolQ'){poolQ=e.target.value;$('#poolGrid').innerHTML=poolGrid();}
-  if(e.target.id==='sa'||e.target.id==='sb'){const a=parseInt($('#sa').value,10),b=parseInt($('#sb').value,10);
-    $('#sbA').classList.toggle('win',!isNaN(a)&&!isNaN(b)&&a>b);$('#sbB').classList.toggle('win',!isNaN(a)&&!isNaN(b)&&b>a);}
-});
+document.addEventListener('input',e=>{if(e.target.id==='poolQ'){poolQ=e.target.value;$('#poolGrid').innerHTML=poolGrid();}});
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'&&modal)closeModal();
-  if(e.key==='Enter'&&(modal==='record'||modal==='edit')){e.preventDefault();$('[data-act="saveScore"]').click();}
+  if(e.key==='Escape'){if(modal)closeModal();else if(ending!=null){ending=null;render();}else if(sel){sel=null;render();}}
+  if(e.key==='Enter'&&e.target.classList&&e.target.classList.contains('score-in')){e.preventDefault();const b=e.target.closest('.acourt').querySelector('[data-act="saveEnd"]');if(b)b.click();}
+  if(e.key==='Enter'&&modal==='edit'){e.preventDefault();$('[data-act="saveEdit"]').click();}
 });
 document.addEventListener('submit',async e=>{
   if(e.target.id!=='loginForm')return;e.preventDefault();
@@ -636,10 +943,11 @@ document.addEventListener('submit',async e=>{
   user=data.user;try{await loadAll();subscribe();}catch(err){fail(err);}render();toast('Welcome back');
 });
 
-/* timers tick every second */
-setInterval(()=>{courts.forEach(c=>{if(!(c.team_a||[]).length)return;const r=remaining(c);
-  document.querySelectorAll(`[data-timer="${c.id}"]`).forEach(el=>{el.textContent=r===0?"TIME'S UP":fmt(r);el.classList.toggle('up',r===0);
+/* timers tick every second; waiting times refresh every 30s */
+setInterval(()=>{courts.forEach(c=>{if(filled(c)<4||!c.started_at)return;const r=remaining(c);
+  document.querySelectorAll(`[data-timer="${c.id}"]`).forEach(el=>{el.textContent=tText(c);el.classList.toggle('up',r===0);
     const card=el.closest('.acourt');if(card)card.classList.toggle('done',r===0);});});},1000);
+setInterval(()=>{if(user&&tab==='rally')safeRender();},30000);
 
 /* start */
 (async()=>{
