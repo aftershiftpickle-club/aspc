@@ -85,6 +85,7 @@ footer{border-top:1px solid var(--line);padding:1.4rem 0 5rem;margin-top:2.5rem;
 .seg button{border:0;background:none;color:var(--muted);font-weight:700;font-size:.78rem;padding:.42rem .9rem;border-radius:999px}
 .seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
 .chip{font-size:.6rem;font-weight:800;letter-spacing:.12em;text-transform:uppercase;border-radius:999px;padding:.16rem .5rem;border:1px solid;white-space:nowrap;display:inline-block}
+button.chip{cursor:pointer;font-family:inherit}
 .chip.regular{color:var(--accent-text);border-color:var(--line2);background:var(--next)}
 .chip.ascend{color:var(--asc);border-color:var(--line2);background:var(--asc-bg)}
 .chip.social{color:var(--bg);border-color:var(--ink);background:var(--ink)}
@@ -93,6 +94,8 @@ footer{border-top:1px solid var(--line);padding:1.4rem 0 5rem;margin-top:2.5rem;
 .chip.pub{color:var(--accent-ink);background:var(--accent);border-color:var(--accent)}
 .chip.draft{color:var(--asc);border-color:var(--line2);background:var(--asc-bg)}
 .chip.prep{color:var(--accent-text);border-color:var(--accent);background:var(--next)}
+.chip.tv{color:var(--ink);border-color:var(--line2);background:var(--card);font-size:.66rem;padding:.3rem .65rem}
+.chip.notv{color:var(--asc);border-color:var(--asc);background:transparent}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow)}
 .box{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:1rem;box-shadow:var(--shadow)}
 .box h3{margin:0 0 .75rem;font-size:.7rem;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:var(--accent-text)}
@@ -117,6 +120,8 @@ footer{border-top:1px solid var(--line);padding:1.4rem 0 5rem;margin-top:2.5rem;
 .ctog input{accent-color:var(--accent);width:16px;height:16px}
 .ctog b{display:block;color:var(--ink);font-size:.85rem;line-height:1.1}
 .ctog small{font-size:.66rem;font-weight:700}
+.tvrow{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;padding:.7rem .8rem;margin:0 0 .9rem;border-radius:12px;background:var(--bg);border:1px solid var(--line)}
+.tvrow b{color:var(--ink);font-size:.88rem}
 .rule{margin-top:1rem;border-left:3px solid var(--accent);background:var(--card);padding:.65rem 1rem;border-radius:0 10px 10px 0;font-size:.84rem}
 .rule b{color:var(--ink)}
 .empty{text-align:center;padding:3rem 1rem}
@@ -138,13 +143,15 @@ footer{border-top:1px solid var(--line);padding:1.4rem 0 5rem;margin-top:2.5rem;
 .acourt header{display:flex;justify-content:space-between;align-items:center;gap:.5rem;padding:.55rem .6rem .55rem 1rem;background:var(--soft);min-height:48px}
 .acourt.free header{background:transparent}
 .acourt.prep header{background:var(--next)}
-.acourt header>b{font-weight:800;text-transform:uppercase;letter-spacing:.08em;font-size:.85rem;color:var(--ink)}
-.hc{display:flex;align-items:center;gap:.35rem}
+.acourt header .ttl{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap}
+.acourt header b{font-weight:800;text-transform:uppercase;letter-spacing:.08em;font-size:.85rem;color:var(--ink)}
+.hc{display:flex;align-items:center;gap:.35rem;flex-wrap:wrap;justify-content:flex-end}
 .timer{font:800 1.2rem var(--sans);color:var(--accent-text);font-variant-numeric:tabular-nums;margin-right:.2rem}
 .timer.up{color:var(--red)}
 .timer.paused{color:var(--asc)}
 .icon-btn{border:1px solid var(--line);background:var(--card);border-radius:8px;height:30px;min-width:30px;padding:0 .55rem;font-size:.72rem;font-weight:800;color:var(--ink);white-space:nowrap}
 .icon-btn:hover{border-color:var(--accent)}
+.icon-btn.sw{border-color:var(--accent);color:var(--accent-text)}
 .ac-body{display:grid;grid-template-columns:1fr auto 1fr;gap:.5rem;align-items:center;padding:.8rem}
 .team{display:grid;gap:.35rem;justify-items:stretch}
 .t2{justify-items:end}
@@ -275,7 +282,7 @@ html[data-theme="dark"] .selbar b{color:var(--accent-text);filter:brightness(.55
 const SUPABASE_URL = 'https://wczulosdzoewznxlawfj.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_ZPRnMslT6BWplkRvVaiRXA_PUh-bQlO';
 const GAME_SECONDS = 600;   // 10-minute games
-const MAX_COURTS   = 6;     // real courts per session (prep courts not counted)
+const MAX_COURTS   = 10;    // real courts per session (prep courts not counted)
 const MAX_PREP     = 1;     // prep courts per section (Regular, Ascend or Social)
 /* ==================================== */
 
@@ -302,7 +309,7 @@ function demoDB(){
     {id:11,session_id:2,label:'Court 1',division:'social',...E,team_a:['jelo','sandy'],team_b:['david','mitch'],started_at:iso(ago(4))},
     {id:12,session_id:2,label:'Court 2',division:'social',...E,team_a:['paul','pj'],team_b:['colleen','justin'],started_at:iso(ago(9.6))},
     {id:13,session_id:2,label:'Court 3',division:'social',...E,team_a:['joy','emman'],team_b:['warren','janelle'],started_at:iso(ago(1))},
-    {id:14,session_id:2,label:'Prep 1',division:'social',...E,active:false,standby:true,team_a:['hubert','karen'],team_b:['rocelyn','clark']}];
+    {id:14,session_id:2,label:'Prep court',division:'social',...E,active:false,standby:true,team_a:['hubert','karen'],team_b:['rocelyn','clark']}];
   const onCourt=['jelo','sandy','david','mitch','paul','pj','colleen','justin','joy','emman','warren','janelle'];
   const ids=[...onCourt,'hubert','karen','rocelyn','clark','ejay','russel','marie','nique','gilbert','adrian','sam'];
   const session_players=ids.map((id,i)=>{const mine=matches.filter(m=>m.session_id===2&&[...m.team1,...m.team2].includes(id));
@@ -310,8 +317,8 @@ function demoDB(){
     const status=onCourt.includes(id)?'court':id==='marie'?'resting':['nique','gilbert'].includes(id)?'expected':'queued';
     return {session_id:2,player_id:id,status,games_played:mine.length,arrived_at:status==='expected'?null:iso(arr),queue_ticket:status==='expected'?null:iso(last?last+i:arr)};});
   return {players,player_private:Object.entries(D).map(([player_id,dupr])=>({player_id,dupr})),
-    sessions:[{id:1,session_date:'2026-09-11',label:'Friday open play',status:'ended',published:true,session_type:'structured',match_mode:'rotation'},
-              {id:2,session_date:today,label:'Social play',status:'live',published:false,session_type:'social',match_mode:'roundrobin'}],
+    sessions:[{id:1,session_date:'2026-09-11',label:'Friday open play',status:'ended',published:true,session_type:'structured',match_mode:'rotation',tv_courts:3},
+              {id:2,session_date:today,label:'Social play',status:'live',published:false,session_type:'social',match_mode:'roundrobin',tv_courts:3}],
     courts,matches,session_players};
 }
 function fakeClient(DB){
@@ -417,6 +424,12 @@ const freeLive=g=>courts.filter(c=>isOn(c)&&c.division===g&&!filled(c));
 const liveCount=()=>courts.filter(c=>!isPrep(c)).length;
 const liveLabel=()=>'Court '+(liveCount()+1);
 const prepLabel=g=>isSocial()?'Prep court':DIVS[g]+' prep';
+/* ---- which courts the TV shows ----
+   tv_courts on the session: empty = all active courts, or a number 1–10.
+   The TV shows the first N active courts (in the order they were created). */
+const tvLimit=()=>{const n=curS()&&Number(curS().tv_courts);return n>0?n:null;};
+function tvSet(){const on=courts.filter(isOn).sort((a,b)=>a.id-b.id),n=tvLimit();return new Set((n?on.slice(0,n):on).map(c=>c.id));}
+const tvText=()=>{const n=tvLimit(),on=courts.filter(isOn).length;return n?`${Math.min(n,on)} of ${on} court${on===1?'':'s'}`:`all ${on} court${on===1?'':'s'}`;};
 function remaining(c){if(!c.started_at)return GAME_SECONDS;const end=c.paused_at?ms(c.paused_at):Date.now();
   return Math.max(0,GAME_SECONDS-Math.floor((end-ms(c.started_at))/1000));}
 const tText=c=>{const r=remaining(c);return r===0?"TIME'S UP":(c.paused_at?'⏸ ':'')+fmt(r);};
@@ -684,7 +697,8 @@ function sessBar(){
   return `<div class="sessbar">
     ${sessions.length?`<select class="inp" data-act="pickSession" aria-label="Session">${opts}</select>`:''}
     ${s?`<span class="chip ${s.session_type==='social'?'social':'plain'}">${s.session_type==='social'?'Social play':'Regular + Ascend'}</span>
-      <span class="chip ${s.status}">${s.status==='live'?'● Live':s.status==='ended'?'Ended':'Planned'}</span>`:''}
+      <span class="chip ${s.status}">${s.status==='live'?'● Live':s.status==='ended'?'Ended':'Planned'}</span>
+      <button class="chip tv" data-act="openCourts" title="Change how many courts the TV shows">📺 TV: ${tvText()}</button>`:''}
     <button class="btn quiet sm" data-act="newSession">+ New session</button>
     ${s?`<button class="btn quiet sm" data-act="exportCSV" title="Download every game and the standings as a spreadsheet">⬇ Save results</button>`:''}
     <span class="grow"></span>
@@ -699,11 +713,15 @@ function sessBar(){
     ${tab==='rally'&&s&&courtsPanel?courtsPanelView():''}`;
 }
 function courtsPanelView(){
-  const live=courts.filter(c=>!isPrep(c)),room=live.length<MAX_COURTS;
-  return `<div class="box cpanel"><h3>Active courts for this session</h3>
-    <p class="dim" style="margin:0 0 .7rem;font-size:.82rem">Only active courts show on the TV. Turn extra courts on or off any time. Prep courts are added on the Rally page and never show on the TV.</p>
+  const live=courts.filter(c=>!isPrep(c)),room=live.length<MAX_COURTS,n=tvLimit(),tv=tvSet();
+  const opts=[`<option value="0" ${!n?'selected':''}>All active courts</option>`]
+    .concat(Array.from({length:MAX_COURTS},(_,i)=>i+1).map(k=>`<option value="${k}" ${n===k?'selected':''}>${k} court${k>1?'s':''}</option>`)).join('');
+  return `<div class="box cpanel"><h3>Courts for this session</h3>
+    <div class="tvrow"><b>📺 Courts shown on the TV</b><select class="inp sm" data-act="tvCourts">${opts}</select>
+      <span class="dim" style="font-size:.8rem">The TV shows the first ${n||'all'} active court${n===1?'':'s'}, numbered Court 1, 2, 3… Other courts still work here but are hidden from the TV.</span></div>
+    <p class="dim" style="margin:0 0 .7rem;font-size:.82rem">Tick the courts in use tonight. ${isSocial()?'':'To move a free court between Regular and Ascend, tap <b>⇄</b> on the court itself. '}Prep courts never show on the TV.</p>
     <div class="cgrid">${live.map(c=>`<label class="ctog ${isOn(c)?'on':''}"><input type="checkbox" data-act="courtActive" data-id="${c.id}" ${isOn(c)?'checked':''}>
-      <span><b>${esc(c.label)}</b><small>${DIVS[c.division]||''}${filled(c)?' · in use':''}</small></span></label>`).join('')||'<span class="dim">No courts yet.</span>'}</div>
+      <span><b>${esc(c.label)}</b><small>${DIVS[c.division]||''}${filled(c)?' · in use':''}${isOn(c)?(tv.has(c.id)?' · 📺 on TV':' · not on TV'):''}</small></span></label>`).join('')||'<span class="dim">No courts yet.</span>'}</div>
     <div class="tools" style="margin-top:.8rem">${!room?`<span class="dim" style="font-size:.8rem">Maximum of ${MAX_COURTS} courts reached.</span>`:isSocial()
       ?`<button class="btn quiet sm" data-act="addCourt" data-div="social">+ Add court</button>`
       :`<button class="btn quiet sm" data-act="addCourt" data-div="regular">+ Regular court</button><button class="btn quiet sm" data-act="addCourt" data-div="ascend">+ Ascend court</button>`}
@@ -715,22 +733,22 @@ const noSession=()=>`<div class="empty"><p>No session selected yet.</p><button c
 function rallyView(){
   if(!cur)return noSession();
   const [ml,md]=MODES[mode()];
-  return `<div class="rule"><b>${ml}:</b> ${md} <span class="hide-sm">· <b>Tap a player</b>, then tap another player, an empty spot or someone waiting to swap them.</span></div>
+  return `<div class="rule"><b>${ml}:</b> ${md} <span class="hide-sm">· <b>Tap a player</b>, then tap another player, an empty spot or someone waiting to swap them.${isSocial()?'':' Use <b>⇄</b> on a free court to move it between Regular and Ascend.'}</span></div>
     ${groups().map(groupBlock).join('')}`;
 }
 function groupBlock(g){
   const cs=courts.filter(c=>c.division===g),on=cs.filter(isOn),off=cs.filter(c=>!isOn(c)&&!isPrep(c)),preps=cs.filter(isPrep);
-  const q=queueOf(g),sugs=suggestionsFor(g),full=preps.filter(p=>filled(p)===4);
+  const q=queueOf(g),sugs=suggestionsFor(g),full=preps.filter(p=>filled(p)===4),tv=tvSet();
   const exp=Object.values(roster).filter(e=>e.status==='expected'&&inGroup(e.player_id,g)).length;
   let pi=0,fi=0;lastPlan={...lastPlan};
   const cards=on.map(c=>{let plan=null;
     if(!filled(c)){if(full[pi])plan={prep:full[pi++].id};else if(sugs[fi])plan={teams:sugs[fi++]};lastPlan[c.id]=plan;}
-    return courtCard(c,plan);}).join('');
+    return courtCard(c,plan,tv);}).join('');
   const playing=on.filter(c=>filled(c)===4).length,room=preps.length<MAX_PREP;
   return `<div class="adiv"><div class="adiv-head"><h2>${g==='social'?'Social play':DIVS[g]}</h2>
       <span class="chip ${g}">${q.length} waiting</span><span class="chip plain">${playing}/${on.length} courts playing</span>
       ${exp?`<button class="linkish" data-act="tab" data-tab="pool">${exp} registered, not arrived yet →</button>`:''}</div>
-    <div class="courts">${cards||'<p class="dim">No active courts — turn one on in ⚙ Courts.</p>'}</div>
+    <div class="courts">${cards||`<p class="dim">No ${g==='social'?'':DIVS[g]+' '}courts right now.${isSocial()?' Turn one on in ⚙ Courts.':' Tap ⇄ on a free court in the other section to move it here.'}</p>`}</div>
     ${off.length?`<div class="offrow"><span class="dim">Inactive:</span>${off.map(c=>`<button class="btn quiet sm" data-act="courtOn" data-id="${c.id}">${esc(c.label)} · Turn on</button>`).join('')}</div>`:''}
     <div class="prep-head"><h3>Line up next</h3><span class="chip prep">Not shown on TV</span>
       ${room?`<button class="btn quiet sm" data-act="addPrep" data-div="${g}">+ Prep court</button>`:''}</div>
@@ -748,7 +766,7 @@ function teamsHTML(c,withScores){
   const team=(i0,side)=>`<div class="team ${side}">${slot(i0)}${slot(i0+1)}${withScores?`<input class="score-in" type="number" min="0" inputmode="numeric" id="sc${side}-${c.id}" placeholder="0" aria-label="Score">`:''}</div>`;
   return `<div class="ac-body">${team(0,'t1')}<div class="vs">vs</div>${team(2,'t2')}</div>`;
 }
-function courtCard(c,plan){
+function courtCard(c,plan,tv){
   const n=filled(c),isFull=n===4,r=remaining(c),ed=ending===c.id;
   const btn=(a,l,t)=>`<button class="icon-btn" data-act="${a}" data-id="${c.id}"${t?` title="${t}"`:''}>${l}</button>`;
   const state=!n?'<span class="dim" style="font-weight:700;font-size:.8rem">Free</span>'
@@ -756,6 +774,9 @@ function courtCard(c,plan){
     :`<span class="timer ${r===0?'up':''} ${c.paused_at?'paused':''}" data-timer="${c.id}">${tText(c)}</span>`;
   const ctl=isFull&&!ed?(!c.started_at?btn('tstart','▶ Start')
     :(c.paused_at?btn('tresume','▶ Resume'):btn('tpause','⏸ Pause'))+btn('trestart','↺','Restart the timer')):'';
+  /* ⇄ moves a FREE court between Regular and Ascend — the TV doesn't change */
+  const sw=!n&&!isSocial()?`<button class="icon-btn sw" data-act="switchDiv" data-id="${c.id}" title="Use this court for ${c.division==='ascend'?'Regular':'Ascend'} — the TV doesn't change">⇄ ${c.division==='ascend'?'Regular':'Ascend'}</button>`:'';
+  const notv=tv&&!tv.has(c.id)?`<span class="chip notv" title="Hidden from the TV — change in ⚙ Courts">Not on TV</span>`:'';
   let foot;
   if(ed) foot=`<div class="ac-act"><button class="btn" data-act="saveEnd" data-id="${c.id}">Save result</button>
       <button class="btn quiet" data-act="noScore" data-id="${c.id}" title="Everyone back in line, no score recorded">No score</button>
@@ -770,7 +791,7 @@ function courtCard(c,plan){
   else if(plan&&plan.teams) foot=`<div class="sugg">Suggested: <b>${names(plan.teams[0])}</b> vs <b>${names(plan.teams[1])}</b></div>
       <div class="ac-act"><button class="btn" data-act="seat" data-id="${c.id}">▶ Put on court</button></div>`;
   else foot=`<div class="free-msg">${mode()==='manual'?'Tap “+ Add player”, then tap someone waiting.':`Need ${Math.max(0,4-avail(c.division).length)} more in the queue.`}</div>`;
-  return `<article class="acourt ${!n?'free':''} ${isFull&&r===0?'done':''}" data-court="${c.id}"><header><b>${esc(c.label)}</b><span class="hc">${state}${ctl}</span></header>
+  return `<article class="acourt ${!n?'free':''} ${isFull&&r===0?'done':''}" data-court="${c.id}"><header><span class="ttl"><b>${esc(c.label)}</b>${notv}</span><span class="hc">${state}${ctl}${sw}</span></header>
     ${teamsHTML(c,ed)}${foot}</article>`;
 }
 function prepCard(p,g){
@@ -782,7 +803,7 @@ function prepCard(p,g){
       <button class="btn quiet" style="flex:0 0 auto" data-act="clear" data-id="${p.id}" title="Empty this prep court — players stay in the waiting list">Clear</button></div>`;
   else foot=`<div class="ac-act"><button class="btn" data-act="fillQ" data-id="${p.id}" ${avail(g).length>=4-n?'':'disabled'}>${n?'Fill from queue':'Fill suggested'}</button>
       ${n?`<button class="btn quiet" style="flex:0 0 auto" data-act="clear" data-id="${p.id}">Clear</button>`:''}</div>`;
-  return `<article class="acourt prep"><header><b>${esc(p.label)}</b><span class="hc"><span class="dim" style="font-weight:700;font-size:.78rem">${n===4?'Ready':'Planning'} · no timer</span>
+  return `<article class="acourt prep"><header><span class="ttl"><b>${esc(p.label)}</b></span><span class="hc"><span class="dim" style="font-weight:700;font-size:.78rem">${n===4?'Ready':'Planning'} · no timer</span>
       <button class="icon-btn" data-act="removePrep" data-id="${p.id}" title="Remove this prep court">✕</button></span></header>
     ${teamsHTML(p,false)}${foot}</article>`;
 }
@@ -929,8 +950,10 @@ async function savePlayer(id){
 }
 function openNewSession(){
   const t=new Date(),iso=`${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;
+  const tvOpts=[`<option value="0">All active courts</option>`].concat(Array.from({length:MAX_COURTS},(_,i)=>i+1)
+    .map(k=>`<option value="${k}" ${k===3?'selected':''}>${k} court${k>1?'s':''}</option>`)).join('');
   newType='social';
-  openModal('session',`<h2>New session</h2><p>You can turn courts on or off, and add a prep court, any time during the session.</p>
+  openModal('session',`<h2>New session</h2><p>Set how many courts you'll use and how many the TV shows. During the session you can switch courts on or off, move a free court between Regular and Ascend with ⇄, and add a prep court for planning.</p>
     <div class="field"><span class="flabel">Type</span><div class="seg" id="nType">
       <button data-act="nType" data-v="social" aria-pressed="true">Social play</button><button data-act="nType" data-v="structured" aria-pressed="false">Regular + Ascend</button></div></div>
     <div class="row2"><div class="field"><label for="nDate">Date</label><input class="inp" type="date" id="nDate" value="${iso}"></div>
@@ -939,6 +962,7 @@ function openNewSession(){
       <p class="dim" style="font-size:.8rem;align-self:center;margin:0">Everyone shares one queue — Regular and Ascend mixed.</p></div>
     <div class="row2" id="nStr" hidden><div class="field"><label for="nReg">Regular courts</label><input class="inp" type="number" id="nReg" min="0" max="${MAX_COURTS}" value="2"></div>
     <div class="field"><label for="nAsc">Ascend courts</label><input class="inp" type="number" id="nAsc" min="0" max="${MAX_COURTS}" value="1"></div></div>
+    <div class="field"><label for="nTv">📺 Courts shown on the TV</label><select class="inp" id="nTv">${tvOpts}</select></div>
     <div class="mrow"><button class="btn quiet" data-act="closeModal">Cancel</button><button class="btn" data-act="createSession">Create session</button></div>`);
 }
 async function createSession(){
@@ -946,6 +970,7 @@ async function createSession(){
   const [y,m,d]=date.split('-').map(Number),wd=new Date(y,m-1,d).toLocaleDateString('en-US',{weekday:'long'});
   const social=newType==='social';
   const label=$('#nLabel').value.trim()||wd+(social?' social play':' open play');
+  const tv=Number($('#nTv').value)||null;
   const rows=[];
   if(social){const n=Math.min(MAX_COURTS,Math.max(1,parseInt($('#nCourts').value,10)||1));
     for(let i=1;i<=n;i++)rows.push({label:'Court '+i,division:'social',active:true});}
@@ -953,7 +978,7 @@ async function createSession(){
     if(nr+na>MAX_COURTS)return toast(`That's more than ${MAX_COURTS} courts`,true);
     for(let i=1;i<=nr;i++)rows.push({label:'Court '+i,division:'regular',active:true});
     for(let i=1;i<=na;i++)rows.push({label:'Court '+(nr+i),division:'ascend',active:true});}
-  const s=need(await sb.from('sessions').insert({session_date:date,label,status:'planned',session_type:newType,match_mode:social?'roundrobin':'rotation'}).select().single());
+  const s=need(await sb.from('sessions').insert({session_date:date,label,status:'planned',session_type:newType,match_mode:social?'roundrobin':'rotation',tv_courts:tv}).select().single());
   if(rows.length)need(await sb.from('courts').insert(rows.map(r=>({...r,session_id:s.id}))));
   cur=s.id;closeModal();await loadAll();tab='pool';render();toast(label+' created — now tick who is playing');
 }
@@ -982,7 +1007,7 @@ async function poolToggle(id,on){
 
 /* ================= EVENTS ================= */
 /* actions that only change what's on screen — no "Saving…" for these */
-const VIEW_ONLY=new Set(['theme','tab','closeModal','newSession','nType','courtsPanel','slot','wait','selCancel','end','cancelEnd',
+const VIEW_ONLY=new Set(['theme','tab','closeModal','newSession','nType','courtsPanel','openCourts','slot','wait','selCancel','end','cancelEnd',
   'editRes','poolDiv','poolShow','newPlayer','editPlayer','rmPhoto','exportCSV','exportJSON','dlLocalCSV','dlLocalJSON','reload','retry']);
 async function act(d,el,e){
   const q=d.id&&players[d.id]?queueOf(groupOf(d.id)):[],i=q.indexOf(d.id);
@@ -1018,10 +1043,16 @@ async function act(d,el,e){
       if(!confirm('Hide these results from the website? Nothing is deleted.'))break;
       need(await sb.from('sessions').update({published:false}).eq('id',cur));await loadAll();render();toast('Hidden from the website');break;
     case 'courtsPanel': courtsPanel=!courtsPanel;render();break;
+    case 'openCourts': tab='rally';courtsPanel=true;render();scrollTo(0,0);break;
     case 'addCourt': {if(liveCount()>=MAX_COURTS){toast(`Maximum of ${MAX_COURTS} courts`,true);break;}
       const label=liveLabel();
       need(await sb.from('courts').insert({session_id:cur,label,division:d.div,active:true,standby:false}));await loadSession();render();toast(label+' added');break;}
     case 'courtOn': {const c=court();need(await sb.from('courts').update({active:true}).eq('id',c.id));c.active=true;await autoFillAll();render();toast(c.label+' is on');break;}
+    /* ⇄ move a free court between Regular and Ascend (TV keeps the same courts) */
+    case 'switchDiv': {const c=court();if(filled(c)){toast('Finish or clear the game on '+c.label+' first',true);break;}
+      const to=c.division==='ascend'?'regular':'ascend';
+      need(await sb.from('courts').update({division:to}).eq('id',c.id));c.division=to;lastPlan={};await autoFillAll();render();
+      toast(c.label+' is now used for '+DIVS[to]+' — the TV still shows it as '+c.label);break;}
     /* prep courts — admin only, never on the TV */
     case 'addPrep': {if(courts.filter(c=>isPrep(c)&&c.division===d.div).length>=MAX_PREP){toast(`Only ${MAX_PREP} prep court here`,true);break;}
       const label=prepLabel(d.div);
@@ -1090,12 +1121,15 @@ document.addEventListener('click',async e=>{
 });
 document.addEventListener('change',async e=>{
   const t=e.target,a=t.dataset.act;
-  const writes=['poolToggle','mode','courtActive','setArr'].includes(a);
+  const writes=['poolToggle','mode','courtActive','setArr','tvCourts'].includes(a);
   if(writes)setSave('saving');
   try{
     if(a==='poolToggle')await poolToggle(t.dataset.id,t.checked);
     if(a==='autoFill'){autoFill=t.checked;await autoFillAll();render();}
     if(a==='mode'){need(await sb.from('sessions').update({match_mode:t.value}).eq('id',cur));curS().match_mode=t.value;render();toast(MODES[t.value][0]+' on');}
+    if(a==='tvCourts'){const v=Number(t.value)||null;
+      need(await sb.from('sessions').update({tv_courts:v}).eq('id',cur));curS().tv_courts=v;render();
+      toast(v?`The TV now shows ${v} court${v>1?'s':''}`:'The TV now shows all active courts');}
     if(a==='courtActive'){const c=courtById(t.dataset.id);
       if(!t.checked&&filled(c)){t.checked=true;setSave('ok');return toast(c.label+' has players on it — clear it first',true);}
       need(await sb.from('courts').update({active:t.checked}).eq('id',c.id));c.active=t.checked;if(t.checked)await autoFillAll();render();}
