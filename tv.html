@@ -16,14 +16,14 @@
 :root{
   --bg:#EEEDEC;--card:#F7F6F4;--soft:#E1E0DE;--ink:#24211C;--muted:#6E733B;--line:#D7D5D1;
   --accent:#B5C42F;--accent-ink:#24211C;--accent-text:#66740F;--logo-lime:#A9BC2A;
-  --next:#EEF2D6;--then:#F3F2EF;--live:#D0553F;--paused:#9A7B2E;
+  --next:#EEF2D6;--live:#D0553F;--paused:#9A7B2E;
   --glow:rgba(181,196,47,.28);--shadow:0 1px 2px rgba(36,33,28,.05),0 14px 30px -24px rgba(36,33,28,.45);
   --serif:"DM Serif Display",Georgia,serif;--sans:"Manrope",system-ui,sans-serif;
 }
 html[data-theme="dark"]{
   --bg:#171715;--card:#242320;--soft:#2E2D29;--ink:#F0EFEC;--muted:#AEB876;--line:#393831;
   --accent:#C2D437;--accent-ink:#171715;--accent-text:#C2D437;--logo-lime:#C2D437;
-  --next:#2C3018;--then:#27261F;--paused:#D9B45A;
+  --next:#2C3018;--paused:#D9B45A;
   --glow:rgba(194,212,55,.14);--shadow:0 1px 2px rgba(0,0,0,.3),0 14px 30px -20px rgba(0,0,0,.7);
   color-scheme:dark;
 }
@@ -56,12 +56,13 @@ html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font:60
 .sum{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:.9rem}
 .pill{font-size:clamp(.7rem,1vw,1rem);font-weight:800;letter-spacing:.12em;text-transform:uppercase;border-radius:999px;padding:.25rem .8rem;background:var(--soft);color:var(--muted)}
 
-/* courts — one grid, columns set by how many courts are on */
+/* courts — one grid; columns depend on how many courts are shown
+   1–4 in one row · 5–6 in rows of 3 · 7–8 in rows of 4 · 9–10 in rows of 5 */
 .courts{display:grid;gap:1rem;grid-template-columns:repeat(var(--cols,3),minmax(0,1fr))}
 .c{background:var(--card);border:2px solid var(--line);border-radius:20px;overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column}
 .c.done{border-color:var(--live)}
 .c.free{border-style:dashed;background:transparent;box-shadow:none}
-.c header{display:flex;justify-content:space-between;align-items:center;padding:.65rem 1.1rem;background:var(--soft)}
+.c header{display:flex;justify-content:space-between;align-items:center;gap:.5rem;padding:.65rem 1.1rem;background:var(--soft)}
 .c.free header{background:transparent}
 .c header b{font-weight:800;text-transform:uppercase;letter-spacing:.1em;font-size:clamp(1rem,1.5vw,1.6rem)}
 .timer{font-weight:800;color:var(--accent-text);font-size:clamp(1.4rem,2.4vw,2.6rem);font-variant-numeric:tabular-nums}
@@ -77,6 +78,24 @@ html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink);font:60
 .bar i{display:block;height:100%;background:var(--accent);transition:width 1s linear}
 .done .bar i{background:var(--live)}
 .freemsg{padding:1.6rem 1rem;text-align:center;font-family:var(--serif);font-style:italic;color:var(--muted);font-size:clamp(1.3rem,2vw,2.2rem);flex:1;display:grid;place-items:center}
+/* many courts: make everything a little smaller so it fits */
+.courts.many .team{font-size:clamp(.95rem,1.4vw,1.6rem)}
+.courts.many .timer{font-size:clamp(1.1rem,1.8vw,2rem)}
+.courts.many .body{padding:.8rem .9rem}
+.courts.many .freemsg{font-size:clamp(1rem,1.5vw,1.6rem);padding:1rem .8rem}
+
+/* ---- NEXT MATCH (from the prep courts in admin) ---- */
+.nextwrap{margin-top:1rem}
+.nexthead{display:flex;align-items:center;gap:.7rem;margin-bottom:.6rem}
+.nexthead h3{margin:0;font-size:clamp(.75rem,1vw,1.05rem);letter-spacing:.22em;text-transform:uppercase;color:var(--accent-text)}
+.nextgrid{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(min(420px,100%),1fr))}
+.nx{background:var(--next);border:2px solid var(--accent);border-radius:20px;overflow:hidden;box-shadow:var(--shadow)}
+.nx header{display:flex;justify-content:space-between;align-items:center;gap:.5rem;padding:.6rem 1.1rem;background:var(--accent);color:var(--accent-ink)}
+.nx header b{font-weight:800;text-transform:uppercase;letter-spacing:.12em;font-size:clamp(.95rem,1.4vw,1.5rem)}
+.nx header span{font-weight:800;font-size:clamp(.75rem,1vw,1.1rem);letter-spacing:.06em}
+.nx.setup{border-style:dashed;background:transparent}
+.nx.setup header{background:var(--soft);color:var(--ink)}
+.nx .body{padding:.9rem 1.2rem}
 
 /* waiting */
 .wait{margin-top:1rem;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:.9rem 1.1rem;box-shadow:var(--shadow)}
@@ -154,22 +173,24 @@ const byTicket=(a,b)=>ms(a.queue_ticket)-ms(b.queue_ticket)||a.player_id.localeC
 function record(id){let w=0,l=0;matches.forEach(m=>{const aw=m.score1>m.score2;
   if((m.team1||[]).includes(id))aw?w++:l++;if((m.team2||[]).includes(id))aw?l++:w++;});return {w,l};}
 
-/* How many columns: 3 → 3, 4 → 4, 5–6 → 3 per row, 7–8 → 4 per row */
-const colsFor=n=>n<=4?Math.max(n,1):n<=6?3:4;
+/* How many columns: 1–4 → one row · 5–6 → rows of 3 · 7–8 → rows of 4 · 9–10 → rows of 5 */
+const colsFor=n=>n<=4?Math.max(n,1):n<=6?3:n<=8?4:5;
 
 /* ---------- sample data for ?demo ---------- */
 function loadDemo(){
   const t=Date.now(),iso=m=>new Date(t-m*60000).toISOString();
   const P=[['jelo','Jelo','regular'],['sandy','Sandy','ascend'],['david','David','regular'],['mitch','Mitch','ascend'],['paul','Paul','regular'],['pj','PJ','ascend'],
     ['colleen','Colleen','regular'],['justin','Justin','ascend'],['hubert','Hubert','regular'],['karen','Karen','regular'],['rocelyn','Rocelyn','ascend'],['clark','Clark','regular'],
-    ['ejay','Ejay','regular'],['warren','Warren','regular'],['joy','Joy','ascend'],['janelle','Janelle','regular'],['emman','Emman','ascend'],['russel','Russel','regular']];
+    ['ejay','Ejay','regular'],['warren','Warren','regular'],['joy','Joy','ascend'],['janelle','Janelle','regular'],['emman','Emman','ascend'],['russel','Russel','regular'],
+    ['bon','Bon','regular'],['marie','Marie','ascend'],['nique','Nique','ascend']];
   players=Object.fromEntries(P.map(([id,name,division])=>[id,{id,name,division}]));
-  session={id:1,label:'Friday open play',status:'live',session_type:'structured'};
+  session={id:1,label:'Friday open play',status:'live',session_type:'structured',tv_courts:3};
   courts=[{id:1,label:'Court 1',division:'regular',active:true,team_a:['jelo','hubert'],team_b:['david','clark'],started_at:iso(4)},
     {id:2,label:'Court 2',division:'regular',active:true,team_a:['paul','karen'],team_b:['colleen','ejay'],started_at:iso(9.7)},
-    {id:3,label:'Ascend Court',division:'ascend',active:true,team_a:['sandy','pj'],team_b:['mitch','justin'],started_at:iso(2)},
-    {id:4,label:'Court 3',division:'regular',active:true,team_a:[],team_b:[],started_at:null}];
-  const W=['warren','janelle','russel','rocelyn','joy','emman'];
+    {id:3,label:'Court 3',division:'ascend',active:true,team_a:['sandy','pj'],team_b:['mitch','justin'],started_at:iso(2)},
+    {id:5,label:'Regular prep',division:'regular',active:false,standby:true,team_a:['warren','janelle'],team_b:['russel','bon'],started_at:null},
+    {id:6,label:'Ascend prep',division:'ascend',active:false,standby:true,team_a:['rocelyn','joy'],team_b:['emman',''],started_at:null}];
+  const W=['warren','janelle','russel','bon','rocelyn','joy','emman','marie','nique'];
   roster=[...['jelo','hubert','david','clark','paul','karen','colleen','ejay','sandy','pj','mitch','justin'].map(id=>({player_id:id,status:'court',games_played:1})),
     ...W.map((id,i)=>({player_id:id,status:'queued',games_played:1+(i%3),queue_ticket:iso(30-i)}))];
   matches=[{team1:['hubert','jelo'],team2:['karen','warren'],score1:11,score2:7},{team1:['rocelyn','joy'],team2:['emman','sandy'],score1:9,score2:11}];
@@ -197,45 +218,65 @@ async function load(){
 
 /* ---------- screen ---------- */
 const ctrls=()=>`<div class="ctrls"><button class="ctl" id="theme" title="Light / dark">◐</button><button class="ctl" id="fs">⛶ Full screen</button></div>`;
+const p=id=>id?`<span>${nm(id)}</span>`:'<span class="gap">…</span>';
+const teamsHTML=s=>`<div class="body"><div class="team">${p(s[0])}${p(s[1])}</div><div class="vs">vs</div><div class="team">${p(s[2])}${p(s[3])}</div></div>`;
+
 function render(){
   const badges=(offline?'<div class="badge offline">Reconnecting…</div>':'')+(demo?'<div class="badge demo">Preview — sample data</div>':'');
   if(!session){$('#app').innerHTML=`<div class="waitscreen"><div>${LOGO}
     <h1>Courts open soon</h1><p>This screen switches on by itself when an organiser taps “Go live”.</p>${ctrls()}</div></div>${badges}`;return;}
 
-  /* ALL active courts together — numbered 1, 2, 3… with no division shown */
-  const on=courts.filter(c=>c.active!==false);
+  /* The courts to show: active, not prep courts, in the order they were created,
+     limited to the number set in admin (⚙ Courts → "Courts shown on the TV").
+     They're numbered Court 1, 2, 3… with nothing saying Regular or Ascend. */
+  const limit=Number(session.tv_courts)>0?Number(session.tv_courts):99;
+  const on=courts.filter(c=>c.active!==false&&!c.standby).sort((a,b)=>a.id-b.id).slice(0,limit);
   const playing=on.filter(c=>filled(c)===4).length;
 
-  /* ONE waiting list in waiting order. Behind the scenes each queue still
-     has its own "next four", so Get ready is correct for everyone.     */
+  /* NEXT MATCH — taken from the prep courts in admin. Anyone lined up on a
+     prep court is shown here, in their teams, and taken out of the waiting
+     list below so nobody appears twice. Prep courts are never shown as courts. */
+  const queuedIds=new Set(roster.filter(e=>e.status==='queued').map(e=>e.player_id));
+  const preps=courts.filter(c=>c.standby).sort((a,b)=>a.id-b.id)
+    .map(c=>({c,s:slots(c).map(id=>queuedIds.has(id)?id:'')})).filter(x=>x.s.some(Boolean));
+  const lined=new Set(preps.flatMap(x=>x.s.filter(Boolean)));
+
+  /* ONE waiting list in waiting order (without the lined-up players).
+     If no prep court is being used, the first four of each queue are
+     marked "Get ready", like before.                                  */
   const queued=roster.filter(e=>e.status==='queued');
+  const rest=queued.filter(e=>!lined.has(e.player_id));
   const pools=session.session_type==='social'
-    ?[queued]
-    :[queued.filter(e=>(players[e.player_id]||{}).division!=='ascend'),queued.filter(e=>(players[e.player_id]||{}).division==='ascend')];
-  const ready=new Set(pools.flatMap(p=>[...p].sort(byTicket).slice(0,4).map(e=>e.player_id)));
-  const list=[...queued].sort(byTicket).map(e=>e.player_id);
+    ?[rest]
+    :[rest.filter(e=>(players[e.player_id]||{}).division!=='ascend'),rest.filter(e=>(players[e.player_id]||{}).division==='ascend')];
+  const ready=preps.length?new Set():new Set(pools.flatMap(p=>[...p].sort(byTicket).slice(0,4).map(e=>e.player_id)));
+  const list=[...rest].sort(byTicket).map(e=>e.player_id);
+
+  const nextHTML=preps.length?`<div class="nextwrap"><div class="nexthead"><h3>Next match${preps.length>1?'es':''}</h3></div>
+    <div class="nextgrid">${preps.map((x,i)=>{const full=x.s.every(Boolean);
+      return `<article class="nx ${full?'':'setup'}"><header><b>Next match${preps.length>1?' '+(i+1):''}</b>
+        <span>${full?'Ready — next free court':'Being set up'}</span></header>${teamsHTML(x.s)}</article>`;}).join('')}</div></div>`:'';
 
   $('#app').innerHTML=`<header class="tvtop">${LOGO}<span class="live"><i class="dot"></i>LIVE</span>
     <div class="title">${esc(session.label||'Open play')}</div><div class="clock" id="clock">${now()}</div>${ctrls()}</header>
-    <div class="sum"><span class="pill">${playing}/${on.length} courts playing</span><span class="pill">${list.length} waiting</span></div>
-    <div class="courts" style="--cols:${colsFor(on.length)}">${on.map((c,i)=>court(c,'Court '+(i+1))).join('')}</div>
-    <div class="wait"><div class="wh"><h3>Waiting</h3>${ready.size?'<span class="leg n1">Get ready</span>':''}</div>
+    <div class="sum"><span class="pill">${playing}/${on.length} courts playing</span><span class="pill">${queued.length} waiting</span></div>
+    <div class="courts ${on.length>6?'many':''}" style="--cols:${colsFor(on.length)}">${on.map((c,i)=>court(c,'Court '+(i+1))).join('')}</div>
+    ${nextHTML}
+    <div class="wait"><div class="wh"><h3>${preps.length?'Then waiting':'Waiting'}</h3>${ready.size?'<span class="leg n1">Get ready</span>':''}</div>
       ${list.length?`<ol class="wl">${list.slice(0,SHOW_WAITING).map((id,i)=>{const r=record(id),e=roster.find(x=>x.player_id===id)||{},gp=e.games_played||0;
         return `<li class="${ready.has(id)?'n1':''}"><span class="num">${i+1}</span><span class="wn"><b>${nm(id)}</b>
           <small>${gp} game${gp===1?'':'s'}${r.w+r.l?` · ${r.w}–${r.l}`:''}</small></span></li>`;}).join('')}</ol>
         ${list.length>SHOW_WAITING?`<div class="more">+${list.length-SHOW_WAITING} more waiting</div>`:''}`
-        :'<div class="empty">Nobody waiting right now.</div>'}</div>
+        :'<div class="empty">Nobody else waiting right now.</div>'}</div>
     <div class="foot">${esc(FOOTER)}</div>${badges}`;
 }
 function court(c,label){
   const s=slots(c),n=filled(c);
-  if(!n)return `<article class="c free"><header><b>${label}</b></header><div class="freemsg">Court free — next four, get ready</div></article>`;
-  const p=id=>id?`<span>${nm(id)}</span>`:'<span class="gap">…</span>';
-  const teams=`<div class="body"><div class="team">${p(s[0])}${p(s[1])}</div><div class="vs">vs</div><div class="team">${p(s[2])}${p(s[3])}</div></div>`;
-  if(n<4)return `<article class="c"><header><b>${label}</b><span class="timer wait">Getting ready</span></header>${teams}</article>`;
+  if(!n)return `<article class="c free"><header><b>${label}</b></header><div class="freemsg">Court free — next match, get ready</div></article>`;
+  if(n<4)return `<article class="c"><header><b>${label}</b><span class="timer wait">Getting ready</span></header>${teamsHTML(s)}</article>`;
   const r=remaining(c);
   return `<article class="c ${r===0?'done':''}" data-court="${c.id}"><header><b>${label}</b>
-      <span class="timer ${r===0?'up':''} ${c.paused_at?'paused':''}">${tText(c)}</span></header>${teams}
+      <span class="timer ${r===0?'up':''} ${c.paused_at?'paused':''}">${tText(c)}</span></header>${teamsHTML(s)}
     <div class="bar"><i style="width:${(GAME_SECONDS-r)/GAME_SECONDS*100}%"></i></div></article>`;
 }
 
