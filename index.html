@@ -304,6 +304,23 @@ tr.org .who span{color:var(--muted)}
 .note p{margin:0}
 .subhead{margin:2.6rem 0 1rem;font-family:var(--serif);font-weight:400;font-size:1.6rem;color:var(--ink)}
 
+/* ---------- top players of the month (always dark, to match the posters) ---------- */
+.topband{background:#171715;padding:2.6rem 0 3.4rem}
+.topband h1{font-family:var(--serif);font-style:italic;font-weight:400;color:#F0EFEC;
+  font-size:clamp(2.6rem,8vw,4.4rem);text-align:center;margin-bottom:.4rem}
+.topband .empty{color:#AEB876}
+.month + .month{margin-top:3.2rem;padding-top:2.4rem;border-top:1px solid #393831}
+.month__title{margin:0;text-align:center;font-size:.8rem;font-weight:700;letter-spacing:.3em;
+  text-transform:uppercase;color:#C2D437}
+.month__div{display:flex;justify-content:space-between;align-items:baseline;margin:1.8rem 0 .7rem;
+  font-size:.74rem;font-weight:800;letter-spacing:.22em;text-transform:uppercase;color:#C2D437}
+.month__div small{display:none;letter-spacing:.04em;text-transform:none;font-weight:600;color:#AEB876}
+.posters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem}
+.poster{display:block;text-decoration:none;border-radius:14px;overflow:hidden;background:#242320;border:1px solid #393831}
+.poster:hover{border-color:#C2D437}
+.poster img{width:100%;aspect-ratio:4/5;object-fit:cover}
+.poster span{display:block;padding:.55rem;text-align:center;font-weight:800;font-size:.92rem;color:#F0EFEC}
+
 footer{border-top:1px solid var(--line);padding:1.7rem 0 2.6rem;color:var(--muted);font-size:.78rem;
   letter-spacing:.14em;text-transform:uppercase;font-weight:700;display:flex;gap:1rem 1.5rem;flex-wrap:wrap;align-items:center;justify-content:space-between}
 footer a{color:var(--ink);text-decoration:none}
@@ -342,6 +359,12 @@ footer a:hover{color:var(--accent-text)}
   th:last-child,td:last-child{padding-right:.7rem}
   .who .avatar{width:32px;height:32px}
   .section__head h2{font-size:1.7rem}
+  /* top players: each division becomes a sideways swipe row */
+  .month__div small{display:inline}
+  .posters{display:flex;gap:.7rem;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;
+    margin-right:-.8rem;padding-right:.8rem}
+  .posters::-webkit-scrollbar{display:none}
+  .poster{flex:0 0 72%;scroll-snap-align:start}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
 </style>
@@ -373,6 +396,7 @@ footer a:hover{color:var(--accent-text)}
     </a>
     <nav class="nav" id="nav" aria-label="Main">
       <a href="#/rankings">Rankings</a>
+      <a href="#/top">Top players</a>
       <a href="tv.html" class="livelink"><i></i>Live</a>
       <a href="#/games">Games</a>
       <a href="#/photos">Photos</a>
@@ -425,6 +449,16 @@ footer a:hover{color:var(--accent-text)}
         <div class="hero__cta" id="heroCta"></div>
       </div>
     </section>
+  </section>
+
+  <!-- TOP PLAYERS OF THE MONTH -->
+  <section id="view-top" hidden>
+    <div class="topband">
+      <div class="wrap">
+        <h1>Top Players</h1>
+        <div id="monthList"></div>
+      </div>
+    </div>
   </section>
 
   <!-- GAMES -->
@@ -593,6 +627,7 @@ document.addEventListener("error", e => {
   const el = e.target;
   if (el.tagName !== "IMG") return;
   if (el.classList.contains("album__img")) { el.remove(); return; }
+  if (el.classList.contains("poster__img")) { el.closest(".poster").remove(); return; }
   if (el.classList.contains("pod__cut")){
     const figure = el.closest(".pod__figure") || el;
     const player = byId[el.dataset.id] || { id: el.dataset.id, name: el.dataset.name };
@@ -770,6 +805,27 @@ function renderAlbums(){
     : `<div class="card empty">No albums added yet.</div>`;
 }
 
+/* ---------- top players of the month (MONTHLY in data.js + photos/top/) ---------- */
+function renderMonthly(){
+  const months = (typeof MONTHLY !== "undefined" ? [...MONTHLY] : [])
+    .sort((a,b) => b.month.localeCompare(a.month));
+  $("monthList").innerHTML = months.length
+    ? months.map(m => `<div class="month">
+        <p class="month__title">${esc(m.title)}</p>
+        ${DIVISIONS.map(d => {
+          const pre = d.id.slice(0,3), names = (m.names && m.names[d.id]) || [];
+          return `<div class="month__div"><span>${esc(d.name)}</span><small>swipe →</small></div>
+          <div class="posters">${[1,2,3].map(n => {
+            const src = `photos/top/${m.month}/${pre}-${n}.jpg`;
+            return `<a class="poster" href="${src}" target="_blank" rel="noopener">
+              <img class="poster__img" src="${src}" loading="lazy" alt="${esc(d.name)} ${ordinal(n)} place, ${esc(m.title)}">
+              ${names[n-1] ? `<span>${esc(names[n-1])}</span>` : ""}</a>`;
+          }).join("")}</div>`;
+        }).join("")}
+      </div>`).join("")
+    : `<p class="empty">Top players will be announced soon.</p>`;
+}
+
 /* ---------- header, footer, join band ---------- */
 function renderClub(){
   document.title = `${CLUB.name} — ${CLUB.tagline}`;
@@ -884,7 +940,7 @@ function refresh(){
 
 /* ---------- navigation ----------
    Old links (#/sessions, #/schedule, #/about, #/faq) now open Join. */
-const views = ["rankings","games","photos","join"];
+const views = ["rankings","top","games","photos","join"];
 const oldPages = ["sessions","schedule","about","faq"];
 function route(){
   let name = (location.hash.replace("#/","") || "rankings").toLowerCase();
@@ -905,6 +961,7 @@ window.addEventListener("hashchange", route);
 renderClub();
 renderHero();
 renderAlbums();
+renderMonthly();
 renderJoin();
 route();
 
