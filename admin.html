@@ -372,7 +372,7 @@ const LOGO=`<svg class="logo" viewBox="0 0 400 168" role="img" aria-label="After
   <g class="lg-dash"><line x1="36" y1="153" x2="78" y2="153"/><line x1="334" y1="153" x2="376" y2="153"/></g>
   <text class="lg-lime lg-sub" x="210" y="160" text-anchor="middle" font-size="19" letter-spacing="10">PICKLECLUB</text></svg>`;
 
-const DIVS={regular:'Regular',ascend:'Ascend',social:'Social'};
+const DIVS={regular:'Regular',ascend:'Ascend',social:'Social',org:'Organisers'};
 const MODES={
   rotation:['Queue rotation','The four who have waited longest play next. Teams are 1st + 4th vs 2nd + 3rd.'],
   roundrobin:['Round robin','Mixes in new partners and opponents. The longest-waiting player is always included.'],
@@ -652,8 +652,8 @@ function render(){
   if(!sb){$('#app').innerHTML=noDbView();return;}
   if(!user){$('#app').innerHTML=loginView();return;}
   ST=stats();
-  const body={rally:rallyView,pool:poolView,results:resultsView}[tab]();
-  const tabs=[['rally','🎾 Rally'],['pool','👥 Player pool'],['results','📋 Results']];
+  const body={rally:rallyView,pool:poolView,results:resultsView,stats:statsView}[tab]();
+  const tabs=[['rally','🎾 Rally'],['pool','👥 Player pool'],['results','📋 Results'],['stats','📊 Monthly stats']];
   $('#app').innerHTML=`${demo?'<div class="demo">Demo mode — sample data, nothing is saved</div>':''}
     ${!navigator.onLine?'<div class="offbar">⚠ No internet — changes are NOT being saved. Keep this page open; everything reloads when you\'re back online. You can still ⬇ Save results from the last saved copy.</div>':''}
     <header class="atop"><div class="wrap atop-in">
@@ -893,6 +893,56 @@ function resultsView(){
     ||'<p class="dim" style="padding:1.5rem;margin:0">No games recorded for this session yet.</p>'}</div>`;
 }
 
+/* ---- Monthly stats ----
+   Adds up every game recorded in the database for the chosen month,
+   across all sessions (open play and social). Players are grouped by
+   their own division. Order: most wins, then win %, then point diff. */
+let statMonth=null,statData=[];
+const statMonths=()=>[...new Set(sessions.map(s=>s.session_date.slice(0,7)))].sort().reverse();
+const monthName=m=>{const [y,mo]=m.split('-').map(Number);return new Date(y,mo-1,1).toLocaleDateString('en-US',{month:'long',year:'numeric'});};
+async function loadStats(){
+  const months=statMonths();
+  if(!statMonth||!months.includes(statMonth))statMonth=months[0]||null;
+  const ids=sessions.filter(s=>s.session_date.slice(0,7)===statMonth).map(s=>s.id);
+  statData=ids.length?need(await sb.from('matches').select('*').in('session_id',ids)):[];
+}
+function monthStats(){
+  const st={};
+  statData.forEach(m=>{const aw=m.score1>m.score2,df=m.score1-m.score2;
+    const add=(id,won,d)=>{const g=m.division==='social'?P(id).division:m.division,k=g+'|'+id,x=st[k]||(st[k]={id,g,w:0,l:0,d:0,s:new Set()});won?x.w++:x.l++;x.d+=d;x.s.add(m.session_id);};
+    (m.team1||[]).forEach(id=>add(id,aw,df));(m.team2||[]).forEach(id=>add(id,!aw,-df));});
+  return Object.values(st).map(x=>({...x,gp:x.w+x.l,wr:x.w/(x.w+x.l)*100,sess:x.s.size}))
+    .sort((a,b)=>b.w-a.w||b.gp-a.gp||b.d-a.d||P(a.id).name.localeCompare(P(b.id).name));
+}
+function statsView(){
+  if(!statMonth)return `<div class="empty"><p>No sessions yet.</p></div>`;
+  const rows=monthStats(),nS=new Set(statData.map(m=>m.session_id)).size;
+  const TH='padding:.55rem .6rem;font-size:.62rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;background:var(--soft);color:var(--ink);text-align:center;white-space:nowrap';
+  const TD='padding:.55rem .6rem;border-top:1px solid var(--line);color:var(--ink);text-align:center;font-variant-numeric:tabular-nums';
+  const tbl=g=>{const r=rows.filter(x=>g==='org'?P(x.id).organiser:x.g===g&&!P(x.id).organiser);
+    return `<div class="adiv"><div class="adiv-head"><h2>${DIVS[g]}</h2><span class="chip ${g}">${r.length} player${r.length===1?'':'s'}</span></div>
+      <div class="card" style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.86rem">
+        <thead><tr>${['#','Player','GP','W','L','Win %','Diff','Sessions'].map((h,i)=>`<th style="${TH}${i===1?';text-align:left':''}">${h}</th>`).join('')}</tr></thead>
+        <tbody>${r.map((x,i)=>`<tr><td style="${TD};font-weight:800">${i+1}</td>
+          <td style="${TD};text-align:left;font-weight:700">${esc(P(x.id).name)}${P(x.id).organiser?' <span class="chip org">/O</span>':''}</td>
+          <td style="${TD}">${x.gp}</td><td style="${TD};font-weight:800">${x.w}</td><td style="${TD}">${x.l}</td>
+          <td style="${TD};font-weight:800">${x.wr.toFixed(1)}%</td><td style="${TD}">${x.d>0?'+'+x.d:x.d}</td><td style="${TD}">${x.sess}</td></tr>`).join('')
+          ||`<tr><td colspan="8" class="dim" style="padding:1.2rem;text-align:center">No ${DIVS[g]} games recorded this month.</td></tr>`}</tbody></table></div></div>`;};
+  return `<div class="sec-head"><div><h2>Monthly stats · ${monthName(statMonth)}</h2>
+      <p>${statData.length} game${statData.length===1?'':'s'} across ${nS} session${nS===1?'':'s'}, Each game counts where it was played: Regular games in Regular, Ascend games in Ascend, and social games under the player's own division. Ordered by most wins, then most games played, then point difference. Only organisers can see this.</p></div>
+    <div class="tools"><select class="inp sm" data-act="statMonth" aria-label="Month">${statMonths().map(m=>`<option value="${m}" ${m===statMonth?'selected':''}>${monthName(m)}</option>`).join('')}</select>
+      <button class="btn sm" data-act="statsCSV">⬇ Download (CSV)</button></div></div>
+    ${tbl('regular')}${tbl('ascend')}${rows.some(x=>P(x.id).organiser)?tbl('org'):''}`;
+}
+function statsCSV(){
+  if(!statMonth)return toast('No month selected',true);
+  const rows=monthStats(),L=[[`Aftershift Pickleclub — Monthly stats — ${monthName(statMonth)}`],[],['Division','Rank','Player','Games played','Won','Lost','Win %','Point diff','Sessions']];
+  ['regular','ascend','org'].forEach(g=>rows.filter(x=>g==='org'?P(x.id).organiser:x.g===g&&!P(x.id).organiser).forEach((x,i)=>
+    L.push([DIVS[g],i+1,P(x.id).name,x.gp,x.w,x.l,x.wr.toFixed(1)+'%',x.d,x.sess])));
+  download(`aftershift-${statMonth}-monthly-stats.csv`,'\ufeff'+L.map(r=>r.map(csvCell).join(',')).join('\r\n'),'text/csv;charset=utf-8');
+  toast('Monthly stats downloaded ⬇');
+}
+
 /* ================= MODALS ================= */
 function openModal(kind,html){modal=kind;$('#modalRoot').innerHTML=`<div class="backdrop" data-act="closeModal"><div class="modal" data-stop>${html}</div></div>`;}
 function closeModal(){modal=null;pendingPhoto=null;removePhoto=false;$('#modalRoot').innerHTML='';}
@@ -1021,7 +1071,8 @@ async function act(d,el,e){
     case 'exportJSON': exportJSON();break;
     case 'dlLocalCSV': {const b=readLocal();if(b)exportCSV(b);break;}
     case 'dlLocalJSON': {const b=readLocal();if(b)exportJSON(b);break;}
-    case 'tab': tab=d.tab;sel=null;render();scrollTo(0,0);break;
+    case 'tab': tab=d.tab;sel=null;if(tab==='stats')await loadStats();render();scrollTo(0,0);break;
+    case 'statsCSV': statsCSV();break;
     case 'signout': await sb.auth.signOut();if(channel){sb.removeChannel(channel);channel=null;}user=null;render();break;
     case 'closeModal': if(e.target===el||el.tagName==='BUTTON')closeModal();break;
     case 'newSession': openNewSession();break;
@@ -1135,6 +1186,7 @@ document.addEventListener('change',async e=>{
   if(writes)setSave('saving');
   try{
     if(a==='poolToggle')await poolToggle(t.dataset.id,t.checked);
+    if(a==='statMonth'){statMonth=t.value;await loadStats();render();}
     if(a==='autoFill'){autoFill=t.checked;await autoFillAll();render();}
     if(a==='mode'){need(await sb.from('sessions').update({match_mode:t.value}).eq('id',cur));curS().match_mode=t.value;render();toast(MODES[t.value][0]+' on');}
     if(a==='tvCourts'){const v=Number(t.value)||null;
