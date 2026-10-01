@@ -23,6 +23,8 @@
      12. Announcements     upcoming sessions, venue, payment policy
      13. FAQ
      14. Contact, social media and important links
+     15. WhatsApp community
+     16. Top players of the month
    ============================================================ */
 
 
@@ -241,57 +243,57 @@ const ALBUMS = [
     description: "Regular and Ascend.",
     url: "https://drive.google.com/drive/folders/18J90HwSJBGXcmFHtwnCsHxF5aU_VC2uO?usp=drive_link",
     cover: ""
-  }, 
-   {
+  },
+  {
     date: "2026-08-21",
     title: "August 21, 2026 Open Play",
     description: "Regular and Ascend.",
     url: "https://drive.google.com/drive/folders/1oHnQqSrIACIAXa5G-j8b0zIKdehFLntZ?usp=sharing",
     cover: ""
-  }, 
-   {
+  },
+  {
     date: "2026-08-22",
     title: "August 22, 2026 LNP & Ascend",
     description: "Learn & Play and Ascend.",
     url: "https://drive.google.com/drive/folders/1QWheNr5hU6zPdCKVZe-IZOAPjIaVRkD0?usp=drive_link",
     cover: ""
-  }, 
-   {
+  },
+  {
     date: "2026-08-28",
     title: "August 28, 2026 Open Play",
     description: "Regular and Ascend.",
     url: "https://drive.google.com/drive/folders/1DJvrmR7VXC7dK9N1kJWQVmt3YVpCFuFF?usp=drive_link",
     cover: ""
-  }, 
-    {
+  },
+  {
     date: "2026-09-04",
     title: "Sept 4, 2026 Open Play",
     description: "Regular and Ascend.",
     url: "https://drive.google.com/drive/folders/1ICyb5uV0frpyunOKOsTdq_O1xZaHVeSH?usp=drive_link",
     cover: ""
-  }, 
-    {
+  },
+  {
     date: "2026-09-11",
     title: "Sept 11, 2026 Open Play",
     description: "Regular and Ascend",
     url: "https://drive.google.com/drive/folders/13PCHXqP0EpsuicrK87lyFUxTBNA_kAXL?usp=sharing",
     cover: ""
-  }, 
-   {
+  },
+  {
     date: "2026-09-15",
     title: "Sept 15, 2026 Social Play",
     description: "Tuesday Social/Open Play",
     url: "https://drive.google.com/drive/folders/1ZYI2ntfxvEaQ_X85xyoc8ALWB4LyGmjT?usp=share_link",
     cover: ""
-  }, 
-   {
+  },
+  {
     date: "2026-09-18",
     title: "Sept 18, 2026 Open Play",
     description: "Regular and Ascend",
     url: "https://drive.google.com/drive/folders/1GQ2BtIDvYe4MyJfbJzxsI4pzL-2vFItv?usp=sharing",
     cover: ""
-   },
-   {
+  },
+  {
     date: "2026-09-26",
     title: "Sept 26, 2026 Social Play",
     description: "Saturday Social Play",
@@ -696,3 +698,18 @@ const COMMUNITY = {
   groupName: "Aftershift Pickleclub",
   button: { label: "Join our WhatsApp group", url: "" }
 };
+
+
+/* 16. TOP PLAYERS OF THE MONTH ----------------------------
+   Shown on the "Top players" page. One line per month.
+   The posters are found by themselves in
+       photos/top/<month>/reg-1.jpg  reg-2.jpg  reg-3.jpg
+       photos/top/<month>/asc-1.jpg  asc-2.jpg  asc-3.jpg
+   Optional: show names under the posters by adding
+       names: { regular: ["First", "Second", "Third"], ascend: ["First", "Second", "Third"] }
+   To add a month, add a line (remember the comma on the line before):
+       { month: "2026-10", title: "October 2026" }
+   --------------------------------------------------------- */
+const MONTHLY = [
+  { month: "2026-09", title: "September 2026" }
+];
