@@ -706,10 +706,11 @@ function sessBar(){
       <label class="chk" title="Free courts fill by themselves — lined-up prep matches first, then the suggested four"><input type="checkbox" data-act="autoFill" ${autoFill?'checked':''}>Auto-assign</label>
       <button class="btn quiet sm" data-act="courtsPanel" aria-pressed="${courtsPanel}">⚙ Courts</button>`:''}
     ${s&&s.status!=='live'?`<button class="btn sm" data-act="goLive">▶ Go live</button>`:''}
-    ${s&&s.status==='live'?`<button class="btn danger sm" data-act="endSession">🏁 End session</button>`:''}
+    ${s&&s.status!=='ended'?`<button class="btn danger sm" data-act="endSession">🏁 End session</button>`:''}
     ${s?(s.published
       ?`<span class="chip pub">✓ On website</span><button class="btn quiet sm" data-act="unpublish">Unpublish</button>`
-      :`<span class="chip draft">Draft</span><button class="btn sm" data-act="publish">📣 Publish</button>`):''}</div>
+      :`<span class="chip draft">Draft</span><button class="btn sm" data-act="publish">📣 Publish</button>`):''}
+    ${s?`<button class="btn danger sm" data-act="delSession" title="Delete this session for good">🗑 Delete</button>`:''}</div>
     ${tab==='rally'&&s&&courtsPanel?courtsPanelView():''}`;
 }
 function courtsPanelView(){
@@ -1036,6 +1037,15 @@ async function act(d,el,e){
       need(await sb.from('sessions').update({status:'ended'}).eq('id',cur));await loadAll();
       exportCSV();tab='results';render();scrollTo(0,0);
       toast('Session ended — results downloaded. Check the scores, then tap 📣 Publish');break;
+    /* delete a session for good (test sessions etc.) — its courts, check-ins and games go with it */
+    case 'delSession': {const s=curS();if(!s)break;const n=matches.length,id=s.id;
+      if(!confirm(`Delete "${s.label||'Session'}" (${fmtDate(s.session_date)})?${n?` Its ${n} recorded game${n===1?'':'s'} will be deleted too and disappear from the website.`:''} This cannot be undone.`))break;
+      if(n&&prompt('This session has recorded games. Type DELETE to confirm.')!=='DELETE'){toast('Not deleted');break;}
+      for(const t of ['matches','courts','session_players'])need(await sb.from(t).delete().eq('session_id',id));
+      need(await sb.from('sessions').delete().eq('id',id));
+      cur=null;sel=null;ending=null;lastPlan={};await loadAll();render();
+      if(sessions.some(x=>x.id===id))toast('The session is still there — the database blocked the delete',true);
+      else toast('Session deleted');break;}
     case 'publish':
       if(!confirm('Publish these results? The website will update for everyone.'))break;
       need(await sb.from('sessions').update({published:true}).eq('id',cur));await loadAll();render();toast('Published ✓');break;
