@@ -398,10 +398,70 @@ footer a:hover{color:var(--accent-text)}
   .pod__bar{font-size:.66rem;padding:.25rem .2rem;text-align:center;line-height:1.25}
   .pod__bar b{display:block;font-size:.8rem}
 }
+/* ---------- OPENING ANIMATION ----------
+   Shown once per visit: the ball flies in from the left, the speed
+   lines streak in behind it, then the club name appears. To change
+   how long it stays, edit the 2400 in the small script under the
+   <body> tag. To remove it, delete the <div class="intro"> block.  */
+.intro{position:fixed;inset:0;z-index:100;background:var(--bg);display:grid;place-items:center;transition:opacity .5s ease;cursor:pointer}
+.intro.out{opacity:0;pointer-events:none}
+.intro .logo{height:auto;width:min(420px,78vw)}
+.intro .in-ball{animation:introFly 1.1s cubic-bezier(.2,.8,.2,1) both}
+.intro .in-spin{animation:introSpin 1.1s cubic-bezier(.2,.8,.2,1) both;transform-box:fill-box;transform-origin:center}
+.intro .in-ln{animation:introStreak .5s ease-out both;transform-box:fill-box;transform-origin:right center}
+.intro .in-ln2{animation-delay:.75s}
+.intro .in-ln1{animation-delay:.85s}
+.intro .in-ln3{animation-delay:.95s}
+.intro .in-word{animation:introRise .6s ease-out 1.1s both}
+.intro .in-sub{animation:introRise .6s ease-out 1.35s both}
+@keyframes introFly{from{transform:translateX(-330px)}to{transform:translateX(0)}}
+@keyframes introSpin{from{transform:rotate(-540deg)}to{transform:rotate(0)}}
+@keyframes introStreak{from{transform:scaleX(0);opacity:0}to{transform:scaleX(1);opacity:1}}
+@keyframes introRise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
 </style>
 </head>
 <body>
+
+<!-- OPENING ANIMATION — plays once per visit, tap to skip -->
+<div class="intro" id="intro" aria-hidden="true">
+  <svg class="logo" viewBox="0 0 400 168">
+    <g class="lg-ink">
+      <polygon class="in-ln in-ln1" points="150,22 200,17 200,26"/>
+      <polygon class="in-ln in-ln2" points="118,43 198,38 198,48"/>
+      <polygon class="in-ln in-ln3" points="146,64 202,58 202,67"/>
+    </g>
+    <g class="in-ball"><g class="in-spin">
+      <circle class="lg-lime" cx="240" cy="40" r="34"/>
+      <g class="lg-hole">
+        <ellipse cx="232" cy="19" rx="6" ry="5"/>
+        <ellipse cx="258" cy="27" rx="5" ry="6" transform="rotate(20 258 27)"/>
+        <ellipse cx="218" cy="38" rx="5" ry="6" transform="rotate(-15 218 38)"/>
+        <circle cx="241" cy="45" r="6"/>
+        <ellipse cx="225" cy="60" rx="6" ry="5"/>
+        <ellipse cx="258" cy="57" rx="5" ry="6" transform="rotate(25 258 57)"/>
+      </g>
+    </g></g>
+    <text class="lg-ink lg-word in-word" x="206" y="122" text-anchor="middle" font-size="31" letter-spacing="12">AFTERSHIFT</text>
+    <g class="in-sub">
+      <g class="lg-dash"><line x1="36" y1="153" x2="78" y2="153"/><line x1="334" y1="153" x2="376" y2="153"/></g>
+      <text class="lg-lime lg-sub" x="210" y="160" text-anchor="middle" font-size="19" letter-spacing="10">PICKLECLUB</text>
+    </g>
+  </svg>
+</div>
+<script>
+(function(){
+  var el = document.getElementById('intro'), seen;
+  try { seen = sessionStorage.getItem('aspc-intro'); } catch(e){}
+  /* already seen this visit, or the visitor prefers no motion: skip it */
+  if (seen || window.matchMedia('(prefers-reduced-motion: reduce)').matches){ el.remove(); return; }
+  try { sessionStorage.setItem('aspc-intro', '1'); } catch(e){}
+  var done = false;
+  function close(){ if (done) return; done = true; el.classList.add('out'); setTimeout(function(){ el.remove(); }, 600); }
+  setTimeout(close, 2400);
+  el.addEventListener('click', close);
+})();
+</script>
 
 <header class="topbar">
   <div class="wrap topbar__in">
