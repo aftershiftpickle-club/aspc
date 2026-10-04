@@ -542,7 +542,9 @@ async function loadFromDatabase(){
       getAll("sessions?select=id&published=eq.true")
     ]);
     const pub = new Set(published.map(s => s.id));
-    const matches = allMatches.filter(m => pub.has(m.session_id));
+    /* Social play is kept for organisers only (admin page). Its games
+       never appear on the website, even if the session was published. */
+    const matches = allMatches.filter(m => pub.has(m.session_id) && m.division !== "social");
     const extra = Object.fromEntries(PLAYERS.map(p => [p.id, p]));
     const fromDb = players.map(p => ({
       ...(extra[p.id] || {}),
@@ -654,8 +656,16 @@ document.addEventListener("error", e => {
 }, true);
 
 /* ---------- ranking logic ----------
-   1. highest win %   2. best streak   3. best point difference
-   Organisers are listed at the bottom with /O, outside the ranking. */
+   Sessions on or after NEW_RULE_FROM:
+     1. most wins   2. highest win %   3. best point difference
+   Earlier sessions keep the old order so past podiums don't change:
+     1. highest win %   2. best streak   3. best point difference
+   Organisers are listed at the bottom with /O, outside the ranking.
+
+   To apply the new rule to an earlier session too, move the date
+   below back (for example "2026-09-01").                          */
+const NEW_RULE_FROM = "2026-10-01";
+
 function gamesOn(date, div){
   return GAMES.filter(m => m.date === date && (m.div || "regular") === div);
 }
@@ -691,8 +701,11 @@ function standings(date, div){
              organiser: Array.isArray(player.organiser)
                ? player.organiser.includes(div) : !!player.organiser };
   });
-  const order = (a,b) => b.pct - a.pct || b.streak - a.streak
-                      || b.diff - a.diff || a.name.localeCompare(b.name);
+  const byWins = date >= NEW_RULE_FROM;
+  const order = (a,b) => (byWins
+      ? b.wins - a.wins || b.pct - a.pct
+      : b.pct - a.pct || b.streak - a.streak)
+    || b.diff - a.diff || a.name.localeCompare(b.name);
   const ranked     = list.filter(r => !r.organiser).sort(order);
   const organisers = list.filter(r =>  r.organiser).sort(order);
   const all = ranked.concat(organisers);
@@ -729,7 +742,9 @@ function renderRankings(){
   $("courtSub").textContent = `${divName(currentDiv)} session results`;
   $("courtTitle").textContent = fmtDate(current);
   $("standingsHead").textContent = `${divName(currentDiv)} standings`;
-  $("standingsNote").textContent = list.length ? "Ranked by win %, then streak, then point difference" : "";
+  $("standingsNote").textContent = !list.length ? ""
+    : current >= NEW_RULE_FROM ? "Ranked by most wins, then win %, then point difference"
+    : "Ranked by win %, then streak, then point difference";
 
   const podiumList = list.filter(r => !r.organiser);
   const order = [1,0,2]; // 2nd, 1st, 3rd
