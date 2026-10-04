@@ -1086,7 +1086,7 @@ function renderStats(){
   $("statsTitle").textContent = statsMonth
     ? `${divName(statsDiv)} stats · ${monthLabel(statsMonth)}` : "Monthly stats";
   $("statsNote").textContent = list.length
-    ? `How it's computed: every open play and social play game this month counts. Win % is wins divided by games played. To get a rank, a player needs at least ${monthRows.min} game${monthRows.min === 1 ? "" : "s"} this month, which is half of the most games anyone has played. Ranked players are ordered by win %, then most wins, then point difference. Players with fewer games are listed below without a rank until they reach the minimum.` : "";
+    ? `How it's computed: every open play and social play game this month counts. Win % is wins divided by games played. Ranked players are ordered by win %, then most wins, then point difference. Players who haven't played enough games yet are listed below without a rank.` : "";
   let n = 0;
   $("statsBody").innerHTML = list.length
     ? list.map(r => `<tr class="${r.organiser ? "org" : ""}">
