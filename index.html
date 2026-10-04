@@ -1057,9 +1057,19 @@ function monthRows(month, div){
              organiser: Array.isArray(player.organiser)
                ? player.organiser.includes(div) : !!player.organiser };
   });
-  const order = (a,b) => b.wins - a.wins || b.pct - a.pct
+  /* MONTHLY ORDER: win % first (exact, not rounded), then most wins */
+  const rate = r => r.gp ? r.wins / r.gp : 0;
+  const order = (a,b) => rate(b) - rate(a) || b.wins - a.wins
                       || b.diff - a.diff || a.name.localeCompare(b.name);
-  return list.filter(r => !r.organiser).sort(order)
+  /* GAMES PLAYED RULE: to get a rank a player needs at least half as many
+     games as the most active player this month. Everyone else is listed
+     underneath without a rank, so a few lucky games can't top the month. */
+  const regulars = list.filter(r => !r.organiser);
+  const min = Math.max(1, Math.ceil(Math.max(0, ...regulars.map(r => r.gp)) / 2));
+  list.forEach(r => { r.ranked = !r.organiser && r.gp >= min; });
+  monthRows.min = min;
+  return regulars.filter(r => r.ranked).sort(order)
+    .concat(regulars.filter(r => !r.ranked).sort(order))
     .concat(list.filter(r => r.organiser).sort(order));
 }
 function renderStats(){
@@ -1076,11 +1086,11 @@ function renderStats(){
   $("statsTitle").textContent = statsMonth
     ? `${divName(statsDiv)} stats · ${monthLabel(statsMonth)}` : "Monthly stats";
   $("statsNote").textContent = list.length
-    ? "Open play and social play games this month. Ranked by most wins, then win %, then point difference." : "";
+    ? `How it's computed: every open play and social play game this month counts. Win % is wins divided by games played. To get a rank, a player needs at least ${monthRows.min} game${monthRows.min === 1 ? "" : "s"} this month, which is half of the most games anyone has played. Ranked players are ordered by win %, then most wins, then point difference. Players with fewer games are listed below without a rank until they reach the minimum.` : "";
   let n = 0;
   $("statsBody").innerHTML = list.length
     ? list.map(r => `<tr class="${r.organiser ? "org" : ""}">
-        <td class="rk">${r.organiser ? "–" : ++n}</td>
+        <td class="rk">${r.ranked ? ++n : "–"}</td>
         <td><div class="who">${avatar(r.player)}<span>${esc(r.name)}${r.organiser ? `<i class="tag-o">/O</i>` : ""}</span></div></td>
         <td>${r.gp}</td>
         <td class="w">${r.wins}</td>
