@@ -517,6 +517,7 @@ footer a:hover{color:var(--accent-text)}
         <p class="eyebrow" id="courtSub">Session results</p>
         <p class="court__date" id="courtTitle">Loading…</p>
         <div class="podium" id="podium"></div>
+        <button class="btn" id="shareBtn" type="button" style="border:0;cursor:pointer;font-family:inherit;margin-top:1.6rem">Share result</button>
       </div>
     </div>
     <div class="wrap section">
@@ -1080,6 +1081,169 @@ function refresh(){
 
 /* ---------- navigation ----------
    Old links (#/sessions, #/schedule, #/about, #/faq) now open Join. */
+/* ---------- share result (story-sized picture) ----------
+   "Share result" draws a 1080 x 1920 picture of the session shown on
+   the Rankings page (logo, date, podium, next five players), then
+   shows it with Share / Save buttons. On a phone, Share opens the
+   share menu where Instagram and Facebook stories appear. A website
+   cannot post to a story by itself — the person picks the app.
+   Change the colours of the picture in SHARE below.                 */
+const SHARE = { W:1080, H:1920, bg:"#171715", card:"#242320", ink:"#F0EFEC", lime:"#C2D437",
+                muted:"#AEB876", line:"#393831", rims:["#C2D437","#8F8D86","#C08A5E"] };
+function loadImg(src){
+  return new Promise(res => { const i = new Image(); i.crossOrigin = "anonymous";
+    i.onload = () => res(i); i.onerror = () => res(null); i.src = src; });
+}
+/* a player's photo: admin upload first, then photos/<id>.jpg etc. No photo → null (initials are drawn) */
+async function playerImg(p){
+  const tries = [];
+  if (p.photo) tries.push(p.photo);
+  if (p.id) PHOTO_EXTS.forEach(x => tries.push(`photos/${p.id}.${x}`));
+  for (const s of tries){ const img = await loadImg(s); if (img) return img; }
+  return null;
+}
+function spaced(ctx, text, x, y, gap){   // centred text with letter spacing
+  const chars = [...text];
+  const w = chars.reduce((s,ch) => s + ctx.measureText(ch).width + gap, -gap);
+  let cx = x - w / 2;
+  ctx.textAlign = "left";
+  chars.forEach(ch => { ctx.fillText(ch, cx, y); cx += ctx.measureText(ch).width + gap; });
+  ctx.textAlign = "center";
+}
+function rrect(ctx, x, y, w, h, r){
+  ctx.beginPath(); ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+}
+function fitText(ctx, text, max){
+  let t = text;
+  while (t.length > 1 && ctx.measureText(t).width > max) t = t.slice(0, -1);
+  return t === text ? text : t.trimEnd() + "…";
+}
+async function drawStory(){
+  const S = SHARE, top = standings(current, currentDiv).filter(r => !r.organiser);
+  const cv = document.createElement("canvas"); cv.width = S.W; cv.height = S.H;
+  const c = cv.getContext("2d");
+  try { await Promise.all([document.fonts.load('800 60px Manrope'),
+                           document.fonts.load('italic 120px "DM Serif Display"')]); } catch(e){}
+  c.fillStyle = S.bg; c.fillRect(0, 0, S.W, S.H);
+  c.textAlign = "center"; c.textBaseline = "alphabetic";
+
+  /* logo: speed lines + ball, then the two words */
+  const bx = 580, by = 170;
+  c.fillStyle = S.ink;
+  [[-150,-34,-70,-42,-70,-26],[-210,6,-74,-4,-74,14],[-158,44,-66,32,-66,48]].forEach(p => {
+    c.beginPath(); c.moveTo(bx + p[0], by + p[1]); c.lineTo(bx + p[2], by + p[3]); c.lineTo(bx + p[4], by + p[5]);
+    c.closePath(); c.fill(); });
+  c.fillStyle = S.lime; c.beginPath(); c.arc(bx, by, 62, 0, Math.PI * 2); c.fill();
+  c.fillStyle = S.bg;
+  [[-14,-38],[32,-24],[-40,-4],[2,10],[-26,36],[32,30]].forEach(h => {
+    c.beginPath(); c.arc(bx + h[0], by + h[1], 10, 0, Math.PI * 2); c.fill(); });
+  c.fillStyle = S.ink;  c.font = '800 58px Manrope, sans-serif'; spaced(c, "AFTERSHIFT", S.W / 2, 320, 22);
+  c.fillStyle = S.lime; c.font = '700 36px Manrope, sans-serif'; spaced(c, "PICKLECLUB", S.W / 2, 376, 18);
+
+  /* heading */
+  c.fillStyle = S.ink; c.font = 'italic 400 132px "DM Serif Display", Georgia, serif';
+  c.fillText("Open Play", S.W / 2, 560);
+  c.fillStyle = S.lime; c.font = '700 32px Manrope, sans-serif';
+  spaced(c, `${divName(currentDiv)} session results`.toUpperCase(), S.W / 2, 626, 6);
+  c.fillStyle = S.muted; c.font = '700 36px Manrope, sans-serif';
+  c.fillText(fmtDate(current), S.W / 2, 690);
+
+  /* podium: 2nd, 1st, 3rd */
+  const base = 1420;
+  const imgs = await Promise.all(top.slice(0, 3).map(r => playerImg(r.player)));
+  [[1, 200, 270, 96], [0, 540, 340, 118], [2, 880, 236, 96]].forEach(([i, x, h, rad]) => {
+    const r = top[i]; if (!r) return;
+    const rim = S.rims[i], w = i === 0 ? 320 : 290, topY = base - h;
+    c.fillStyle = S.card; rrect(c, x - w / 2, topY, w, h, 28); c.fill();
+    c.lineWidth = 4; c.strokeStyle = rim; c.stroke();
+    c.fillStyle = rim; c.font = `800 ${i === 0 ? 96 : 72}px Manrope, sans-serif`;
+    c.fillText(ordinal(i + 1), x, topY + (i === 0 ? 120 : 96));
+    c.fillStyle = S.ink; c.font = '800 44px Manrope, sans-serif';
+    c.fillText(`${r.wins}–${r.losses}`, x, base - 84);
+    c.fillStyle = S.muted; c.font = '600 30px Manrope, sans-serif';
+    c.fillText(`Win rate ${r.pct}%`, x, base - 36);
+    c.fillStyle = S.ink; c.font = `800 ${i === 0 ? 46 : 38}px Manrope, sans-serif`;
+    c.fillText(fitText(c, r.name, w), x, topY - 28);
+    const cy = topY - 90 - rad, img = imgs[i];
+    c.save(); c.beginPath(); c.arc(x, cy, rad, 0, Math.PI * 2); c.closePath();
+    c.fillStyle = S.card; c.fill(); c.clip();
+    if (img){
+      const s = Math.max(2 * rad / img.width, 2 * rad / img.height), dw = img.width * s, dh = img.height * s;
+      c.drawImage(img, x - dw / 2, cy - dh / 2, dw, dh);
+    } else {
+      c.fillStyle = S.ink; c.font = `800 ${Math.round(rad * 0.7)}px Manrope, sans-serif`;
+      c.textBaseline = "middle"; c.fillText(initials(r.name), x, cy + 4); c.textBaseline = "alphabetic";
+    }
+    c.restore();
+    c.beginPath(); c.arc(x, cy, rad, 0, Math.PI * 2); c.lineWidth = 6; c.strokeStyle = rim; c.stroke();
+  });
+
+  /* 4th to 8th place */
+  let y = base + 96;
+  top.slice(3, 8).forEach(r => {
+    c.strokeStyle = S.line; c.lineWidth = 2;
+    c.beginPath(); c.moveTo(120, y - 44); c.lineTo(S.W - 120, y - 44); c.stroke();
+    c.textAlign = "left";
+    c.fillStyle = S.muted; c.font = '800 34px Manrope, sans-serif'; c.fillText(String(r.rank), 130, y);
+    c.fillStyle = S.ink;   c.font = '700 36px Manrope, sans-serif'; c.fillText(fitText(c, r.name, 500), 200, y);
+    c.textAlign = "right";
+    c.fillText(`${r.wins}–${r.losses}`, S.W - 260, y);
+    c.fillStyle = S.muted; c.fillText(`${r.pct}%`, S.W - 130, y);
+    c.textAlign = "center"; y += 64;
+  });
+
+  /* footer: Instagram handle from data.js */
+  const ig = (SOCIAL.find(s => /instagram/i.test(s.label)) || {}).handle || CLUB.name;
+  c.fillStyle = S.lime; c.font = '700 34px Manrope, sans-serif'; c.fillText(ig, S.W / 2, S.H - 70);
+  return cv;
+}
+function showSharePreview(file){
+  const url = URL.createObjectURL(file);
+  const canShare = !!(navigator.canShare && navigator.canShare({ files:[file] }));
+  const b = "border:0;cursor:pointer;font-family:inherit;margin:0";
+  const box = document.createElement("div");
+  box.style.cssText = "position:fixed;inset:0;z-index:90;background:rgba(0,0,0,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1rem;padding:1rem";
+  box.innerHTML = `<img src="${url}" alt="Session result picture" style="max-height:66vh;max-width:90vw;width:auto;border-radius:14px">
+    <div style="display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center">
+      ${canShare ? `<button class="btn" data-a="share" style="${b}">Share to story</button>` : ""}
+      <button class="btn" data-a="save" style="${b}${canShare ? ";background:#F0EFEC;color:#171715" : ""}">Save picture</button>
+      <button class="btn" data-a="close" style="${b};background:transparent;color:#F0EFEC;box-shadow:inset 0 0 0 1.5px rgba(240,239,236,.4)">Close</button>
+    </div>
+    <p style="margin:0;color:#C9C7C1;font-size:.82rem;text-align:center;max-width:34ch">${canShare
+      ? "Tap Share to story, then choose Instagram or Facebook and pick Story."
+      : "Save the picture, then add it to your Instagram or Facebook story."}</p>`;
+  const close = () => { box.remove(); URL.revokeObjectURL(url); };
+  box.addEventListener("click", async e => {
+    const a = e.target.dataset ? e.target.dataset.a : "";
+    if (a === "share"){
+      try { await navigator.share({ files:[file], title: CLUB.name }); }
+      catch (err){ if (err.name !== "AbortError") alert("Sharing isn't available here. Use Save picture instead."); }
+    } else if (a === "save"){
+      const l = document.createElement("a"); l.href = url; l.download = file.name;
+      document.body.appendChild(l); l.click(); l.remove();
+    } else if (a === "close" || e.target === box) close();
+  });
+  document.body.appendChild(box);
+}
+async function shareResult(){
+  const btn = $("shareBtn");
+  if (!current || !standings(current, currentDiv).some(r => !r.organiser)){
+    alert("There are no results to share for this session yet."); return; }
+  const label = btn.textContent;
+  btn.disabled = true; btn.textContent = "Creating picture…";
+  try {
+    const cv = await drawStory();
+    const blob = await new Promise(res => cv.toBlob(res, "image/png"));
+    if (!blob) throw new Error("The picture could not be created");
+    showSharePreview(new File([blob], `aftershift-${current}-${currentDiv}.png`, { type:"image/png" }));
+  } catch (e){
+    console.error(e); alert("Sorry, the picture could not be created on this device.");
+  } finally { btn.disabled = false; btn.textContent = label; }
+}
+$("shareBtn").addEventListener("click", shareResult);
+
 /* ---------- monthly stats (public page) ----------
    Adds up every published open play game in the chosen month.
    Social play is NOT counted — it stays in the admin page only.
