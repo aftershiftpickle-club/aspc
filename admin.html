@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <title>ASPC Admin</title>
+<!-- Version: 4 Oct 2026 (final) — start-a-session pop-up, shared courts, arrivals list, duplicate warning, delete/merge player -->
+
 <script>
 (function(){var t;try{t=localStorage.getItem('aspc-theme')}catch(e){}
   var d=t?t==='dark':window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -1120,10 +1122,9 @@ function drawWizard(){
     <div class="field"><label for="wzLabel">Name (optional)</label><input class="inp" id="wzLabel" value="${esc(wz.label)}" placeholder="e.g. Friday open play"></div></div>
     <button data-act="wzType" data-v="social" style="${wzBig}${wz.type==='social'?wzOn:''}">Social play<br><small class="dim" style="font-weight:600">Everyone in one queue — Regular and Ascend mixed. Organisers only, not shown on the website.</small></button>
     <button data-act="wzType" data-v="structured" style="${wzBig}${wz.type==='structured'?wzOn:''}">Open play<br><small class="dim" style="font-weight:600">Regular and Ascend each have their own courts, queue and ranking.</small></button>${nav(null)}`;
-  else if(s===2) body=`<h2>How many courts?</h2><p>${social?'Everyone shares these courts.':'Regular and Ascend each get their own courts. You can still move a free court between them later with ⇄.'} Maximum ${MAX_COURTS}.</p>
-    ${social?`<div class="field"><label for="wzCourts">Courts</label><input class="inp" type="number" inputmode="numeric" id="wzCourts" min="1" max="${MAX_COURTS}" value="${wz.courts}"></div>`
-      :`<div class="row2"><div class="field"><label for="wzReg">Regular courts</label><input class="inp" type="number" inputmode="numeric" id="wzReg" min="0" max="${MAX_COURTS}" value="${wz.reg}"></div>
-        <div class="field"><label for="wzAsc">Ascend courts</label><input class="inp" type="number" inputmode="numeric" id="wzAsc" min="0" max="${MAX_COURTS}" value="${wz.asc}"></div></div>`}${nav('wzNext')}`;
+  else if(s===2) body=`<h2>How many courts?</h2><p>${social?'Everyone shares these courts.':'Type the total. Regular and Ascend share them.'} This is also how many courts the TV shows. Maximum ${MAX_COURTS}.</p>
+    <div class="field"><label for="wzCourts">Courts</label><input class="inp" type="number" inputmode="numeric" id="wzCourts" min="1" max="${MAX_COURTS}" value="${wz.courts}"></div>
+    <div id="wzChips">${wzCourtChips()}</div>${nav('wzNext')}`;
   else if(s===3) body=`<h2>What kind of rotation?</h2><p>Tap one to continue. You can change it any time during the session.</p>
     ${Object.entries(MODES).map(([k,[l,d]])=>`<button data-act="wzMode" data-v="${k}" style="${wzBig}${wz.mode===k?wzOn:''}">${l}<br><small class="dim" style="font-weight:600">${d}</small></button>`).join('')}${nav(null)}`;
   else body=`<h2>Who's playing?</h2><p>Tap everyone who registered. This only puts them on the list — they join the queue when you tap <b>Arrived</b> at check-in.</p>
@@ -1133,12 +1134,24 @@ function drawWizard(){
   openModal('wizard',head+body);
 }
 /* remembers what was typed on the current step; false = not valid yet */
+/* Open play: the courts are shared. This only decides which group each court
+   STARTS with — about one in three begin as Ascend, the rest Regular. Tap a
+   court in step 2 to flip it; during the session use ⇄ on any free court.  */
+function wzSplit(){const n=wz.courts,k=n>=2?Math.max(1,Math.floor(n/3)):0;wz.ascSet=new Set();for(let i=n-k+1;i<=n;i++)wz.ascSet.add(i);}
+function wzCourtChips(){
+  if(wz.type==='social')return '';
+  if(!wz.ascSet)wzSplit();
+  let h='';for(let i=1;i<=wz.courts;i++){const a=wz.ascSet.has(i);
+    h+=`<button data-act="wzCourt" data-i="${i}" style="${wzBig};margin:0;text-align:center;padding:.7rem .4rem${a?';border-color:var(--asc);background:var(--asc-bg)':wzOn}">Court ${i}<br><small style="font-weight:800;color:${a?'var(--asc)':'var(--accent-text)'}">${a?'Ascend':'Regular'}</small></button>`;}
+  return `<div class="flabel" style="margin:.2rem 0 .5rem">Starts as — tap a court to switch it</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:.5rem">${h}</div>
+    <p class="dim" style="margin:.8rem 0 0;font-size:.82rem">This is only the starting setup. During the session, tap ⇄ on any free court to hand it to the other group.</p>`;}
+document.addEventListener('input',e=>{if(e.target.id!=='wzCourts'||!wz)return;const n=parseInt(e.target.value,10);
+  if(n>=1&&n<=MAX_COURTS){wz.courts=n;wzSplit();const c=$('#wzChips');if(c)c.innerHTML=wzCourtChips();}});
 function wzRead(){
-  if(wz.step===2){
-    if(wz.type==='social'){const n=parseInt(($('#wzCourts')||{}).value,10);
-      if(!(n>=1&&n<=MAX_COURTS)){toast(`Enter 1 to ${MAX_COURTS} courts`,true);return false;}wz.courts=n;}
-    else{const r=parseInt(($('#wzReg')||{}).value,10)||0,a=parseInt(($('#wzAsc')||{}).value,10)||0;
-      if(r<0||a<0||r+a<1||r+a>MAX_COURTS){toast(`Use between 1 and ${MAX_COURTS} courts in total`,true);return false;}wz.reg=r;wz.asc=a;}}
+  if(wz.step===2){const n=parseInt(($('#wzCourts')||{}).value,10);
+    if(!(n>=1&&n<=MAX_COURTS)){toast(`Enter 1 to ${MAX_COURTS} courts`,true);return false;}
+    if(n!==wz.courts||!wz.ascSet){wz.courts=n;wzSplit();}}
   return true;}
 async function wzCopyLast(){
   const prev=sessions.filter(x=>x.session_date<=wz.date).sort((a,b)=>b.session_date.localeCompare(a.session_date)||b.id-a.id)[0];
@@ -1150,9 +1163,8 @@ async function wzCopyLast(){
 async function wzCreate(){
   const social=wz.type==='social',[y,m,d]=wz.date.split('-').map(Number),wd=new Date(y,m-1,d).toLocaleDateString('en-US',{weekday:'long'});
   const label=wz.label||wd+(social?' social play':' open play'),rows=[];
-  if(social)for(let i=1;i<=wz.courts;i++)rows.push({label:'Court '+i,division:'social',active:true});
-  else{for(let i=1;i<=wz.reg;i++)rows.push({label:'Court '+i,division:'regular',active:true});
-       for(let i=1;i<=wz.asc;i++)rows.push({label:'Court '+(wz.reg+i),division:'ascend',active:true});}
+  if(!social&&!wz.ascSet)wzSplit();
+  for(let i=1;i<=wz.courts;i++)rows.push({label:'Court '+i,division:social?'social':wz.ascSet.has(i)?'ascend':'regular',active:true});
   const s=need(await sb.from('sessions').insert({session_date:wz.date,label,status:'planned',session_type:wz.type,
     match_mode:wz.mode||(social?'roundrobin':'rotation'),tv_courts:null}).select().single());
   need(await sb.from('courts').insert(rows.map(r=>({...r,session_id:s.id}))));
@@ -1257,6 +1269,7 @@ async function act(d,el,e){
     case 'wzType': wz.date=$('#wzDate').value||wz.date;wz.label=$('#wzLabel').value.trim();wz.type=d.v;wz.step=2;drawWizard();break;
     case 'wzBack': wzRead();wz.step--;drawWizard();break;
     case 'wzNext': if(wzRead()){wz.step++;drawWizard();}break;
+    case 'wzCourt': {const i=Number(d.i);wz.ascSet.has(i)?wz.ascSet.delete(i):wz.ascSet.add(i);$('#wzChips').innerHTML=wzCourtChips();break;}
     case 'wzMode': wz.mode=d.v;wz.step=4;drawWizard();break;
     case 'wzPick': wz.picked.has(d.id)?wz.picked.delete(d.id):wz.picked.add(d.id);wzRefreshList();break;
     case 'wzCopy': await wzCopyLast();break;
