@@ -1130,6 +1130,9 @@ async function drawStory(){
   c.textAlign = "center"; c.textBaseline = "alphabetic";
 
   /* logo: speed lines + ball, then the two words */
+  /* LOGO SIZE: 0.72 = 72% of full size. Raise or lower this one number to resize it. */
+  const LOGO_SCALE = 0.72;
+  c.save(); c.translate(S.W / 2, 60); c.scale(LOGO_SCALE, LOGO_SCALE); c.translate(-S.W / 2, 0);
   const bx = 580, by = 170;
   c.fillStyle = S.ink;
   [[-150,-34,-70,-42,-70,-26],[-210,6,-74,-4,-74,14],[-158,44,-66,32,-66,48]].forEach(p => {
@@ -1141,6 +1144,7 @@ async function drawStory(){
     c.beginPath(); c.arc(bx + h[0], by + h[1], 10, 0, Math.PI * 2); c.fill(); });
   c.fillStyle = S.ink;  c.font = '800 58px Manrope, sans-serif'; spaced(c, "AFTERSHIFT", S.W / 2, 320, 22);
   c.fillStyle = S.lime; c.font = '700 36px Manrope, sans-serif'; spaced(c, "PICKLECLUB", S.W / 2, 376, 18);
+  c.restore();
 
   /* heading */
   c.fillStyle = S.ink; c.font = 'italic 400 132px "DM Serif Display", Georgia, serif';
