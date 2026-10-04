@@ -730,7 +730,7 @@ function sessBar(){
     ${s?`<span class="chip ${s.session_type==='social'?'social':'plain'}">${s.session_type==='social'?'Social play':'Regular + Ascend'}</span>
       <span class="chip ${s.status}">${s.status==='live'?'● Live':s.status==='ended'?'Ended':'Planned'}</span>
       <button class="chip tv" data-act="openCourts" title="Change how many courts the TV shows">📺 TV: ${tvText()}</button>`:''}
-    <button class="btn quiet sm" data-act="newSession">+ New session</button>
+    <button class="btn sm" data-act="newSession" title="Set up a new session: type, courts, rotation and players">+ Start a session</button>
     ${s?`<button class="btn quiet sm" data-act="exportCSV" title="Download every game and the standings as a spreadsheet">⬇ Save results</button>`:''}
     <span class="grow"></span>
     ${tab==='rally'&&s?`<label class="mm">Matchmaking <select class="inp sm" data-act="mode">${Object.entries(MODES).map(([k,[l]])=>`<option value="${k}" ${mode()===k?'selected':''}>${l}</option>`).join('')}</select></label>
@@ -759,14 +759,14 @@ function courtsPanelView(){
       :`<button class="btn quiet sm" data-act="addCourt" data-div="regular">+ Regular court</button><button class="btn quiet sm" data-act="addCourt" data-div="ascend">+ Ascend court</button>`}
       <span class="grow"></span><button class="btn sm" data-act="courtsPanel">Done</button></div></div>`;
 }
-const noSession=()=>`<div class="empty"><p>No session selected yet.</p><button class="btn" data-act="newSession">+ Create your first session</button></div>`;
+const noSession=()=>`<div class="empty"><p>No session selected yet.</p><button class="btn" data-act="newSession">+ Start a session</button></div>`;
 
 /* ---- Rally ---- */
 function rallyView(){
   if(!cur)return noSession();
   const [ml,md]=MODES[mode()];
   return `<div class="rule"><b>${ml}:</b> ${md} <span class="hide-sm">· <b>Tap a player</b>, then tap another player, an empty spot or someone waiting to swap them.${isSocial()?'':' Use <b>⇄</b> on a free court to move it between Regular and Ascend.'}</span></div>
-    ${groups().map(groupBlock).join('')}`;
+    ${rallyBody()}`;
 }
 function groupBlock(g){
   const cs=courts.filter(c=>c.division===g),on=cs.filter(isOn),off=cs.filter(c=>!isOn(c)&&!isPrep(c)),preps=cs.filter(isPrep);
@@ -1089,6 +1089,93 @@ async function savePlayer(id){
   const had=!!pendingPhoto;closeModal();await loadAll();render();
   toast(id?name+' updated':name+' added'+(addNow?' to this session':'')+(had?'':' — add a photo any time'));
 }
+/* ================= START-A-SESSION WIZARD =================
+   Four questions, one at a time: type → courts → rotation → players.
+   Picking players only REGISTERS them. They join the queue when you tap
+   "Arrived" in the list on the left of the Rally screen.               */
+let wz=null;
+const todayISO=()=>{const t=new Date();return `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;};
+function openWizard(){wz={step:1,type:null,courts:3,reg:2,asc:1,mode:null,date:todayISO(),label:'',picked:new Set(),q:''};drawWizard();}
+const wzBig='display:block;width:100%;text-align:left;padding:.9rem 1rem;border-radius:12px;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);font-weight:800;font-size:1rem;margin-bottom:.6rem';
+const wzOn=';border-color:var(--accent);background:var(--next)';
+/* a player tile: photo + name only */
+function wzTile(p){const on=wz.picked.has(p.id);
+  return `<button data-act="wzPick" data-id="${esc(p.id)}" aria-pressed="${on}" style="position:relative;display:flex;flex-direction:column;align-items:center;gap:.4rem;padding:.7rem .3rem;border-radius:12px;border:1.5px solid ${on?'var(--accent)':'var(--line)'};background:${on?'var(--next)':'var(--bg)'};color:var(--ink);font-weight:700;font-size:.82rem;min-width:0">
+    ${av(p.id,56)}<span style="max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.name)}</span>
+    ${on?'<span style="position:absolute;top:6px;right:6px;width:20px;height:20px;border-radius:50%;background:var(--accent);color:var(--accent-ink);font-size:.75rem;display:grid;place-items:center;font-weight:900">✓</span>':''}</button>`;}
+function wzGrid(list){return `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:.5rem;margin-bottom:1rem">${list.map(wzTile).join('')||'<span class="dim">Nobody matches.</span>'}</div>`;}
+function wzPlayers(){
+  const all=Object.values(players).filter(p=>p.name.toLowerCase().includes(wz.q.toLowerCase())).sort((a,b)=>a.name.localeCompare(b.name));
+  if(wz.type==='social')return wzGrid(all);
+  return ['regular','ascend'].map(d=>`<div class="flabel" style="margin:.2rem 0 .5rem">${DIVS[d]} · ${Object.values(players).filter(p=>p.division===d&&wz.picked.has(p.id)).length} selected</div>${wzGrid(all.filter(p=>p.division===d))}`).join('');
+}
+function wzRefreshList(){$('#wzList').innerHTML=wzPlayers();$('#wzCount').textContent=wz.picked.size;}
+function drawWizard(){
+  const s=wz.step,social=wz.type==='social';
+  const head=`<div class="flabel" style="margin-bottom:.3rem">Step ${s} of 4</div>`;
+  const nav=(next,label='Next')=>`<div class="mrow" style="margin-top:1rem">${s>1?'<button class="btn quiet" data-act="wzBack">Back</button>':'<button class="btn quiet" data-act="closeModal">Cancel</button>'}<span class="grow"></span>${next?`<button class="btn" data-act="${next}">${label}</button>`:''}</div>`;
+  let body;
+  if(s===1) body=`<h2>Start a session?</h2><p>Tap the type to continue. The date and name are filled in for you — change them first if needed.</p>
+    <div class="row2"><div class="field"><label for="wzDate">Date</label><input class="inp" type="date" id="wzDate" value="${wz.date}"></div>
+    <div class="field"><label for="wzLabel">Name (optional)</label><input class="inp" id="wzLabel" value="${esc(wz.label)}" placeholder="e.g. Friday open play"></div></div>
+    <button data-act="wzType" data-v="social" style="${wzBig}${wz.type==='social'?wzOn:''}">Social play<br><small class="dim" style="font-weight:600">Everyone in one queue — Regular and Ascend mixed. Organisers only, not shown on the website.</small></button>
+    <button data-act="wzType" data-v="structured" style="${wzBig}${wz.type==='structured'?wzOn:''}">Open play<br><small class="dim" style="font-weight:600">Regular and Ascend each have their own courts, queue and ranking.</small></button>${nav(null)}`;
+  else if(s===2) body=`<h2>How many courts?</h2><p>${social?'Everyone shares these courts.':'Regular and Ascend each get their own courts. You can still move a free court between them later with ⇄.'} Maximum ${MAX_COURTS}.</p>
+    ${social?`<div class="field"><label for="wzCourts">Courts</label><input class="inp" type="number" inputmode="numeric" id="wzCourts" min="1" max="${MAX_COURTS}" value="${wz.courts}"></div>`
+      :`<div class="row2"><div class="field"><label for="wzReg">Regular courts</label><input class="inp" type="number" inputmode="numeric" id="wzReg" min="0" max="${MAX_COURTS}" value="${wz.reg}"></div>
+        <div class="field"><label for="wzAsc">Ascend courts</label><input class="inp" type="number" inputmode="numeric" id="wzAsc" min="0" max="${MAX_COURTS}" value="${wz.asc}"></div></div>`}${nav('wzNext')}`;
+  else if(s===3) body=`<h2>What kind of rotation?</h2><p>Tap one to continue. You can change it any time during the session.</p>
+    ${Object.entries(MODES).map(([k,[l,d]])=>`<button data-act="wzMode" data-v="${k}" style="${wzBig}${wz.mode===k?wzOn:''}">${l}<br><small class="dim" style="font-weight:600">${d}</small></button>`).join('')}${nav(null)}`;
+  else body=`<h2>Who's playing?</h2><p>Tap everyone who registered. This only puts them on the list — they join the queue when you tap <b>Arrived</b> at check-in.</p>
+    <div class="tools" style="margin-bottom:.8rem"><input class="search" id="wzQ" placeholder="Search…" value="${esc(wz.q)}" style="flex:1;min-width:140px"><button class="btn quiet sm" data-act="wzCopy">⧉ Same as last session</button></div>
+    <div id="wzList">${wzPlayers()}</div>
+    ${nav('wzCreate',`Start session · <span id="wzCount">${wz.picked.size}</span> selected`)}`;
+  openModal('wizard',head+body);
+}
+/* remembers what was typed on the current step; false = not valid yet */
+function wzRead(){
+  if(wz.step===2){
+    if(wz.type==='social'){const n=parseInt(($('#wzCourts')||{}).value,10);
+      if(!(n>=1&&n<=MAX_COURTS)){toast(`Enter 1 to ${MAX_COURTS} courts`,true);return false;}wz.courts=n;}
+    else{const r=parseInt(($('#wzReg')||{}).value,10)||0,a=parseInt(($('#wzAsc')||{}).value,10)||0;
+      if(r<0||a<0||r+a<1||r+a>MAX_COURTS){toast(`Use between 1 and ${MAX_COURTS} courts in total`,true);return false;}wz.reg=r;wz.asc=a;}}
+  return true;}
+async function wzCopyLast(){
+  const prev=sessions.filter(x=>x.session_date<=wz.date).sort((a,b)=>b.session_date.localeCompare(a.session_date)||b.id-a.id)[0];
+  if(!prev)return toast('No earlier session to copy from',true);
+  let ids=need(await sb.from('session_players').select('player_id').eq('session_id',prev.id)).map(x=>x.player_id);
+  if(!ids.length)ids=[...new Set(need(await sb.from('matches').select('team1,team2').eq('session_id',prev.id)).flatMap(x=>[...x.team1,...x.team2]))];
+  ids.filter(id=>players[id]).forEach(id=>wz.picked.add(id));wzRefreshList();
+  toast('Added everyone from '+fmtDate(prev.session_date));}
+async function wzCreate(){
+  const social=wz.type==='social',[y,m,d]=wz.date.split('-').map(Number),wd=new Date(y,m-1,d).toLocaleDateString('en-US',{weekday:'long'});
+  const label=wz.label||wd+(social?' social play':' open play'),rows=[];
+  if(social)for(let i=1;i<=wz.courts;i++)rows.push({label:'Court '+i,division:'social',active:true});
+  else{for(let i=1;i<=wz.reg;i++)rows.push({label:'Court '+i,division:'regular',active:true});
+       for(let i=1;i<=wz.asc;i++)rows.push({label:'Court '+(wz.reg+i),division:'ascend',active:true});}
+  const s=need(await sb.from('sessions').insert({session_date:wz.date,label,status:'planned',session_type:wz.type,
+    match_mode:wz.mode||(social?'roundrobin':'rotation'),tv_courts:null}).select().single());
+  need(await sb.from('courts').insert(rows.map(r=>({...r,session_id:s.id}))));
+  const ids=[...wz.picked].filter(id=>players[id]);
+  if(ids.length)need(await sb.from('session_players').insert(ids.map(id=>({session_id:s.id,player_id:id,status:'expected'}))));
+  cur=s.id;wz=null;closeModal();await loadAll();tab='rally';sel=null;ending=null;lastPlan={};render();scrollTo(0,0);
+  toast(`${label} is ready — tap Arrived as players check in`);}
+document.addEventListener('input',e=>{if(e.target.id==='wzQ'&&wz){wz.q=e.target.value;$('#wzList').innerHTML=wzPlayers();}});
+
+/* Rally screen: selected players wait in this list (left side) until they arrive */
+function arrivalsPanel(){
+  const exp=Object.values(roster).filter(e=>e.status==='expected').map(e=>P(e.player_id)).sort((a,b)=>a.name.localeCompare(b.name));
+  const row=p=>`<li style="display:flex;align-items:center;gap:.5rem;padding:.35rem .45rem;border-radius:10px;background:var(--bg);border:1px solid var(--line)">${av(p.id,34)}<b style="flex:1;min-width:0;color:var(--ink);font-size:.88rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.name)}</b>
+    <button class="btn sm" data-act="arrive" data-id="${esc(p.id)}">Arrived</button><button class="icon-btn" data-act="wzDrop" data-id="${esc(p.id)}" title="Not coming — take off the list">✕</button></li>`;
+  const list=l=>`<ul style="list-style:none;margin:0 0 .8rem;padding:0;display:grid;gap:.3rem">${l.map(row).join('')}</ul>`;
+  const body=!exp.length?'<p class="dim" style="margin:0 0 .8rem;font-size:.84rem">Nobody is waiting to check in.</p>'
+    :isSocial()?list(exp):['regular','ascend'].map(d=>{const l=exp.filter(p=>p.division===d);return l.length?`<div class="flabel" style="margin-bottom:.4rem">${DIVS[d]} · ${l.length}</div>${list(l)}`:'';}).join('');
+  return `<aside class="box" style="flex:1 1 240px;max-width:100%;margin-top:1.8rem"><h3>Selected, not arrived · ${exp.length}</h3>${body}
+    <button class="btn quiet sm w" data-act="tab" data-tab="pool">+ Add or change players</button></aside>`;
+}
+function rallyBody(){
+  return `<div style="display:flex;flex-wrap:wrap;gap:0 1.2rem;align-items:flex-start">${arrivalsPanel()}<div style="flex:5 1 560px;min-width:0">${groups().map(groupBlock).join('')}</div></div>`;
+}
 function openNewSession(){
   const t=new Date(),iso=`${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;
   const tvOpts=[`<option value="0">All active courts</option>`].concat(Array.from({length:MAX_COURTS},(_,i)=>i+1)
@@ -1148,7 +1235,7 @@ async function poolToggle(id,on){
 
 /* ================= EVENTS ================= */
 /* actions that only change what's on screen — no "Saving…" for these */
-const VIEW_ONLY=new Set(['theme','tab','closeModal','newSession','nType','courtsPanel','openCourts','slot','wait','selCancel','end','cancelEnd',
+const VIEW_ONLY=new Set(['wzType','wzBack','wzNext','wzMode','wzPick','wzCopy','theme','tab','closeModal','newSession','nType','courtsPanel','openCourts','slot','wait','selCancel','end','cancelEnd',
   'editRes','poolDiv','poolShow','newPlayer','editPlayer','rmPhoto','exportCSV','exportJSON','dlLocalCSV','dlLocalJSON','reload','retry']);
 async function act(d,el,e){
   const q=d.id&&players[d.id]?queueOf(groupOf(d.id)):[],i=q.indexOf(d.id);
@@ -1165,7 +1252,16 @@ async function act(d,el,e){
     case 'statsCSV': statsCSV();break;
     case 'signout': await sb.auth.signOut();if(channel){sb.removeChannel(channel);channel=null;}user=null;render();break;
     case 'closeModal': if(e.target===el||el.tagName==='BUTTON')closeModal();break;
-    case 'newSession': openNewSession();break;
+    case 'newSession': openWizard();break;
+    /* start-a-session wizard */
+    case 'wzType': wz.date=$('#wzDate').value||wz.date;wz.label=$('#wzLabel').value.trim();wz.type=d.v;wz.step=2;drawWizard();break;
+    case 'wzBack': wzRead();wz.step--;drawWizard();break;
+    case 'wzNext': if(wzRead()){wz.step++;drawWizard();}break;
+    case 'wzMode': wz.mode=d.v;wz.step=4;drawWizard();break;
+    case 'wzPick': wz.picked.has(d.id)?wz.picked.delete(d.id):wz.picked.add(d.id);wzRefreshList();break;
+    case 'wzCopy': await wzCopyLast();break;
+    case 'wzCreate': await wzCreate();break;
+    case 'wzDrop': await poolToggle(d.id,false);break;
     case 'nType': newType=d.v;document.querySelectorAll('#nType button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===newType));
       $('#nSoc').hidden=newType!=='social';$('#nStr').hidden=newType==='social';break;
     case 'createSession': await createSession();break;
