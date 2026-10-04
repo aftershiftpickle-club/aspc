@@ -596,6 +596,16 @@ async function loadFromDatabase(){
     /* Social play is kept for organisers only (admin page). Its games
        never appear on the website, even if the session was published. */
     const matches = allMatches.filter(m => pub.has(m.session_id) && m.division !== "social");
+    /* MONTHLY STATS also count social play. Social games still never show on
+       the Rankings or Games pages — they are only added into the monthly
+       totals, under each player's own division (Regular or Ascend).       */
+    window.SOCIAL_GAMES = allMatches.filter(m => m.division === "social").map(m => ({
+      date: m.session_date, div: "social", game: m.game,
+      team1: m.team1, team2: m.team2, score1: m.score1, score2: m.score2 }));
+    try {
+      window.PLAYER_DIV = Object.fromEntries(
+        (await getAll("players?select=id,division&order=id")).map(p => [p.id, p.division]));
+    } catch (e) { window.PLAYER_DIV = {}; }
     const extra = Object.fromEntries(PLAYERS.map(p => [p.id, p]));
     const fromDb = players.map(p => ({
       ...(extra[p.id] || {}),
@@ -1022,7 +1032,15 @@ const monthLabel = m => { const [y,mo] = m.split("-").map(Number);
   return new Date(y, mo-1, 1).toLocaleDateString("en-US",{month:"long",year:"numeric"}); };
 function monthRows(month, div){
   const rows = {};
-  GAMES.filter(m => m.date.slice(0,7) === month && (m.div || "regular") === div).forEach(m => {
+  const inMonth = m => m.date.slice(0,7) === month;
+  /* which division a player belongs to (for social games, which mix both) */
+  const inDiv = p => { const d = (window.PLAYER_DIV || {})[p];
+    return d ? d === div
+             : GAMES.some(g => (g.div || "regular") === div && (g.team1.includes(p) || g.team2.includes(p))); };
+  GAMES.filter(m => inMonth(m) && (m.div || "regular") === div)
+    .concat((window.SOCIAL_GAMES || []).filter(inMonth)
+      .map(m => ({ ...m, team1: m.team1.filter(inDiv), team2: m.team2.filter(inDiv) })))
+    .forEach(m => {
     const t1won = m.score1 > m.score2, margin = m.score1 - m.score2;
     const add = (p, won, d) => {
       const r = rows[p] || (rows[p] = { id:p, wins:0, losses:0, diff:0, days:new Set() });
@@ -1045,7 +1063,7 @@ function monthRows(month, div){
     .concat(list.filter(r => r.organiser).sort(order));
 }
 function renderStats(){
-  const months = [...new Set(GAMES.map(m => m.date.slice(0,7)))]
+  const months = [...new Set(GAMES.concat(window.SOCIAL_GAMES || []).map(m => m.date.slice(0,7)))]
     .filter(m => m >= STATS_START).sort().reverse();
   if (!statsMonth || !months.includes(statsMonth)) statsMonth = months[0] || null;
   $("statsMonth").hidden = !months.length;
@@ -1058,7 +1076,7 @@ function renderStats(){
   $("statsTitle").textContent = statsMonth
     ? `${divName(statsDiv)} stats · ${monthLabel(statsMonth)}` : "Monthly stats";
   $("statsNote").textContent = list.length
-    ? "Every open play game this month. Ranked by most wins, then win %, then point difference." : "";
+    ? "Open play and social play games this month. Ranked by most wins, then win %, then point difference." : "";
   let n = 0;
   $("statsBody").innerHTML = list.length
     ? list.map(r => `<tr class="${r.organiser ? "org" : ""}">
