@@ -602,9 +602,21 @@ async function writeSlots(c,s){
   if(isPrep(c)||!isFull){started=null;paused=null;}else if(!wasFull||!started){started=new Date().toISOString();paused=null;}
   const patch={team_a:isEmpty?[]:[s[0],s[1]],team_b:isEmpty?[]:[s[2],s[3]],started_at:started,paused_at:paused};
   Object.assign(c,patch);need(await sb.from('courts').update(patch).eq('id',c.id));}
-async function seat(c,teams){const four=teams.flat();await setStatus(four,statusFor(c));await writeSlots(c,four);}
+/* LAST CHECK before anyone goes on a REAL court: ask the database (not this
+   screen) whether that court is unchanged and none of these players is already
+   on another court. This stops double-booking when two organisers use the admin
+   page at the same time. Prep courts are planning only, so they skip the check. */
+async function stillFree(c,ids){
+  if(isPrep(c))return;
+  const all=need(await sb.from('courts').select('*').eq('session_id',cur));
+  const me=all.find(x=>x.id===c.id);
+  const taken=new Set(all.filter(x=>!x.standby&&x.id!==c.id).flatMap(x=>slots(x)).filter(Boolean));
+  if(!me||slots(me).join('|')!==slots(c).join('|')||ids.filter(Boolean).some(id=>taken.has(id)))
+    throw new Error('that court or player was just changed on another device. The screen is now up to date — please try again.');
+}
+async function seat(c,teams){const four=teams.flat();await stillFree(c,four);await setStatus(four,statusFor(c));await writeSlots(c,four);}
 /* Move a lined-up prep match onto a real court (timer starts). */
-async function sendPrep(p,c){const four=slots(p);
+async function sendPrep(p,c){const four=slots(p);await stillFree(c,four);
   await setStatus(four,'court');await writeSlots(c,four);await writeSlots(p,['','','','']);}
 async function fillCourt(c){
   if(!isOn(c)&&!isPrep(c))return false;
@@ -617,7 +629,7 @@ async function fillCourt(c){
     if(!t||!t.flat().every(id=>q.includes(id)))t=suggest(q,mode()==='manual'?'rotation':mode());
     if(!t)return false;await seat(c,t);return true;}
   let k=0;const add=[];const ns=s.map(x=>x||(q[k]?(add.push(q[k]),q[k++]):''));
-  if(!add.length)return false;await setStatus(add,statusFor(c));await writeSlots(c,ns);return true;}
+  if(!add.length)return false;await stillFree(c,add);await setStatus(add,statusFor(c));await writeSlots(c,ns);return true;}
 async function autoFillAll(){if(!autoFill||mode()==='manual')return;
   for(const c of courts)if(isOn(c)&&!filled(c))await fillCourt(c);}
 async function clearCourt(c){await setStatus(slots(c),'queued');await writeSlots(c,['','','','']);}
@@ -655,7 +667,7 @@ async function doSwap(a,b){
   if(a.k==='w'&&b.k==='w'){const q=queueOf(groupOf(a.id));const [x,y]=q.indexOf(a.id)<q.indexOf(b.id)?[a.id,b.id]:[b.id,a.id];
     await swapTickets(x,y);toast(`${P(a.id).name} and ${P(b.id).name} swapped places`);return;}
   if(a.k==='w')[a,b]=[b,a];
-  if(b.k==='w'){const c=courtById(a.c),s=slots(c),old=s[a.i];s[a.i]=b.id;
+  if(b.k==='w'){const c=courtById(a.c);await stillFree(c,[b.id]);const s=slots(c),old=s[a.i];s[a.i]=b.id;
     await setStatus([b.id],statusFor(c));if(old)await setStatus([old],'queued');await writeSlots(c,s);
     toast(old?`${P(b.id).name} in for ${P(old).name}`:`${P(b.id).name} on ${c.label}`);return;}
   const ca=courtById(a.c),cb=courtById(b.c);
@@ -1116,7 +1128,7 @@ async function act(d,el,e){
       if(!confirm('End this session? A copy of the results will also download to this device. Results stay as a draft — check them in Results, then Publish.'))break;
       need(await sb.from('sessions').update({status:'ended'}).eq('id',cur));await loadAll();
       exportCSV();tab='results';render();scrollTo(0,0);
-      toast('Session ended — results downloaded. Check the scores, then tap 📣 Publish');break;
+      toast(isSocial()?'Session ended — results downloaded and saved for organisers only':'Session ended — results downloaded. Check the scores, then tap 📣 Publish');break;
     /* delete a session for good (test sessions etc.) — its courts, check-ins and games go with it */
     case 'delSession': {const s=curS();if(!s)break;const n=matches.length,id=s.id;
       if(!confirm(`Delete "${s.label||'Session'}" (${fmtDate(s.session_date)})?${n?` Its ${n} recorded game${n===1?'':'s'} will be deleted too and disappear from the website.`:''} This cannot be undone.`))break;
