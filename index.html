@@ -429,6 +429,7 @@ footer a:hover{color:var(--accent-text)}
     <nav class="nav" id="nav" aria-label="Main">
       <a href="#/rankings">Rankings</a>
       <a href="#/top">Top players</a>
+      <a href="#/stats">Monthly stats</a>
       <a href="tv.html" class="livelink"><i></i>Live</a>
       <a href="#/games">Games</a>
       <a href="#/photos">Photos</a>
@@ -489,6 +490,28 @@ footer a:hover{color:var(--accent-text)}
       <div class="wrap">
         <h1>Top Players</h1>
         <div id="monthList"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MONTHLY STATS -->
+  <section id="view-stats" hidden>
+    <div class="wrap section">
+      <div class="section__head">
+        <h2 id="statsTitle">Monthly stats</h2>
+        <p id="statsNote"></p>
+      </div>
+      <div style="display:flex;align-items:center;gap:.7rem 1.1rem;flex-wrap:wrap;margin-bottom:1rem">
+        <select id="statsMonth" aria-label="Month"></select>
+        <div class="seg" id="statsSeg" role="group" aria-label="Division"></div>
+      </div>
+      <div class="card">
+        <table>
+          <thead>
+            <tr><th>Rank</th><th>Player</th><th>GP</th><th>W</th><th>L</th><th>Win %</th><th class="hide-sm">Diff</th><th class="hide-sm">Sessions</th></tr>
+          </thead>
+          <tbody id="statsBody"></tbody>
+        </table>
       </div>
     </div>
   </section>
@@ -987,7 +1010,80 @@ function refresh(){
 
 /* ---------- navigation ----------
    Old links (#/sessions, #/schedule, #/about, #/faq) now open Join. */
-const views = ["rankings","top","games","photos","join"];
+/* ---------- monthly stats (public page) ----------
+   Adds up every published open play game in the chosen month.
+   Social play is NOT counted — it stays in the admin page only.
+   Order: most wins, then win %, then point difference.
+   Organisers are listed at the bottom with /O, outside the ranking.
+   "Sessions" = how many different session dates the player played. */
+const STATS_START = "2026-10";   // months before this are not shown
+let statsMonth = null, statsDiv = DIVISIONS[0].id;
+const monthLabel = m => { const [y,mo] = m.split("-").map(Number);
+  return new Date(y, mo-1, 1).toLocaleDateString("en-US",{month:"long",year:"numeric"}); };
+function monthRows(month, div){
+  const rows = {};
+  GAMES.filter(m => m.date.slice(0,7) === month && (m.div || "regular") === div).forEach(m => {
+    const t1won = m.score1 > m.score2, margin = m.score1 - m.score2;
+    const add = (p, won, d) => {
+      const r = rows[p] || (rows[p] = { id:p, wins:0, losses:0, diff:0, days:new Set() });
+      won ? r.wins++ : r.losses++; r.diff += d; r.days.add(m.date);
+    };
+    m.team1.forEach(p => add(p, t1won, margin));
+    m.team2.forEach(p => add(p, !t1won, -margin));
+  });
+  const list = Object.values(rows).map(r => {
+    const gp = r.wins + r.losses;
+    const player = byId[r.id] || { id:r.id, name:r.id, photo:"" };
+    return { ...r, gp, name: player.name, player, sessions: r.days.size,
+             pct: gp ? Math.round(r.wins / gp * 100) : 0,
+             organiser: Array.isArray(player.organiser)
+               ? player.organiser.includes(div) : !!player.organiser };
+  });
+  const order = (a,b) => b.wins - a.wins || b.pct - a.pct
+                      || b.diff - a.diff || a.name.localeCompare(b.name);
+  return list.filter(r => !r.organiser).sort(order)
+    .concat(list.filter(r => r.organiser).sort(order));
+}
+function renderStats(){
+  const months = [...new Set(GAMES.map(m => m.date.slice(0,7)))]
+    .filter(m => m >= STATS_START).sort().reverse();
+  if (!statsMonth || !months.includes(statsMonth)) statsMonth = months[0] || null;
+  $("statsMonth").hidden = !months.length;
+  $("statsMonth").innerHTML = months.map(m =>
+    `<option value="${m}"${m === statsMonth ? " selected" : ""}>${monthLabel(m)}</option>`).join("");
+  $("statsSeg").hidden = DIVISIONS.length < 2 || !months.length;
+  $("statsSeg").innerHTML = DIVISIONS.map(d =>
+    `<button type="button" data-div="${d.id}" aria-pressed="${d.id === statsDiv}">${d.name}</button>`).join("");
+  const list = statsMonth ? monthRows(statsMonth, statsDiv) : [];
+  $("statsTitle").textContent = statsMonth
+    ? `${divName(statsDiv)} stats · ${monthLabel(statsMonth)}` : "Monthly stats";
+  $("statsNote").textContent = list.length
+    ? "Every open play game this month. Ranked by most wins, then win %, then point difference." : "";
+  let n = 0;
+  $("statsBody").innerHTML = list.length
+    ? list.map(r => `<tr class="${r.organiser ? "org" : ""}">
+        <td class="rk">${r.organiser ? "–" : ++n}</td>
+        <td><div class="who">${avatar(r.player)}<span>${esc(r.name)}${r.organiser ? `<i class="tag-o">/O</i>` : ""}</span></div></td>
+        <td>${r.gp}</td>
+        <td class="w">${r.wins}</td>
+        <td class="l">${r.losses}</td>
+        <td class="pct">${r.pct}%</td>
+        <td class="diff hide-sm ${r.diff > 0 ? "up" : ""}">${r.diff > 0 ? "+" + r.diff : r.diff}</td>
+        <td class="hide-sm">${r.sessions}</td>
+      </tr>`).join("")
+    : `<tr><td colspan="8" class="empty">${statsMonth
+        ? `No ${divName(statsDiv)} games recorded this month yet.`
+        : "Monthly stats start from October 2026."}</td></tr>`;
+}
+$("statsMonth").addEventListener("change", e => { statsMonth = e.target.value; renderStats(); });
+$("statsSeg").addEventListener("click", e => {
+  const btn = e.target.closest("button[data-div]");
+  if (!btn) return;
+  statsDiv = btn.dataset.div;
+  renderStats();
+});
+
+const views = ["rankings","top","stats","games","photos","join"];
 const oldPages = ["sessions","schedule","about","faq"];
 function route(){
   let name = (location.hash.replace("#/","") || "rankings").toLowerCase();
@@ -1017,6 +1113,7 @@ route();
   byId = Object.fromEntries(ROSTER.map(p => [p.id, p]));
   dates = [...new Set(GAMES.map(m => m.date))].sort().reverse();
   current = dates[0];
+  renderStats();
   $("dateSelect").innerHTML = dates.map(d => `<option value="${d}">${fmtDate(d)}</option>`).join("");
   if (current) $("dateSelect").value = current;
   ensureDivision();
