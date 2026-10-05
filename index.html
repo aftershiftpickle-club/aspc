@@ -260,6 +260,26 @@ tr.org .who span{color:var(--muted)}
 .album__body h3{font-size:1.02rem;font-weight:800}
 .album__body p{margin:0;color:var(--muted);font-size:.88rem}
 
+/* ---------- PHOTO ALBUM COVERS: stacked prints ----------
+   Each cover looks like a small pile of photos. With a cover picture
+   the photo sits on top; without one the top print shows the session
+   type (Open play / Social play / Ascend) on a colour. No date on the
+   image — the album title underneath already has it.               */
+.album__cover{margin:20px 22px 10px;aspect-ratio:16/10;position:relative;isolation:isolate;display:grid;place-items:center;
+  border:3px solid var(--card);border-radius:10px;background:var(--accent);box-shadow:0 6px 14px -8px rgba(0,0,0,.45)}
+.album__cover::before,.album__cover::after,.album__cover:has(img)::after{content:"";position:absolute;inset:-3px;z-index:-1;
+  border:3px solid var(--card);border-radius:10px;box-shadow:0 4px 10px -8px rgba(0,0,0,.4)}
+.album__cover::before{background:var(--soft);transform:rotate(-5deg)}
+.album__cover::after,.album__cover:has(img)::after{background:var(--line);transform:rotate(4deg)}
+.album__cover img{border-radius:7px;z-index:1}
+.album__cover span,.album__cover:has(img) span{position:relative;left:auto;bottom:auto;z-index:0;padding:0 .6rem;text-align:center;
+  font-family:var(--serif);font-style:italic;font-size:1.5rem;color:var(--accent-ink)}
+.album__cover:has(img) span{display:none}
+.album__cover--social{background:var(--band)}
+.album__cover--social span{color:var(--band-ink)}
+.album__cover--ascend{background:var(--bronze)}
+.album__cover--ascend span{color:#171715}
+
 /* ---------- buttons ---------- */
 .btn{margin-top:auto;align-self:start;display:inline-block;text-decoration:none;
   background:var(--accent);color:var(--accent-ink);font-weight:800;font-size:.76rem;letter-spacing:.12em;
@@ -598,6 +618,7 @@ footer a:hover{color:var(--accent-text)}
       <div style="display:flex;align-items:center;gap:.7rem 1.1rem;flex-wrap:wrap;margin-bottom:1rem">
         <select id="statsMonth" aria-label="Month"></select>
         <div class="seg" id="statsSeg" role="group" aria-label="Division"></div>
+        <button class="btn" id="statsShareBtn" type="button" style="border:0;cursor:pointer;font-family:inherit;margin:0 0 0 auto">Share monthly stats</button>
       </div>
       <div class="card">
         <table>
@@ -961,13 +982,20 @@ function renderGames(){
     : `<div class="card empty">No ${divName(currentDiv)} games recorded for this session yet.</div>`;
 }
 
+/* which kind of session an album is, worked out from its title in data.js */
+function albumKind(a){
+  const t = String(a.title || "");
+  if (/social/i.test(t)) return { id:"social", label:"Social play" };
+  if (/ascend|lnp|learn/i.test(t) && !/open\s*play/i.test(t)) return { id:"ascend", label:"Ascend" };
+  return { id:"open", label:"Open play" };
+}
 function renderAlbums(){
   $("galleryTitle").textContent = (typeof GALLERY !== "undefined" && GALLERY.title) || "Photos";
   const list = [...ALBUMS].sort((a,b) => b.date.localeCompare(a.date));
   $("albumList").innerHTML = list.length
     ? list.map(a => `<article class="album">
-        <div class="album__cover">
-          <span>${fmtDate(a.date)}</span>
+        <div class="album__cover album__cover--${albumKind(a).id}">
+          <span>${albumKind(a).label}</span>
           <img class="album__img" src="${a.cover || `photos/albums/${a.date}.jpg`}" alt="">
         </div>
         <div class="album__body">
@@ -1159,7 +1187,7 @@ async function drawStory(){
   const c = cv.getContext("2d");
   try { await Promise.all([document.fonts.load('800 60px Manrope'),
                            document.fonts.load('italic 120px "DM Serif Display"')]); } catch(e){}
-  c.fillStyle = S.bg; c.fillRect(0, 0, S.W, S.H);
+  storyBg(c);   // "court lines" background, shared with the monthly picture
   c.textAlign = "center"; c.textBaseline = "alphabetic";
 
   /* logo: speed lines + ball, then the two words */
@@ -1373,6 +1401,140 @@ $("statsSeg").addEventListener("click", e => {
   statsDiv = btn.dataset.div;
   renderStats();
 });
+
+/* ---------- shared look for the story pictures: "court lines" ----------
+   Dark background with a dotted texture, lime diagonal stripes down both
+   sides and faint court markings. Used by Share result and Share monthly
+   stats. To go back to plain black, replace the body of storyBg with its
+   first line only.                                                      */
+function storyBg(c){
+  const S = SHARE;
+  c.fillStyle = S.bg; c.fillRect(0, 0, S.W, S.H);
+  c.fillStyle = "rgba(240,239,236,.07)";                 // dots
+  for (let y = 18; y < S.H; y += 36) for (let x = 18; x < S.W; x += 36){
+    c.beginPath(); c.arc(x, y, 3, 0, Math.PI * 2); c.fill(); }
+  c.fillStyle = "rgba(194,212,55,.16)";                  // diagonal stripes
+  for (let k = 0; k < 5; k++) [-80 + k * 46, 1010 + k * 46].forEach(x => {
+    c.beginPath(); c.moveTo(x, 0); c.lineTo(x + 24, 0); c.lineTo(x - 276, S.H); c.lineTo(x - 300, S.H);
+    c.closePath(); c.fill(); });
+  c.strokeStyle = "rgba(194,212,55,.22)"; c.lineWidth = 4;   // court markings
+  c.strokeRect(90, 640, 900, 1120);
+  c.beginPath(); c.moveTo(90, 1130); c.lineTo(990, 1130); c.moveTo(540, 1130); c.lineTo(540, 1760); c.stroke();
+}
+function storyLogo(c){
+  const S = SHARE, bx = 580, by = 170;
+  c.save(); c.translate(S.W / 2, 60); c.scale(0.5, 0.5); c.translate(-S.W / 2, 0);
+  c.fillStyle = S.ink;
+  [[-150,-34,-70,-42,-70,-26],[-210,6,-74,-4,-74,14],[-158,44,-66,32,-66,48]].forEach(p => {
+    c.beginPath(); c.moveTo(bx + p[0], by + p[1]); c.lineTo(bx + p[2], by + p[3]); c.lineTo(bx + p[4], by + p[5]);
+    c.closePath(); c.fill(); });
+  c.fillStyle = S.lime; c.beginPath(); c.arc(bx, by, 62, 0, Math.PI * 2); c.fill();
+  c.fillStyle = S.bg;
+  [[-14,-38],[32,-24],[-40,-4],[2,10],[-26,36],[32,30]].forEach(h => {
+    c.beginPath(); c.arc(bx + h[0], by + h[1], 10, 0, Math.PI * 2); c.fill(); });
+  c.textAlign = "center";
+  c.fillStyle = S.ink;  c.font = '800 58px Manrope, sans-serif'; spaced(c, "AFTERSHIFT", S.W / 2, 320, 22);
+  c.fillStyle = S.lime; c.font = '700 36px Manrope, sans-serif'; spaced(c, "PICKLECLUB", S.W / 2, 376, 18);
+  c.restore();
+}
+
+/* ---------- share monthly stats (story-sized picture) ----------
+   Top three as photo circles with rank badges, places 4 to 8 as cards. */
+async function drawMonthlyStory(){
+  const S = SHARE, all = monthRows(statsMonth, statsDiv).filter(r => !r.organiser);
+  const top = all.some(r => r.ranked) ? all.filter(r => r.ranked) : all;
+  const cv = document.createElement("canvas"); cv.width = S.W; cv.height = S.H;
+  const c = cv.getContext("2d");
+  try { await Promise.all([document.fonts.load('800 60px Manrope'),
+                           document.fonts.load('italic 120px "DM Serif Display"')]); } catch(e){}
+  storyBg(c); storyLogo(c);
+  c.textAlign = "center"; c.textBaseline = "alphabetic";
+  c.fillStyle = S.ink; c.font = 'italic 400 124px "DM Serif Display", Georgia, serif';
+  c.fillText("Monthly Stats", S.W / 2, 400);
+  c.fillStyle = S.lime; c.font = '700 32px Manrope, sans-serif';
+  spaced(c, `${monthLabel(statsMonth)} · ${divName(statsDiv)}`.toUpperCase(), S.W / 2, 466, 6);
+
+  const imgs = await Promise.all(top.slice(0, 3).map(r => playerImg(r.player)));
+  [[1, 220, 860, 100], [0, 540, 820, 132], [2, 860, 860, 100]].forEach(([i, x, cy, rad]) => {
+    const r = top[i]; if (!r) return;
+    const rim = S.rims[i], img = imgs[i];
+    c.save(); c.beginPath(); c.arc(x, cy, rad, 0, Math.PI * 2); c.closePath();
+    c.fillStyle = S.card; c.fill(); c.clip();
+    if (img){
+      const s = Math.max(2 * rad / img.width, 2 * rad / img.height), dw = img.width * s, dh = img.height * s;
+      c.drawImage(img, x - dw / 2, cy - dh / 2, dw, dh);
+    } else {
+      c.fillStyle = S.ink; c.font = `800 ${Math.round(rad * 0.7)}px Manrope, sans-serif`;
+      c.textBaseline = "middle"; c.fillText(initials(r.name), x, cy + 4); c.textBaseline = "alphabetic";
+    }
+    c.restore();
+    c.beginPath(); c.arc(x, cy, rad, 0, Math.PI * 2); c.lineWidth = 8; c.strokeStyle = rim; c.stroke();
+    const bx = x + rad * 0.72, by = cy + rad * 0.72;                      // rank badge
+    c.fillStyle = rim; c.beginPath(); c.arc(bx, by, 34, 0, Math.PI * 2); c.fill();
+    c.fillStyle = S.bg; c.font = '800 38px Manrope, sans-serif'; c.fillText(String(i + 1), bx, by + 13);
+    c.fillStyle = S.ink; c.font = `800 ${i === 0 ? 46 : 38}px Manrope, sans-serif`;
+    c.fillText(fitText(c, r.name, i === 0 ? 330 : 290), x, cy + rad + 62);
+    c.fillStyle = S.muted; c.font = '600 30px Manrope, sans-serif';
+    c.fillText(`${r.wins}–${r.losses} · ${r.pct}%`, x, cy + rad + 108);
+  });
+
+  let y = 1190;
+  top.slice(3, 8).forEach((r, k) => {
+    c.fillStyle = S.card; rrect(c, 110, y, 860, 92, 20); c.fill();
+    c.lineWidth = 2; c.strokeStyle = S.line; c.stroke();
+    c.beginPath(); c.arc(170, y + 46, 28, 0, Math.PI * 2); c.lineWidth = 3; c.strokeStyle = S.lime; c.stroke();
+    c.fillStyle = S.lime; c.font = '800 32px Manrope, sans-serif'; c.fillText(String(k + 4), 170, y + 58);
+    c.textAlign = "left";  c.fillStyle = S.ink; c.font = '700 36px Manrope, sans-serif';
+    c.fillText(fitText(c, r.name, 420), 230, y + 59);
+    c.textAlign = "right"; c.fillText(`${r.wins}–${r.losses}`, 800, y + 59);
+    c.fillStyle = S.muted; c.fillText(`${r.pct}%`, 935, y + 59);
+    c.textAlign = "center"; y += 108;
+  });
+
+  const ig = (SOCIAL.find(s => /instagram/i.test(s.label)) || {}).handle || CLUB.name;
+  c.fillStyle = S.lime; c.font = '700 34px Manrope, sans-serif'; c.fillText(ig, S.W / 2, S.H - 70);
+  return cv;
+}
+async function shareMonthly(){
+  const btn = $("statsShareBtn");
+  if (!statsMonth || !monthRows(statsMonth, statsDiv).some(r => !r.organiser)){
+    alert("There are no monthly stats to share yet."); return; }
+  const label = btn.textContent;
+  btn.disabled = true; btn.textContent = "Creating picture…";
+  try {
+    const cv = await drawMonthlyStory();
+    const blob = await new Promise(res => cv.toBlob(res, "image/png"));
+    if (!blob) throw new Error("The picture could not be created");
+    showSharePreview(new File([blob], `aftershift-${statsMonth}-${statsDiv}-monthly.png`, { type:"image/png" }));
+  } catch (e){
+    console.error(e); alert("Sorry, the picture could not be created on this device.");
+  } finally { btn.disabled = false; btn.textContent = label; }
+}
+$("statsShareBtn").addEventListener("click", shareMonthly);
+
+/* ---------- top three cards on the Monthly stats page ---------- */
+function renderStatsTop(){
+  let el = $("statsTop");
+  if (!el){
+    el = document.createElement("div"); el.id = "statsTop";
+    const card = $("statsBody").closest(".card");
+    card.parentNode.insertBefore(el, card);
+  }
+  const top = statsMonth ? monthRows(statsMonth, statsDiv).filter(r => r.ranked).slice(0, 3) : [];
+  const rims = ["var(--gold)", "var(--silver)", "var(--bronze)"];
+  el.innerHTML = top.length
+    ? `<div style="display:grid;grid-template-columns:repeat(${top.length},minmax(0,1fr));gap:.7rem;margin-bottom:1rem">${top.map((r, i) => `
+        <div class="card" style="--rim:${rims[i]};padding:1rem .6rem;text-align:center;border:2px solid ${rims[i]};display:flex;flex-direction:column;align-items:center;gap:.35rem;min-width:0">
+          <div style="font:800 .72rem var(--sans);letter-spacing:.18em;text-transform:uppercase;color:${rims[i]}">${ordinal(i + 1)} place</div>
+          ${avatar(r.player, "pod__photo")}
+          <div style="font-weight:800;color:var(--ink);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(r.name)}</div>
+          <div style="font-size:.8rem;color:var(--muted)"><b style="color:var(--ink)">${r.wins}&#8211;${r.losses}</b> · ${r.pct}%</div>
+        </div>`).join("")}</div>`
+    : "";
+}
+/* run the top-three cards every time the monthly table is drawn */
+const baseRenderStats = renderStats;
+renderStats = function(){ baseRenderStats(); renderStatsTop(); };
 
 const views = ["rankings","top","stats","games","photos","join"];
 const oldPages = ["sessions","schedule","about","faq"];
