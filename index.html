@@ -1130,8 +1130,8 @@ async function drawStory(){
   c.textAlign = "center"; c.textBaseline = "alphabetic";
 
   /* logo: speed lines + ball, then the two words */
-  /* LOGO SIZE: 0.72 = 72% of full size. Raise or lower this one number to resize it. */
-  const LOGO_SCALE = 0.72;
+  /* LOGO SIZE: 0.5 = half of full size. Raise or lower this one number to resize it. */
+  const LOGO_SCALE = 0.5;
   c.save(); c.translate(S.W / 2, 60); c.scale(LOGO_SCALE, LOGO_SCALE); c.translate(-S.W / 2, 0);
   const bx = 580, by = 170;
   c.fillStyle = S.ink;
@@ -1146,16 +1146,18 @@ async function drawStory(){
   c.fillStyle = S.lime; c.font = '700 36px Manrope, sans-serif'; spaced(c, "PICKLECLUB", S.W / 2, 376, 18);
   c.restore();
 
-  /* heading */
+  /* heading — moved up 110px so it sits closer to the smaller logo */
+  c.save(); c.translate(0, -110);
   c.fillStyle = S.ink; c.font = 'italic 400 132px "DM Serif Display", Georgia, serif';
   c.fillText("Open Play", S.W / 2, 560);
   c.fillStyle = S.lime; c.font = '700 32px Manrope, sans-serif';
   spaced(c, `${divName(currentDiv)} session results`.toUpperCase(), S.W / 2, 626, 6);
   c.fillStyle = S.muted; c.font = '700 36px Manrope, sans-serif';
   c.fillText(fmtDate(current), S.W / 2, 690);
+  c.restore();
 
   /* podium: 2nd, 1st, 3rd */
-  const base = 1420;
+  const base = 1350;
   const imgs = await Promise.all(top.slice(0, 3).map(r => playerImg(r.player)));
   [[1, 200, 270, 96], [0, 540, 340, 118], [2, 880, 236, 96]].forEach(([i, x, h, rad]) => {
     const r = top[i]; if (!r) return;
