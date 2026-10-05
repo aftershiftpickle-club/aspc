@@ -418,12 +418,38 @@ footer a:hover{color:var(--accent-text)}
 @keyframes introSpin{from{transform:rotate(-540deg)}to{transform:rotate(0)}}
 @keyframes introStreak{from{transform:scaleX(0);opacity:0}to{transform:scaleX(1);opacity:1}}
 @keyframes introRise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+/* OPENING ANIMATION, VERSION 2 — these rules replace the timings just above.
+   The ball is hit in from the left edge of the screen, stops in its place in
+   the logo, then is smashed out past the right edge while the three speed
+   lines stretch, blur and fade like smoke. Total length: about 4 seconds
+   (to change how long the screen stays, edit the 4300 in the script under
+   the <body> tag).                                                        */
+.intro{overflow:hidden}
+.intro .in-ball{animation:introThru 3.8s both}
+.intro .in-spin{animation:introThruSpin 3.8s both}
+.intro .in-ln{animation:introStreak .4s ease-out both,introSmoke .9s ease-out 3.05s forwards}
+.intro .in-ln2{animation-delay:.95s,3.05s}
+.intro .in-ln1{animation-delay:1.05s,3.12s}
+.intro .in-ln3{animation-delay:1.15s,3.19s}
+.intro .in-word{animation:introRise .6s ease-out 1.2s both}
+.intro .in-sub{animation:introRise .6s ease-out 1.5s both}
+@keyframes introThru{
+  0%{transform:translateX(var(--intro-from,-330px));animation-timing-function:cubic-bezier(.12,.9,.25,1.12)}
+  24%{transform:translateX(0);animation-timing-function:linear}
+  80%{transform:translateX(0);animation-timing-function:cubic-bezier(.75,0,1,.55)}
+  100%{transform:translateX(var(--intro-to,330px))}}
+@keyframes introThruSpin{
+  0%{transform:rotate(-1260deg);animation-timing-function:cubic-bezier(.12,.9,.25,1)}
+  24%{transform:rotate(0);animation-timing-function:linear}
+  80%{transform:rotate(0);animation-timing-function:cubic-bezier(.75,0,1,.55)}
+  100%{transform:rotate(1080deg)}}
+@keyframes introSmoke{from{opacity:1;transform:scaleX(1);filter:blur(0)}to{opacity:0;transform:scaleX(1.6);filter:blur(5px)}}
 @media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important}}
 </style>
 </head>
 <body>
 
-<!-- OPENING ANIMATION — plays once per visit, tap to skip -->
+<!-- OPENING ANIMATION — plays every time the page loads, tap to skip -->
 <div class="intro" id="intro" aria-hidden="true">
   <svg class="logo" viewBox="0 0 400 168">
     <g class="lg-ink">
@@ -453,12 +479,19 @@ footer a:hover{color:var(--accent-text)}
 (function(){
   var el = document.getElementById('intro'), seen;
   try { seen = sessionStorage.getItem('aspc-intro'); } catch(e){}
-  /* already seen this visit, or the visitor prefers no motion: skip it */
-  if (seen || window.matchMedia('(prefers-reduced-motion: reduce)').matches){ el.remove(); return; }
+  /* plays EVERY time the page loads. Only skipped for visitors whose device
+     is set to reduce motion. (To go back to once per visit, change the next
+     line to start with:  if (seen || window.matchMedia...  )               */
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches){ el.remove(); return; }
   try { sessionStorage.setItem('aspc-intro', '1'); } catch(e){}
+  /* how far the ball travels: from just off the left edge of the screen to
+     just off the right edge, whatever the screen size */
+  var svg = el.querySelector('svg'), sc = svg.getBoundingClientRect().width / 400 || 1, half = window.innerWidth / 2;
+  svg.style.setProperty('--intro-from', (-(half + 74 * sc + 20) / sc) + 'px');
+  svg.style.setProperty('--intro-to', ((half - 6 * sc + 20) / sc) + 'px');
   var done = false;
   function close(){ if (done) return; done = true; el.classList.add('out'); setTimeout(function(){ el.remove(); }, 600); }
-  setTimeout(close, 2400);
+  setTimeout(close, 4300);
   el.addEventListener('click', close);
 })();
 </script>
