@@ -840,9 +840,9 @@ document.addEventListener("error", e => {
 
    To apply the new rule to an earlier session too, move the date
    below back (for example "2026-09-01").                          */
-const NEW_RULE_FROM = "2026-10-01";
+const NEW_RULE_FROM = "2099-01-01";
 
-function gamesOn(date, div){
+  function gamesOn(date, div){
   return GAMES.filter(m => m.date === date && (m.div || "regular") === div);
 }
 function streakOf(seq){
