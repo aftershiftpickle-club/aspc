@@ -299,7 +299,13 @@ const ALBUMS = [
     description: "Saturday Social Play",
     url: "https://drive.google.com/drive/folders/1OOym4ZyqgHOY7xzpLYn34d6Ux5dzzHsF?usp=sharing",
     cover: ""
-  }
+  },
+   {
+    date: "2026-09-29",
+    title: "Sept 29, 2026 Social Play",
+    description: "Tuesday Social Play",
+    url: "https://drive.google.com/drive/folders/1YEONG_88gXl0yjNtzVsypauJE4JwAGom?usp=sharing",
+    cover: ""
 ];
 
 
