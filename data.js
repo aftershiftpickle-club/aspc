@@ -306,6 +306,7 @@ const ALBUMS = [
     description: "Tuesday Social Play",
     url: "https://drive.google.com/drive/folders/1YEONG_88gXl0yjNtzVsypauJE4JwAGom?usp=sharing",
     cover: ""
+   },
 ];
 
 
