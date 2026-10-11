@@ -299,28 +299,7 @@ const ALBUMS = [
     description: "Saturday Social Play",
     url: "https://drive.google.com/drive/folders/1OOym4ZyqgHOY7xzpLYn34d6Ux5dzzHsF?usp=sharing",
     cover: ""
-  },
-   {
-    date: "2026-09-29",
-    title: "Sept 29, 2026 Social Play",
-    description: "Tuesday Social Play",
-    url: "https://drive.google.com/drive/folders/1YEONG_88gXl0yjNtzVsypauJE4JwAGom?usp=sharing",
-    cover: ""
-  },
-   {
-    date: "2026-10-02",
-    title: "Oct 02, 2026 Open Play",
-    description: "Friday Open Play",
-    url: "https://drive.google.com/drive/folders/1Fi6FednAaZ8lSthrZV2PqBVbTQ3QfPGj?usp=sharing",
-    cover: ""
-   },
-   {
-    date: "2026-10-03",
-    title: "Oct 03, 2026 Social Play",
-    description: "Friday Open Play",
-    url: "https://drive.google.com/drive/folders/1EDsuJQatPgyx7hrP_M5uEEGoFaVj2vPH?usp=sharing",
-    cover: ""
-
+  }
 ];
 
 
