@@ -320,7 +320,7 @@ const ALBUMS = [
     description: "Friday Open Play",
     url: "https://drive.google.com/drive/folders/1EDsuJQatPgyx7hrP_M5uEEGoFaVj2vPH?usp=sharing",
     cover: ""
-   
+
 ];
 
 
