@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <title>ASPC Admin</title>
-<!-- Version: 19 Oct 2026 — live leaderboard (admin only), winners-vs-winners matchmaking, +1/−1 minute court timers -->
+<!-- Version: 19 Oct 2026 — live leaderboard, winners-vs-winners, +1/−1 timers, lock-in partners & rivals -->
 
 <script>
 (function(){var t;try{t=localStorage.getItem('aspc-theme')}catch(e){}
@@ -96,6 +96,7 @@ button.chip{cursor:pointer;font-family:inherit}
 .chip.pub{color:var(--accent-ink);background:var(--accent);border-color:var(--accent)}
 .chip.draft{color:var(--asc);border-color:var(--line2);background:var(--asc-bg)}
 .chip.prep{color:var(--accent-text);border-color:var(--accent);background:var(--next)}
+.chip.rival{color:var(--red);border-color:var(--red);background:var(--card)}
 .chip.tv{color:var(--ink);border-color:var(--line2);background:var(--card);font-size:.66rem;padding:.3rem .65rem}
 .chip.notv{color:var(--asc);border-color:var(--asc);background:transparent}
 .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;box-shadow:var(--shadow)}
@@ -183,13 +184,13 @@ button.chip{cursor:pointer;font-family:inherit}
 .waitbox{margin-top:1rem}
 .upnext{display:grid;gap:.3rem;margin:0 0 .8rem;font-size:.85rem;color:var(--ink);font-weight:600}
 .wl{list-style:none;margin:0;padding:0;display:grid;gap:.3rem}
-.wr{display:grid;grid-template-columns:minmax(0,1fr) 38px 52px 60px 72px 124px;align-items:center;gap:.5rem;padding:.3rem .5rem;border-radius:10px;background:var(--bg);border:1px solid var(--line)}
+.wr{display:grid;grid-template-columns:minmax(0,1fr) 38px 52px 60px 72px 156px;align-items:center;gap:.5rem;padding:.3rem .5rem;border-radius:10px;background:var(--bg);border:1px solid var(--line)}
 .wr.head{background:none;border:0;font-size:.6rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;padding:0 .5rem}
 .wr.g1{border-color:var(--accent);background:var(--next)}
 .wr.g2{border-color:var(--line2);background:var(--then)}
 .wr.lined{border-style:dashed;border-color:var(--accent);opacity:.8}
 .wr.sel{box-shadow:0 0 0 3px var(--sel);border-color:var(--accent)}
-.wmain{display:flex;align-items:center;gap:.45rem;border:0;background:none;padding:0;text-align:left;min-width:0}
+.wmain{display:flex;align-items:center;gap:.45rem;border:0;background:none;padding:0;text-align:left;min-width:0;flex-wrap:wrap}
 .wmain b{color:var(--ink);font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .qn{width:22px;height:22px;border-radius:50%;background:var(--card);border:1px solid var(--line);font-size:.68rem;font-weight:800;color:var(--ink);display:flex;align-items:center;justify-content:center;flex:none}
 .g1 .qn{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
@@ -203,6 +204,7 @@ button.chip{cursor:pointer;font-family:inherit}
 .qa button:hover:not(:disabled){background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .qa button:disabled{opacity:.3;cursor:default}
 .qa button.txt{padding:0 .55rem;font-weight:700}
+.qa button.on{border-color:var(--accent);color:var(--accent-text)}
 .rest{list-style:none;margin:.5rem 0 0;padding:0;display:grid;gap:.3rem}
 .rest li{display:flex;align-items:center;gap:.5rem;padding:.3rem .5rem;border-radius:10px;border:1px dashed var(--line2)}
 .rest b{flex:1;color:var(--ink);font-size:.86rem}
@@ -213,6 +215,7 @@ button.chip{cursor:pointer;font-family:inherit}
 html[data-theme="dark"] .selbar b{color:var(--accent-text);filter:brightness(.55)}
 .selbar button{border:0;border-radius:999px;padding:.42rem .8rem;font-weight:800;font-size:.72rem;background:var(--accent);color:var(--accent-ink)}
 .selbar button:hover{filter:brightness(1.08)}
+.selbar button.off{background:transparent;color:var(--bg);box-shadow:inset 0 0 0 1.5px var(--bg);opacity:.7}
 
 /* ---- pool ---- */
 .tools{display:flex;gap:.7rem;flex-wrap:wrap;align-items:center}
@@ -267,7 +270,7 @@ html[data-theme="dark"] .selbar b{color:var(--accent-text);filter:brightness(.55
 [hidden]{display:none!important}
 
 @media(max-width:900px){.rrow{grid-template-columns:1fr auto 1fr}.rrow>span:first-child,.rrow .acts{grid-column:1/-1}}
-@media(max-width:700px){.wr{grid-template-columns:minmax(0,1fr) 34px 48px 46px 116px}.hide-md{display:none!important}.qa button{min-width:26px}.logo{height:44px}}
+@media(max-width:700px){.wr{grid-template-columns:minmax(0,1fr) 34px 48px 46px 148px}.hide-md{display:none!important}.qa button{min-width:26px}.logo{height:44px}}
 @media(max-width:520px){.pform{grid-template-columns:1fr}.row2{grid-template-columns:1fr}.hide-sm{display:none}.courts{grid-template-columns:1fr}
   .wr{grid-template-columns:minmax(0,1fr) 34px 48px 46px;row-gap:.3rem}
   .wr .qa{grid-column:1/-1}
@@ -286,6 +289,7 @@ const SUPABASE_KEY = 'sb_publishable_ZPRnMslT6BWplkRvVaiRXA_PUh-bQlO';
 const GAME_SECONDS = 600;   // 10-minute games
 const MAX_COURTS   = 10;    // real courts per session (prep courts not counted)
 const MAX_PREP     = 1;     // prep courts per section (Regular, Ascend or Social)
+const MIN_LOCK_GAMES = 1;   // open play: games each player must finish before a lock-in (social play: no minimum)
 /* ==================================== */
 
 /* ---------- DEMO MODE ----------
@@ -317,7 +321,7 @@ function demoDB(){
   const session_players=ids.map((id,i)=>{const mine=matches.filter(m=>m.session_id===2&&[...m.team1,...m.team2].includes(id));
     const last=mine.length?Math.max(...mine.map(m=>Date.parse(m.created_at))):null,arr=ago(52-i);
     const status=onCourt.includes(id)?'court':id==='marie'?'resting':['nique','gilbert'].includes(id)?'expected':'queued';
-    return {session_id:2,player_id:id,status,games_played:mine.length,arrived_at:status==='expected'?null:iso(arr),queue_ticket:status==='expected'?null:iso(last?last+i:arr)};});
+    return {session_id:2,player_id:id,status,games_played:mine.length,partner:null,arrived_at:status==='expected'?null:iso(arr),queue_ticket:status==='expected'?null:iso(last?last+i:arr)};});
   return {players,player_private:Object.entries(D).map(([player_id,dupr])=>({player_id,dupr})),
     sessions:[{id:1,session_date:'2026-09-11',label:'Friday open play',status:'ended',published:true,session_type:'structured',match_mode:'rotation',tv_courts:3},
               {id:2,session_date:today,label:'Social play',status:'live',published:false,session_type:'social',match_mode:'roundrobin',tv_courts:3}],
@@ -388,7 +392,7 @@ let user=null,tab='rally',busy=false,channel=null;
 let players={},priv={},sessions=[],cur=null,roster={},courts=[],matches=[];
 let autoFill=false,poolDiv='all',poolShow='all',poolQ='';
 let modal=null,pendingPhoto=null,removePhoto=false,newType='social';
-let sel=null,ending=null,courtsPanel=false,ST={},lastPlan={};
+let sel=null,lockSel=null,ending=null,courtsPanel=false,ST={},lastPlan={};
 let saveState={s:'ok',t:Date.now()};
 /* ops = actions in progress right now; epoch goes up whenever one starts or
    finishes. A background reload that overlaps an action is thrown away and
@@ -431,6 +435,12 @@ const freeLive=g=>courts.filter(c=>isOn(c)&&c.division===g&&!filled(c));
 const liveCount=()=>courts.filter(c=>!isPrep(c)).length;
 const liveLabel=()=>'Court '+(liveCount()+1);
 const prepLabel=g=>isSocial()?'Prep court':DIVS[g]+' prep';
+/* ---- lock-ins ----
+   Stored in session_players.partner: "<id>" = partners, "r:<id>" = rivals.
+   A lock only counts when BOTH players point at each other.              */
+function lockOf(id){const v=roster[id]&&roster[id].partner;if(!v)return null;
+  const rival=v.startsWith('r:'),o=rival?v.slice(2):v,back=roster[o]&&roster[o].partner;
+  return back===(rival?'r:':'')+id?{id:o,rival}:null;}
 /* ---- which courts the TV shows ----
    tv_courts on the session: empty = all active courts, or a number 1–10.
    The TV shows the first N active courts (in the order they were created). */
@@ -580,7 +590,22 @@ const wr=id=>{const x=ST[id];return x&&(x.w+x.l)?x.w/(x.w+x.l):.5;};
 function repeatCost(t,H){const [a,b]=t;
   return (H.p[pk(a[0],a[1])]||0)*3+(H.p[pk(b[0],b[1])]||0)*3+a.reduce((s,x)=>s+b.reduce((u,y)=>u+(H.o[pk(x,y)]||0),0),0);}
 function bestPairing(f,cost){let best=null,bc=Infinity;PAIRS.forEach(p=>{const t=teamsOf(f,p),c=cost(t);if(c<bc-1e-9){bc=c;best=t;}});return {teams:best,cost:bc};}
+/* Lock-ins first: when the longest-waiting player has a locked partner or
+   rival who is ALSO waiting, both play together (partners on the same team,
+   rivals on opposite teams). If one is busy, the other plays solo meanwhile.
+   Locked pairs are otherwise kept together, never split by a suggestion.   */
 function suggest(q,m=mode()){
+  if(q.length<4||m==='manual')return null;
+  const qs=new Set(q),L=id=>{const l=lockOf(id);return l&&qs.has(l.id)?l:null;};
+  const first=q[0],lf=L(first);
+  if(!lf){const q2=q.filter(id=>!L(id));return suggestRaw(q2.length>=4?q2:q,m);}
+  const p=lf.id,rest=q.filter(id=>id!==first&&id!==p);
+  const [o1,o2]=[...rest.filter(id=>!L(id)),...rest.filter(id=>L(id))];
+  if(!o2)return null;
+  if(!lf.rival)return [[first,p],[o1,o2]];
+  const a=[[first,o1],[p,o2]],b=[[first,o2],[p,o1]],d=t=>Math.abs(sum(t[0],rating)-sum(t[1],rating));
+  return d(a)<=d(b)?a:b;}
+function suggestRaw(q,m){
   if(q.length<4||m==='manual')return null;
   /* Winners vs winners: the longest-waiting player plus others who had the
      SAME result last game (won/lost/not played yet). If there aren't enough,
@@ -606,6 +631,18 @@ async function upd(pid,patch){Object.assign(roster[pid],patch);
 async function setStatus(ids,status){ids=ids.filter(Boolean);if(!ids.length)return;
   ids.forEach(id=>{if(roster[id])roster[id].status=status;});
   need(await sb.from('session_players').update({status}).eq('session_id',cur).in('player_id',ids));}
+/* ---- lock-in partners / rivals ---- */
+async function unlock(id){const l=lockOf(id),ids=[id].concat(l?[l.id]:[]);
+  for(const x of ids)if(roster[x]&&roster[x].partner)await upd(x,{partner:null});}
+async function doLock(a,b){
+  const A=a.id;if(A===b||!roster[b])return;
+  if(groupOf(A)!==groupOf(b))return toast("In open play, Regular and Ascend players can't be locked together",true);
+  if(!isSocial()){const short=[A,b].filter(id=>(roster[id].games_played||0)<MIN_LOCK_GAMES);
+    if(short.length)return toast(`${short.map(id=>P(id).name).join(' and ')} must play ${MIN_LOCK_GAMES} game${MIN_LOCK_GAMES>1?'s':''} first — open play ranks them individually`,true);}
+  const pre=a.type==='r'?'r:':'';
+  await unlock(A);await unlock(b);
+  await upd(A,{partner:pre+b});await upd(b,{partner:pre+A});
+  toast(a.type==='r'?`${P(A).name} and ${P(b).name} locked as rivals ⚔`:`${P(A).name} and ${P(b).name} locked as partners 🔗`);}
 /* Saves a court's four spots. On a REAL court the timer starts by itself the
    moment all four spots are filled. Prep courts never run a timer.       */
 async function writeSlots(c,s){
@@ -667,10 +704,12 @@ async function unlinePrep(id){const lp=linedMap()[id];if(lp){const s=slots(lp);s
    Tap a player (on a court, a prep court or waiting), then tap:
    • another court spot → they swap (same court, other team, another court or prep court)
    • an empty spot      → they move there
-   • someone waiting    → the waiting player replaces them                 */
+   • someone waiting    → the waiting player replaces them
+   While picking a lock-in (🔗), tapping someone waiting locks the two.  */
 const same=(a,b)=>a.k===b.k&&(a.k==='w'?a.id===b.id:String(a.c)===String(b.c)&&a.i===b.i);
 async function pickTarget(t){
   if(ending!=null)return;
+  if(lockSel){const a=lockSel;lockSel=null;if(t.k==='w')await doLock(a,t.id);render();return;}
   if(t.k==='w'){const L=linedMap();if(L[t.id]){const c=L[t.id];t={k:'s',c:String(c.id),i:slots(c).indexOf(t.id)};}}
   if(!sel){sel=t;render();return;}
   if(same(sel,t)){sel=null;render();return;}
@@ -777,7 +816,7 @@ const noSession=()=>`<div class="empty"><p>No session selected yet.</p><button c
 function rallyView(){
   if(!cur)return noSession();
   const [ml,md]=MODES[mode()];
-  return `<div class="rule"><b>${ml}:</b> ${md} <span class="hide-sm">· <b>Tap a player</b>, then tap another player, an empty spot or someone waiting to swap them.${isSocial()?'':' Use <b>⇄</b> on a free court to move it between Regular and Ascend.'}</span></div>
+  return `<div class="rule"><b>${ml}:</b> ${md} <span class="hide-sm">· <b>Tap a player</b>, then tap another player, an empty spot or someone waiting to swap them. Tap <b>🔗</b> to lock in a partner or rival${isSocial()?'':` (after ${MIN_LOCK_GAMES} game${MIN_LOCK_GAMES>1?'s':''} each)`}.${isSocial()?'':' Use <b>⇄</b> on a free court to move it between Regular and Ascend.'}</span></div>
     ${rallyBody()}`;
 }
 function groupBlock(g){
@@ -804,8 +843,9 @@ function groupBlock(g){
 function teamsHTML(c,withScores){
   const s=slots(c);
   const isSel=i=>sel&&sel.k==='s'&&String(sel.c)===String(c.id)&&sel.i===i;
+  const lk=id=>{const l=lockOf(id);return l?(l.rival?' ⚔':' 🔗'):'';};
   const slot=i=>s[i]
-    ?`<button class="slot ${isSel(i)?'sel':''}" data-act="slot" data-c="${c.id}" data-i="${i}">${av(s[i],26)}<span>${esc(P(s[i]).name)}</span></button>`
+    ?`<button class="slot ${isSel(i)?'sel':''}" data-act="slot" data-c="${c.id}" data-i="${i}">${av(s[i],26)}<span>${esc(P(s[i]).name)}${lk(s[i])}</span></button>`
     :`<button class="slot empty ${isSel(i)?'sel':''}" data-act="slot" data-c="${c.id}" data-i="${i}">+ Add player</button>`;
   const team=(i0,side)=>`<div class="team ${side}">${slot(i0)}${slot(i0+1)}${withScores?`<input class="score-in" type="number" min="0" inputmode="numeric" id="sc${side}-${c.id}" placeholder="0" aria-label="Score">`:''}</div>`;
   return `<div class="ac-body">${team(0,'t1')}<div class="vs">vs</div>${team(2,'t2')}</div>`;
@@ -861,24 +901,29 @@ function waitingBox(g,sugs){
   return `<div class="box waitbox"><h3>Waiting · ${q.length}</h3>
     ${sugs[0]?`<div class="upnext">${line(sugs[0],'Next','n1')}${line(sugs[1],'Then','n2')}</div>`:''}
     ${q.length?`<ol class="wl"><li class="wr head"><span>Player</span><span class="wc">GP</span><span class="wc">W–L</span><span class="wc">Wait</span><span class="wc hide-md">Last game</span><span></span></li>
-    ${q.map((id,i)=>{const e=roster[id],st=ST[id]||{w:0,l:0,last:0},k=L[id]?-1:grp(id);
+    ${q.map((id,i)=>{const e=roster[id],st=ST[id]||{w:0,l:0,last:0},k=L[id]?-1:grp(id),lk=lockOf(id);
       const since=Math.max(ms(e.arrived_at),st.last),mins=since?Math.floor((now-since)/60000):0;
-      const isS=sel&&sel.k==='w'&&sel.id===id;
+      const isS=(sel&&sel.k==='w'&&sel.id===id)||(lockSel&&lockSel.id===id);
       return `<li class="wr ${L[id]?'lined':k===0?'g1':k===1?'g2':''} ${isS?'sel':''}">
         <button class="wmain" data-act="wait" data-id="${esc(id)}" title="Tap to select, then tap a court spot"><span class="qn">${i+1}</span>${av(id,28)}<b>${esc(P(id).name)}</b>
+          ${lk?`<span class="chip ${lk.rival?'rival':'prep'}">${lk.rival?'⚔ vs':'🔗 with'} ${esc(P(lk.id).name)}</span>`:''}
           ${L[id]?`<span class="chip prep">Lined up</span>`:''}
           ${LR[id]?`<span class="chip ${LR[id]==='w'?'pub':'plain'}">${LR[id]==='w'?'Won last':'Lost last'}</span>`:''}
           ${g==='social'?`<span class="chip ${P(id).division} hide-md">${DIVS[P(id).division].slice(0,3)}</span>`:''}${P(id).organiser?'<span class="chip org">/O</span>':''}</button>
         <span class="wc">${e.games_played||0}</span><span class="wc">${st.w}–${st.l}</span><span class="wc dim">${mins<1?'now':mins+'m'}</span>
         <span class="wc dim hide-md">${st.last?fmtTime(st.last):'—'}</span>
-        <span class="qa"><button title="Move up one" data-act="qup" data-id="${esc(id)}" ${i?'':'disabled'}>▲</button><button title="Move down one" data-act="qdown" data-id="${esc(id)}" ${i<q.length-1?'':'disabled'}>▼</button><button title="Play next" data-act="qtop" data-id="${esc(id)}" ${i?'':'disabled'}>⏭</button><button title="Sit out" data-act="qrest" data-id="${esc(id)}">💤</button></span></li>`;}).join('')}</ol>`
+        <span class="qa"><button class="${lk?'on':''}" title="${lk?'Unlock '+esc(P(id).name)+' and '+esc(P(lk.id).name):'Lock in a partner or rival'}" data-act="lock" data-id="${esc(id)}">${lk?'🔓':'🔗'}</button><button title="Move up one" data-act="qup" data-id="${esc(id)}" ${i?'':'disabled'}>▲</button><button title="Move down one" data-act="qdown" data-id="${esc(id)}" ${i<q.length-1?'':'disabled'}>▼</button><button title="Play next" data-act="qtop" data-id="${esc(id)}" ${i?'':'disabled'}>⏭</button><button title="Sit out" data-act="qrest" data-id="${esc(id)}">💤</button></span></li>`;}).join('')}</ol>`
       :'<p class="dim" style="margin:0">Nobody waiting.</p>'}
     ${rest.length?`<h3 style="margin-top:1rem">Sitting out</h3><ul class="rest">${rest.map(id=>`<li>${av(id,26)}<b>${esc(P(id).name)}</b>
       <span class="qa"><button class="txt" data-act="qback" data-id="${esc(id)}">Back in line</button><button title="Gone for the night" data-act="qleave" data-id="${esc(id)}">✕</button></span></li>`).join('')}</ul>`:''}
   </div>`;
 }
 function selBar(){
-  if(!sel||tab!=='rally')return '';
+  if(tab!=='rally')return '';
+  if(lockSel){const t=lockSel.type;
+    return `<div class="selbar"><span><b>${esc(P(lockSel.id).name)}</b> — tap someone waiting to lock them in</span>
+      <button data-act="lockType" data-v="p" class="${t==='p'?'':'off'}">🔗 As partners</button><button data-act="lockType" data-v="r" class="${t==='r'?'':'off'}">⚔ As rivals</button><button data-act="selCancel">Cancel</button></div>`;}
+  if(!sel)return '';
   if(sel.k==='w')return `<div class="selbar"><span><b>${esc(P(sel.id).name)}</b> — tap a court spot to put them on, or another waiting player to swap places.</span><button data-act="selCancel">Cancel</button></div>`;
   const c=courtById(sel.c);if(!c){sel=null;return '';}const id=slots(c)[sel.i];
   if(!id)return `<div class="selbar"><span>Empty spot on <b>${esc(c.label)}</b> — tap someone waiting or a player on another court.</span><button data-act="selCancel">Cancel</button></div>`;
@@ -1094,7 +1139,7 @@ async function removePlayer(id){
   for(const r of sp.filter(x=>x.player_id===id)){
     const k=into?sp.find(x=>x.player_id===into&&x.session_id===r.session_id):null;
     if(k)need(await sb.from('session_players').update({games_played:(k.games_played||0)+(r.games_played||0)}).eq('session_id',k.session_id).eq('player_id',into));
-    if(into&&!k)need(await sb.from('session_players').update({player_id:into}).eq('session_id',r.session_id).eq('player_id',id));
+    if(into&&!k)need(await sb.from('session_players').update({player_id:into,partner:null}).eq('session_id',r.session_id).eq('player_id',id));
     else need(await sb.from('session_players').delete().eq('session_id',r.session_id).eq('player_id',id));
   }
   /* 4. keep the DUPR and photo if the kept player has none, then delete */
@@ -1218,7 +1263,7 @@ async function wzCreate(){
   need(await sb.from('courts').insert(rows.map(r=>({...r,session_id:s.id}))));
   const ids=[...wz.picked].filter(id=>players[id]);
   if(ids.length)need(await sb.from('session_players').insert(ids.map(id=>({session_id:s.id,player_id:id,status:'expected'}))));
-  cur=s.id;wz=null;closeModal();await loadAll();tab='rally';sel=null;ending=null;lastPlan={};render();scrollTo(0,0);
+  cur=s.id;wz=null;closeModal();await loadAll();tab='rally';sel=null;lockSel=null;ending=null;lastPlan={};render();scrollTo(0,0);
   toast(`${label} is ready — tap Arrived as players check in`);}
 document.addEventListener('input',e=>{if(e.target.id==='wzQ'&&wz){wz.q=e.target.value;$('#wzList').innerHTML=wzPlayers();}});
 
@@ -1287,6 +1332,7 @@ async function poolToggle(id,on){
     roster[id]={games_played:0,...(e||{}),...row};toast(P(id).name+' added — tap “Arrived” when they check in');}
   else{if(e&&e.status==='court'){render();return toast(P(id).name+' is on court — take them off the court first',true);}
     await unlinePrep(id);
+    if(e&&lockOf(id))await unlock(id);
     if(e&&e.games_played>0)await upd(id,{status:'left'});
     else{need(await sb.from('session_players').delete().eq('session_id',cur).eq('player_id',id));delete roster[id];}
     toast(P(id).name+' taken out of this session');}
@@ -1296,7 +1342,7 @@ async function poolToggle(id,on){
 /* ================= EVENTS ================= */
 /* actions that only change what's on screen — no "Saving…" for these */
 const VIEW_ONLY=new Set(['wzType','wzBack','wzNext','wzMode','wzPick','wzCopy','theme','tab','closeModal','newSession','nType','courtsPanel','openCourts','slot','wait','selCancel','end','cancelEnd',
-  'editRes','poolDiv','poolShow','newPlayer','editPlayer','rmPhoto','exportCSV','exportJSON','dlLocalCSV','dlLocalJSON','reload','retry']);
+  'editRes','poolDiv','poolShow','newPlayer','editPlayer','rmPhoto','exportCSV','exportJSON','dlLocalCSV','dlLocalJSON','reload','retry','lockType']);
 async function act(d,el,e){
   const q=d.id&&players[d.id]?queueOf(groupOf(d.id)):[],i=q.indexOf(d.id);
   const court=()=>courtById(d.id);
@@ -1308,7 +1354,7 @@ async function act(d,el,e){
     case 'exportJSON': exportJSON();break;
     case 'dlLocalCSV': {const b=readLocal();if(b)exportCSV(b);break;}
     case 'dlLocalJSON': {const b=readLocal();if(b)exportJSON(b);break;}
-    case 'tab': tab=d.tab;sel=null;if(tab==='stats')await loadStats();render();scrollTo(0,0);break;
+    case 'tab': tab=d.tab;sel=null;lockSel=null;if(tab==='stats')await loadStats();render();scrollTo(0,0);break;
     case 'statsCSV': statsCSV();break;
     case 'signout': await sb.auth.signOut();if(channel){sb.removeChannel(channel);channel=null;}user=null;render();break;
     case 'closeModal': if(e.target===el||el.tagName==='BUTTON')closeModal();break;
@@ -1341,7 +1387,7 @@ async function act(d,el,e){
       if(n&&prompt('This session has recorded games. Type DELETE to confirm.')!=='DELETE'){toast('Not deleted');break;}
       for(const t of ['matches','courts','session_players'])need(await sb.from(t).delete().eq('session_id',id));
       need(await sb.from('sessions').delete().eq('id',id));
-      cur=null;sel=null;ending=null;lastPlan={};await loadAll();render();
+      cur=null;sel=null;lockSel=null;ending=null;lastPlan={};await loadAll();render();
       if(sessions.some(x=>x.id===id))toast('The session is still there — the database blocked the delete',true);
       else toast('Session deleted');break;}
     case 'publish':
@@ -1372,7 +1418,14 @@ async function act(d,el,e){
     /* courts */
     case 'slot': await pickTarget({k:'s',c:String(d.c),i:Number(d.i)});break;
     case 'wait': await pickTarget({k:'w',id:d.id});break;
-    case 'selCancel': sel=null;render();break;
+    case 'selCancel': sel=null;lockSel=null;render();break;
+    /* lock-in partners / rivals */
+    case 'lock': {const l=lockOf(d.id);
+      if(l){await unlock(d.id);render();toast(`${P(d.id).name} and ${P(l.id).name} unlocked`);break;}
+      if(!isSocial()&&(roster[d.id].games_played||0)<MIN_LOCK_GAMES){
+        toast(`${P(d.id).name} needs to play ${MIN_LOCK_GAMES} game${MIN_LOCK_GAMES>1?'s':''} first — open play ranks them individually`,true);break;}
+      sel=null;lockSel={id:d.id,type:'p'};render();break;}
+    case 'lockType': if(lockSel){lockSel.type=d.v;render();}break;
     case 'selSide': {const a=sel;sel=null;await doSwap(a,{k:'s',c:a.c,i:(a.i+2)%4});render();break;}
     case 'selWait': {const a=sel;sel=null;const c=courtById(a.c),s=slots(c),id=s[a.i];s[a.i]='';
       await setStatus([id],'queued');await writeSlots(c,s);render();toast(P(id).name+' back in line');break;}
@@ -1406,7 +1459,7 @@ async function act(d,el,e){
     case 'qtop': if(i>0){await upd(d.id,{queue_ticket:new Date(ms(roster[q[0]].queue_ticket)-1).toISOString()});render();toast(P(d.id).name+' plays next');}break;
     case 'qrest': if(sel&&sel.k==='w'&&sel.id===d.id)sel=null;await unlinePrep(d.id);await upd(d.id,{status:'resting'});render();toast(P(d.id).name+' is sitting out');break;
     case 'qback': await upd(d.id,{status:'queued',queue_ticket:new Date().toISOString()});await autoFillAll();render();toast(P(d.id).name+' is back — end of the line');break;
-    case 'qleave': await unlinePrep(d.id);await upd(d.id,{status:'left'});render();toast(P(d.id).name+' has left for the night');break;
+    case 'qleave': await unlinePrep(d.id);if(lockOf(d.id))await unlock(d.id);await upd(d.id,{status:'left'});render();toast(P(d.id).name+' has left for the night');break;
     /* pool */
     case 'poolAdd': await poolToggle(d.id,true);break;
     case 'arrive': {const v=($('#arr-'+d.id)||{}).value,t=v?onDate(v):new Date().toISOString();
@@ -1426,10 +1479,10 @@ document.addEventListener('click',async e=>{
   if(e.target.closest('[data-stop]')&&!e.target.closest('[data-act]:not(.backdrop)'))return;
   const el=e.target.closest('[data-act]');if(!el||el.tagName==='INPUT'||el.tagName==='SELECT')return;
   if(busy&&el.dataset.act!=='closeModal')return;
-  const writes=!VIEW_ONLY.has(el.dataset.act)||(el.dataset.act==='slot'||el.dataset.act==='wait')&&sel;
+  const writes=!VIEW_ONLY.has(el.dataset.act)||(el.dataset.act==='slot'||el.dataset.act==='wait')&&(sel||lockSel);
   busy=true;ops++;epoch++;if(writes)setSave('saving');
   try{await act(el.dataset,el,e);if(writes){setSave('ok');backupLocal();}}
-  catch(err){fail(err);sel=null;await loadSession().catch(()=>{});render();}
+  catch(err){fail(err);sel=null;lockSel=null;await loadSession().catch(()=>{});render();}
   finally{busy=false;ops--;epoch++;}
 });
 document.addEventListener('change',async e=>{
@@ -1448,7 +1501,7 @@ document.addEventListener('change',async e=>{
     if(a==='courtActive'){const c=courtById(t.dataset.id);
       if(!t.checked&&filled(c)){t.checked=true;setSave('ok');return toast(c.label+' has players on it — clear it first',true);}
       need(await sb.from('courts').update({active:t.checked}).eq('id',c.id));c.active=t.checked;if(t.checked)await autoFillAll();render();}
-    if(a==='pickSession'){cur=Number(t.value);sel=null;ending=null;lastPlan={};await loadSession();render();}
+    if(a==='pickSession'){cur=Number(t.value);sel=null;lockSel=null;ending=null;lastPlan={};await loadSession();render();}
     if(a==='setArr'&&t.value){const id=t.dataset.id,e2=roster[id],v=onDate(t.value),patch={arrived_at:v};
       if(e2.status==='queued'&&!e2.games_played)patch.queue_ticket=v;
       await upd(id,patch);render();toast(patch.queue_ticket?'Arrival time changed — queue place adjusted':'Arrival time saved');}
@@ -1460,7 +1513,7 @@ document.addEventListener('change',async e=>{
 });
 document.addEventListener('input',e=>{if(e.target.id==='poolQ'){poolQ=e.target.value;$('#poolGrid').innerHTML=poolGrid();}});
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){if(modal)closeModal();else if(ending!=null){ending=null;render();}else if(sel){sel=null;render();}}
+  if(e.key==='Escape'){if(modal)closeModal();else if(ending!=null){ending=null;render();}else if(sel||lockSel){sel=null;lockSel=null;render();}}
   if(e.key==='Enter'&&e.target.classList&&e.target.classList.contains('score-in')){e.preventDefault();const b=e.target.closest('.acourt').querySelector('[data-act="saveEnd"]');if(b)b.click();}
   if(e.key==='Enter'&&modal==='edit'){e.preventDefault();$('[data-act="saveEdit"]').click();}
 });
@@ -1476,7 +1529,7 @@ document.addEventListener('submit',async e=>{
 setInterval(()=>{courts.forEach(c=>{if(isPrep(c)||filled(c)<4||!c.started_at)return;const r=remaining(c);
   document.querySelectorAll(`[data-timer="${c.id}"]`).forEach(el=>{el.textContent=tText(c);el.classList.toggle('up',r===0);
     const card=el.closest('.acourt');if(card)card.classList.toggle('done',r===0);});});},1000);
-setInterval(()=>{if(user&&tab==='rally')safeRender();},30000);
+setInterval(()=>{if(user&&tab==='rally'&&!lockSel)safeRender();},30000);
 
 /* start */
 (async()=>{
