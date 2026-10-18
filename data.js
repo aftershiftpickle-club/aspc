@@ -320,7 +320,29 @@ const ALBUMS = [
     description: "Friday Open Play",
     url: "https://drive.google.com/drive/folders/1EDsuJQatPgyx7hrP_M5uEEGoFaVj2vPH?usp=sharing",
     cover: ""
+   },
+   {
+    date: "2026-10-06",
+    title: "Oct 06, 2026 Social Play",
+    description: "Tuesday Social Play",
+    url: "https://drive.google.com/drive/folders/1gl_4vNY4CNGxVgXHNfJRAfWqw-DTB7Km?usp=sharing",
+    cover: ""
+   },
+   {
+    date: "2026-10-10",
+    title: "Oct 10, 2026 Open Play",
+    description: "Friday Open Play",
+    url: "https://drive.google.com/drive/folders/1xYw-MmpkT2MtbXdJnSD3fqeIyjSNJXGh?usp=sharing",
+    cover: ""
     },
+   {
+    date: "2026-10-13",
+    title: "Oct 13, 2026 Social Play",
+    description: "Tuesday Social Play",
+    url: "https://drive.google.com/drive/folders/1oxWzvpGUGBXiJe2K6ht5oEJRoU7CjFA_?usp=sharing",
+    cover: ""
+    },
+
 ];
 
 
