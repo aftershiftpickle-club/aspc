@@ -330,8 +330,8 @@ const ALBUMS = [
    },
    {
     date: "2026-10-10",
-    title: "Oct 10, 2026 Open Play",
-    description: "Friday Open Play",
+    title: "Oct 10, 2026 Social Play",
+    description: "Saturday Social Play",
     url: "https://drive.google.com/drive/folders/1xYw-MmpkT2MtbXdJnSD3fqeIyjSNJXGh?usp=sharing",
     cover: ""
     },
