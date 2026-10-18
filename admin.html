@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <title>ASPC Admin</title>
-<!-- Version: 4 Oct 2026 (final) — start-a-session pop-up, shared courts, arrivals list, duplicate warning, delete/merge player -->
+<!-- Version: 19 Oct 2026 — live leaderboard (admin only), winners-vs-winners matchmaking, +1/−1 minute court timers -->
 
 <script>
 (function(){var t;try{t=localStorage.getItem('aspc-theme')}catch(e){}
@@ -380,6 +380,7 @@ const MODES={
   roundrobin:['Round robin','Mixes in new partners and opponents. The longest-waiting player is always included.'],
   balanced:['Balanced','The four who have waited longest play next, split into the fairest teams by DUPR.'],
   result:['Result based','Players with similar records tonight play each other, starting with the longest-waiting player.'],
+  wwll:['Winners vs winners','Winners of their last game play other winners, losers play other losers. Starts with the longest-waiting player.'],
   manual:['Manual','No suggestions. Tap “+ Add player” on a court, then tap someone waiting.']};
 
 /* ---------- state ---------- */
@@ -564,6 +565,9 @@ const pk=(a,b)=>a<b?a+'|'+b:b+'|'+a;
 function history(){const p={},o={};matches.forEach(m=>{const A=m.team1||[],B=m.team2||[];
   [A,B].forEach(T=>{if(T.length===2)p[pk(T[0],T[1])]=(p[pk(T[0],T[1])]||0)+1;});
   A.forEach(x=>B.forEach(y=>{o[pk(x,y)]=(o[pk(x,y)]||0)+1;}));});return {p,o};}
+/* each player's result in their most recent game tonight: 'w' or 'l' */
+function lastRes(){const R={};[...matches].sort((a,b)=>ms(a.created_at)-ms(b.created_at)).forEach(m=>{const aw=m.score1>m.score2;
+  (m.team1||[]).forEach(id=>R[id]=aw?'w':'l');(m.team2||[]).forEach(id=>R[id]=aw?'l':'w');});return R;}
 
 /* ================= MATCHMAKING ================= */
 const PAIRS=[[[0,1],[2,3]],[[0,2],[1,3]],[[0,3],[1,2]]];
@@ -578,6 +582,12 @@ function repeatCost(t,H){const [a,b]=t;
 function bestPairing(f,cost){let best=null,bc=Infinity;PAIRS.forEach(p=>{const t=teamsOf(f,p),c=cost(t);if(c<bc-1e-9){bc=c;best=t;}});return {teams:best,cost:bc};}
 function suggest(q,m=mode()){
   if(q.length<4||m==='manual')return null;
+  /* Winners vs winners: the longest-waiting player plus others who had the
+     SAME result last game (won/lost/not played yet). If there aren't enough,
+     the next people in line fill the gaps so a court never sits empty.     */
+  if(m==='wwll'){const H=history(),R=lastRes(),first=q[0],want=R[first]||'n',W=q.slice(0,12).filter(id=>id!==first);
+    const f=[first,...W.filter(id=>(R[id]||'n')===want),...W.filter(id=>(R[id]||'n')!==want)].slice(0,4);
+    return bestPairing(f,t=>repeatCost(t,H)+Math.abs(sum(t[0],rating)-sum(t[1],rating))*.3).teams;}
   if(m==='rotation')return teamsOf(q.slice(0,4),PAIRS[2]);
   if(m==='balanced')return bestPairing(q.slice(0,4),t=>Math.abs(sum(t[0],rating)-sum(t[1],rating))).teams;
   const H=history(),W=q.slice(0,8),first=W[0];let best=null,bs=Infinity;
@@ -685,8 +695,8 @@ function render(){
   if(!sb){$('#app').innerHTML=noDbView();return;}
   if(!user){$('#app').innerHTML=loginView();return;}
   ST=stats();
-  const body={rally:rallyView,pool:poolView,results:resultsView,stats:statsView}[tab]();
-  const tabs=[['rally','🎾 Rally'],['pool','👥 Player pool'],['results','📋 Results'],['stats','📊 Monthly stats']];
+  const body={rally:rallyView,leader:leaderView,pool:poolView,results:resultsView,stats:statsView}[tab]();
+  const tabs=[['rally','🎾 Rally'],['leader','🏆 Leaderboard'],['pool','👥 Player pool'],['results','📋 Results'],['stats','📊 Monthly stats']];
   $('#app').innerHTML=`${demo?'<div class="demo">Demo mode — sample data, nothing is saved</div>':''}
     ${!navigator.onLine?'<div class="offbar">⚠ No internet — changes are NOT being saved. Keep this page open; everything reloads when you\'re back online. You can still ⬇ Save results from the last saved copy.</div>':''}
     <header class="atop"><div class="wrap atop-in">
@@ -806,8 +816,10 @@ function courtCard(c,plan,tv){
   const state=!n?'<span class="dim" style="font-weight:700;font-size:.8rem">Free</span>'
     :!isFull?`<span class="dim" style="font-weight:700;font-size:.8rem">Needs ${4-n} more</span>`
     :`<span class="timer ${r===0?'up':''} ${c.paused_at?'paused':''}" data-timer="${c.id}">${tText(c)}</span>`;
+  /* −1 / +1 change the time left by one minute (works while paused too) */
   const ctl=isFull&&!ed?(!c.started_at?btn('tstart','▶ Start')
-    :(c.paused_at?btn('tresume','▶ Resume'):btn('tpause','⏸ Pause'))+btn('trestart','↺','Restart the timer')):'';
+    :btn('tminus','−1','Take 1 minute off')+btn('tplus','+1','Add 1 minute')
+     +(c.paused_at?btn('tresume','▶ Resume'):btn('tpause','⏸ Pause'))+btn('trestart','↺','Restart the timer')):'';
   /* ⇄ moves a FREE court between Regular and Ascend — the TV doesn't change */
   const sw=!n&&!isSocial()?`<button class="icon-btn sw" data-act="switchDiv" data-id="${c.id}" title="Use this court for ${c.division==='ascend'?'Regular':'Ascend'} — the TV doesn't change">⇄ ${c.division==='ascend'?'Regular':'Ascend'}</button>`:'';
   const notv=tv&&!tv.has(c.id)?`<span class="chip notv" title="Hidden from the TV — change in ⚙ Courts">Not on TV</span>`:'';
@@ -842,7 +854,7 @@ function prepCard(p,g){
     ${teamsHTML(p,false)}${foot}</article>`;
 }
 function waitingBox(g,sugs){
-  const q=queueOf(g),now=Date.now(),L=linedMap();
+  const q=queueOf(g),now=Date.now(),L=linedMap(),LR=mode()==='wwll'?lastRes():{};
   const rest=Object.values(roster).filter(e=>e.status==='resting'&&inGroup(e.player_id,g)).map(e=>e.player_id);
   const grp=id=>sugs.findIndex(t=>t&&t.flat().includes(id));
   const line=(t,l,c)=>t?`<div><span class="nx ${c}">${l}</span>${names(t[0])} <span class="dim">vs</span> ${names(t[1])}</div>`:'';
@@ -855,6 +867,7 @@ function waitingBox(g,sugs){
       return `<li class="wr ${L[id]?'lined':k===0?'g1':k===1?'g2':''} ${isS?'sel':''}">
         <button class="wmain" data-act="wait" data-id="${esc(id)}" title="Tap to select, then tap a court spot"><span class="qn">${i+1}</span>${av(id,28)}<b>${esc(P(id).name)}</b>
           ${L[id]?`<span class="chip prep">Lined up</span>`:''}
+          ${LR[id]?`<span class="chip ${LR[id]==='w'?'pub':'plain'}">${LR[id]==='w'?'Won last':'Lost last'}</span>`:''}
           ${g==='social'?`<span class="chip ${P(id).division} hide-md">${DIVS[P(id).division].slice(0,3)}</span>`:''}${P(id).organiser?'<span class="chip org">/O</span>':''}</button>
         <span class="wc">${e.games_played||0}</span><span class="wc">${st.w}–${st.l}</span><span class="wc dim">${mins<1?'now':mins+'m'}</span>
         <span class="wc dim hide-md">${st.last?fmtTime(st.last):'—'}</span>
@@ -871,6 +884,41 @@ function selBar(){
   if(!id)return `<div class="selbar"><span>Empty spot on <b>${esc(c.label)}</b> — tap someone waiting or a player on another court.</span><button data-act="selCancel">Cancel</button></div>`;
   return `<div class="selbar"><span><b>${esc(P(id).name)}</b> — tap a player, empty spot or someone waiting to swap.</span>
     <button data-act="selSide">⇄ Other team</button><button data-act="selWait">↩ To waiting</button><button data-act="selCancel">Cancel</button></div>`;
+}
+
+/* ---- Live leaderboard (admin only) ----
+   Tonight's session only. Open play: Regular and Ascend separately.
+   Social play: one board. Order: most wins, then win %, then point diff.
+   Never shown on the TV or the website. */
+function leaderView(){
+  if(!cur)return noSession();
+  const st={};
+  matches.forEach(m=>{const aw=m.score1>m.score2,df=m.score1-m.score2,g=m.division;
+    const add=(id,won,d)=>{const k=g+'|'+id,x=st[k]||(st[k]={id,g,w:0,l:0,d:0,res:[]});won?x.w++:x.l++;x.d+=d;x.res.push([ms(m.created_at),won]);};
+    (m.team1||[]).forEach(id=>add(id,aw,df));(m.team2||[]).forEach(id=>add(id,!aw,-df));});
+  const rows=Object.values(st).map(x=>{x.res.sort((a,b)=>b[0]-a[0]);const f=x.res[0][1];let s=0;
+      for(const r of x.res){if(r[1]===f)s++;else break;}
+      return {...x,gp:x.w+x.l,wr:x.w/(x.w+x.l)*100,streak:(f?'W':'L')+s};})
+    .sort((a,b)=>b.w-a.w||b.wr-a.wr||b.d-a.d||P(a.id).name.localeCompare(P(b.id).name));
+  const TH='padding:.55rem .6rem;font-size:.62rem;font-weight:800;letter-spacing:.14em;text-transform:uppercase;background:var(--soft);color:var(--ink);text-align:center;white-space:nowrap';
+  const TD='padding:.55rem .6rem;border-top:1px solid var(--line);color:var(--ink);text-align:center;font-variant-numeric:tabular-nums';
+  const where=id=>{const e=roster[id];if(!e)return '';return e.status==='court'?`<span class="st c">${esc(courtOf(id))}</span>`
+    :e.status==='queued'?'<span class="st q">Waiting</span>':e.status==='resting'?'<span class="st r">Sitting out</span>':'<span class="st exp">Left</span>';};
+  const medal=i=>['🥇','🥈','🥉'][i]||i+1;
+  const tbl=g=>{const r=rows.filter(x=>x.g===g);
+    return `<div class="adiv"><div class="adiv-head"><h2>${g==='social'?'Social play':DIVS[g]}</h2><span class="chip ${g}">${r.length} player${r.length===1?'':'s'}</span></div>
+      <div class="card" style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:.86rem">
+        <thead><tr>${['#','Player','GP','W','L','Win %','Diff','Streak','Now'].map((h,i)=>`<th style="${TH}${i===1?';text-align:left':''}">${h}</th>`).join('')}</tr></thead>
+        <tbody>${r.map((x,i)=>`<tr${i<3?' style="background:var(--next)"':''}><td style="${TD};font-weight:800">${medal(i)}</td>
+          <td style="${TD};text-align:left;font-weight:700"><span style="display:inline-flex;align-items:center;gap:.45rem">${av(x.id,28)}${esc(P(x.id).name)}</span>${isSocial()?` <span class="chip ${P(x.id).division}">${DIVS[P(x.id).division].slice(0,3)}</span>`:''}</td>
+          <td style="${TD}">${x.gp}</td><td style="${TD};font-weight:800">${x.w}</td><td style="${TD}">${x.l}</td>
+          <td style="${TD};font-weight:800">${x.wr.toFixed(0)}%</td><td style="${TD}">${x.d>0?'+'+x.d:x.d}</td>
+          <td style="${TD};font-weight:800;color:${x.streak[0]==='W'?'var(--accent-text)':'var(--red)'}">${x.streak}</td><td style="${TD}">${where(x.id)}</td></tr>`).join('')
+          ||`<tr><td colspan="9" class="dim" style="padding:1.2rem;text-align:center">No games recorded yet.</td></tr>`}</tbody></table></div></div>`;};
+  return `<div class="sec-head"><div><h2>Live leaderboard</h2>
+      <p>Tonight's session only — updates by itself after every game. Ordered by most wins, then win %, then point difference. Only organisers can see this; it is never shown on the TV or the website.</p></div>
+    <span class="chip live">● Live</span></div>
+    ${isSocial()?tbl('social'):tbl('regular')+tbl('ascend')}`;
 }
 
 /* ---- Player pool ---- */
@@ -1333,6 +1381,10 @@ async function act(d,el,e){
     case 'clear': {const c=court();sel=null;await clearCourt(c);render();toast(isPrep(c)?c.label+' emptied — players are still waiting':c.label+' cleared — everyone back in their old places');break;}
     case 'tstart': case 'trestart': {const c=court(),iso=new Date().toISOString();
       need(await sb.from('courts').update({started_at:iso,paused_at:null}).eq('id',c.id));Object.assign(c,{started_at:iso,paused_at:null});render();break;}
+    /* +1 / −1 minute: shifts the start time, so it also works while paused and the TV follows */
+    case 'tplus': case 'tminus': {const c=court(),end=c.paused_at?ms(c.paused_at):Date.now();
+      const nr=Math.max(0,remaining(c)+(d.act==='tplus'?60:-60)),st=new Date(end-(GAME_SECONDS-nr)*1000).toISOString();
+      need(await sb.from('courts').update({started_at:st}).eq('id',c.id));c.started_at=st;render();break;}
     case 'tpause': {const c=court(),iso=new Date().toISOString();
       need(await sb.from('courts').update({paused_at:iso}).eq('id',c.id));c.paused_at=iso;render();break;}
     case 'tresume': {const c=court(),st=new Date(ms(c.started_at)+(Date.now()-ms(c.paused_at))).toISOString();
