@@ -345,13 +345,6 @@ const ALBUMS = [
     {
     date: "2026-10-16",
     title: "Oct 16, 2026 Open Play",
-    description: "Friday Open Play",
-    url: "https://drive.google.com/drive/folders/1yXXnSzgrXqrCn5BC5HAGFzr50h09aVVv?usp=sharing",
-    cover: ""
-    },
-   {
-    date: "2026-10-16",
-    title: "Oct 16, 2026 Open Play",
     description: "Friday BCA Open Play",
     url: "https://drive.google.com/drive/folders/1yXXnSzgrXqrCn5BC5HAGFzr50h09aVVv?usp=sharing",
     cover: ""
@@ -359,11 +352,11 @@ const ALBUMS = [
    {
     date: "2026-10-17",
     title: "Oct 17, 2026 Social Play",
-    description: "Saturday Open Play",
-    url: "https://drive.google.com/drive/folders/1yXXnSzgrXqrCn5BC5HAGFzr50h09aVVv?usp=sharing",
+    description: "Saturday Social Play",
+    url: "https://drive.google.com/drive/folders/1LUbnZKjdlJp5-Gmay35MX_4rXdB9OyF9?usp=sharing",
     cover: ""
     },
-
+ 
 ];
 
 
