@@ -249,36 +249,34 @@ tr.org .who span{color:var(--muted)}
 /* ---------- photos ---------- */
 .albums{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:1.1rem}
 .album{background:var(--card);border:1px solid var(--line);border-radius:var(--r);overflow:hidden;display:flex;flex-direction:column;box-shadow:var(--shadow)}
-.album__cover{aspect-ratio:16/10;position:relative;display:grid;place-items:center;
-  background:radial-gradient(circle, var(--dots) 1.3px, transparent 1.5px) 0 0/15px 15px,
-    linear-gradient(135deg,var(--soft),var(--card))}
-.album__cover img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;z-index:1}
-.album__cover span{position:relative;font-family:var(--serif);color:var(--ink);font-size:1.3rem;text-align:center;padding:0 1rem}
-.album__cover:has(img)::after{content:"";position:absolute;inset:0;z-index:2;background:linear-gradient(to top,rgba(0,0,0,.7),transparent 55%)}
-.album__cover:has(img) span{position:absolute;left:14px;bottom:10px;z-index:3;color:#F0EFEC;padding:0;text-align:left}
 .album__body{padding:1.05rem 1.15rem 1.25rem;display:flex;flex-direction:column;gap:.4rem;flex:1}
 .album__body h3{font-size:1.02rem;font-weight:800}
 .album__body p{margin:0;color:var(--muted);font-size:.88rem}
 
-/* ---------- PHOTO ALBUM COVERS: stacked prints ----------
-   Each cover looks like a small pile of photos. With a cover picture
-   the photo sits on top; without one the top print shows the session
-   type (Open play / Social play / Ascend) on a colour. No date on the
-   image — the album title underneath already has it.               */
-.album__cover{margin:20px 22px 10px;aspect-ratio:16/10;position:relative;isolation:isolate;display:grid;place-items:center;
-  border:3px solid var(--card);border-radius:10px;background:var(--accent);box-shadow:0 6px 14px -8px rgba(0,0,0,.45)}
-.album__cover::before,.album__cover::after,.album__cover:has(img)::after{content:"";position:absolute;inset:-3px;z-index:-1;
-  border:3px solid var(--card);border-radius:10px;box-shadow:0 4px 10px -8px rgba(0,0,0,.4)}
-.album__cover::before{background:var(--soft);transform:rotate(-5deg)}
-.album__cover::after,.album__cover:has(img)::after{background:var(--line);transform:rotate(4deg)}
-.album__cover img{border-radius:7px;z-index:1}
-.album__cover span,.album__cover:has(img) span{position:relative;left:auto;bottom:auto;z-index:0;padding:0 .6rem;text-align:center;
-  font-family:var(--serif);font-style:italic;font-size:1.5rem;color:var(--accent-ink)}
-.album__cover:has(img) span{display:none}
-.album__cover--social{background:var(--band)}
-.album__cover--social span{color:var(--band-ink)}
-.album__cover--ascend{background:var(--bronze)}
-.album__cover--ascend span{color:#171715}
+/* ---------- PHOTO ALBUM COVERS: title card, photo on hover ----------
+   By default each cover is plain white with the session type and date
+   in black. Hovering (or tapping on a phone) fades in the group photo.
+   Albums without a photo simply stay as the white title card.        */
+.album__cover{
+  margin:0;aspect-ratio:16/10;position:relative;isolation:isolate;overflow:hidden;
+  display:grid;place-items:center;cursor:pointer;
+  background:#fff;border:0;border-bottom:1px solid var(--line);border-radius:0;box-shadow:none}
+.album__cover span{
+  display:block;position:relative;z-index:1;
+  padding:0 1.2rem;text-align:center;color:#111;
+  font-family:var(--sans);font-style:normal;font-weight:700;
+  font-size:clamp(.95rem,2.6vw,1.1rem);line-height:1.4;letter-spacing:.01em;
+  transition:opacity .35s ease}
+.album__cover img{
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:2;
+  opacity:0;transform:scale(1.04);
+  transition:opacity .45s ease,transform .6s ease}
+.album:hover .album__cover img,
+.album__cover:focus-visible img,
+.album__cover.is-on img{opacity:1;transform:scale(1)}
+.album:hover .album__cover:has(img) span,
+.album__cover:focus-visible:has(img) span,
+.album__cover.is-on:has(img) span{opacity:0}
 
 /* ---------- buttons ---------- */
 .btn{margin-top:auto;align-self:start;display:inline-block;text-decoration:none;
@@ -997,14 +995,21 @@ function albumKind(a){
   if (/ascend|lnp|learn/i.test(t) && !/open\s*play/i.test(t)) return { id:"ascend", label:"Ascend" };
   return { id:"open", label:"Open play" };
 }
+/* date on the cover, from each album's own date, e.g. "October 19, 2026" */
+function albumDate(iso){
+  const [y,m,d] = String(iso).split("-").map(Number);
+  return new Date(y, m-1, d).toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
+}
 function renderAlbums(){
   $("galleryTitle").textContent = (typeof GALLERY !== "undefined" && GALLERY.title) || "Photos";
   const list = [...ALBUMS].sort((a,b) => b.date.localeCompare(a.date));
+  const title = a => albumKind(a).label.replace(/\b\w/g, c => c.toUpperCase());   // "Social play" → "Social Play"
   $("albumList").innerHTML = list.length
     ? list.map(a => `<article class="album">
-        <div class="album__cover album__cover--${albumKind(a).id}">
-          <span>${albumKind(a).label}</span>
-          <img class="album__img" src="${a.cover || `photos/albums/${a.date}.jpg`}" alt="">
+        <div class="album__cover album__cover--${albumKind(a).id}" tabindex="0"
+             aria-label="${esc(title(a))} – ${albumDate(a.date)}: show photo">
+          <span>${esc(title(a))} – ${albumDate(a.date)}</span>
+          <img class="album__img" src="${a.cover || `photos/albums/${a.date}.jpg`}" alt="${esc(a.title)}" loading="lazy">
         </div>
         <div class="album__body">
           <h3>${esc(a.title)}</h3>
@@ -1014,6 +1019,14 @@ function renderAlbums(){
       </article>`).join("")
     : `<div class="card empty">No albums added yet.</div>`;
 }
+/* phones have no hover: tapping a cover shows its photo, tapping again hides it */
+$("albumList").addEventListener("click", e => {
+  const cover = e.target.closest(".album__cover");
+  if (!cover) return;
+  const on = !cover.classList.contains("is-on");
+  document.querySelectorAll(".album__cover.is-on").forEach(c => c.classList.remove("is-on"));
+  if (on) cover.classList.add("is-on");
+});
 
 /* ---------- top players of the month (MONTHLY in data.js + photos/top/) ---------- */
 function renderMonthly(){
