@@ -253,30 +253,49 @@ tr.org .who span{color:var(--muted)}
 .album__body h3{font-size:1.02rem;font-weight:800}
 .album__body p{margin:0;color:var(--muted);font-size:.88rem}
 
-/* ---------- PHOTO ALBUM COVERS: title card, photo on hover ----------
-   By default each cover is plain white with the session type and date
-   in black. Hovering (or tapping on a phone) fades in the group photo.
-   Albums without a photo simply stay as the white title card.        */
+/* ---------- PHOTO ALBUM COVERS: date + title card, photo on hover ----------
+   Default: plain white card with the album date (light lime) above the
+   session title (dark olive, uppercase), both in DM Serif Display.
+   Hover (desktop) or tap (phone/tablet): the group photo fades in under a
+   soft dark overlay and the text stays readable on top.
+   Change the two colours here: date #C2D443, title #687D0B.             */
 .album__cover{
   margin:0;aspect-ratio:16/10;position:relative;isolation:isolate;overflow:hidden;
   display:grid;place-items:center;cursor:pointer;
-  background:#fff;border:0;border-bottom:1px solid var(--line);border-radius:0;box-shadow:none}
-.album__cover span{
-  display:block;position:relative;z-index:1;
-  padding:0 1.2rem;text-align:center;color:#111;
-  font-family:var(--sans);font-style:normal;font-weight:700;
-  font-size:clamp(.95rem,2.6vw,1.1rem);line-height:1.4;letter-spacing:.01em;
-  transition:opacity .35s ease}
+  background:#fff;border-bottom:1px solid var(--line);
+  -webkit-tap-highlight-color:transparent}
+/* the group photo, hidden by default */
 .album__cover img{
-  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:2;
-  opacity:0;transform:scale(1.04);
-  transition:opacity .45s ease,transform .6s ease}
-.album:hover .album__cover img,
+  position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1;
+  opacity:0;transform:scale(1.05);
+  transition:opacity .5s ease,transform .7s ease}
+/* soft overlay so the text reads over the photo */
+.album__cover::after{
+  content:"";position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:linear-gradient(rgba(23,23,21,.35),rgba(23,23,21,.55));
+  opacity:0;transition:opacity .5s ease}
+/* date + title */
+.album__label{
+  position:relative;z-index:3;display:flex;flex-direction:column;align-items:center;
+  gap:.45rem;padding:0 1.6rem;text-align:center;font-family:var(--serif);font-weight:400;font-style:normal}
+.album__date{
+  color:#C2D443;font-size:clamp(.92rem,1.4vw + .5rem,1.1rem);letter-spacing:.03em;line-height:1.2}
+.album__name{
+  color:#687D0B;font-size:clamp(1.55rem,2.6vw + .9rem,2.15rem);letter-spacing:.09em;line-height:1.05;
+  text-transform:uppercase;transition:color .5s ease}
+
+/* revealed state: hover on devices with a mouse, keyboard focus, or a tap */
+@media (hover:hover){
+  .album:hover .album__cover img{opacity:1;transform:scale(1)}
+  .album:hover .album__cover:has(img)::after{opacity:1}
+  .album:hover .album__cover:has(img) .album__name{color:#fff}
+}
 .album__cover:focus-visible img,
 .album__cover.is-on img{opacity:1;transform:scale(1)}
-.album:hover .album__cover:has(img) span,
-.album__cover:focus-visible:has(img) span,
-.album__cover.is-on:has(img) span{opacity:0}
+.album__cover:focus-visible:has(img)::after,
+.album__cover.is-on:has(img)::after{opacity:1}
+.album__cover:focus-visible:has(img) .album__name,
+.album__cover.is-on:has(img) .album__name{color:#fff}
 
 /* ---------- buttons ---------- */
 .btn{margin-top:auto;align-self:start;display:inline-block;text-decoration:none;
@@ -995,7 +1014,7 @@ function albumKind(a){
   if (/ascend|lnp|learn/i.test(t) && !/open\s*play/i.test(t)) return { id:"ascend", label:"Ascend" };
   return { id:"open", label:"Open play" };
 }
-/* date on the cover, from each album's own date, e.g. "October 19, 2026" */
+/* date on the cover, from each album's own date, e.g. "October 17, 2026" */
 function albumDate(iso){
   const [y,m,d] = String(iso).split("-").map(Number);
   return new Date(y, m-1, d).toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
@@ -1003,29 +1022,41 @@ function albumDate(iso){
 function renderAlbums(){
   $("galleryTitle").textContent = (typeof GALLERY !== "undefined" && GALLERY.title) || "Photos";
   const list = [...ALBUMS].sort((a,b) => b.date.localeCompare(a.date));
-  const title = a => albumKind(a).label.replace(/\b\w/g, c => c.toUpperCase());   // "Social play" → "Social Play"
   $("albumList").innerHTML = list.length
-    ? list.map(a => `<article class="album">
-        <div class="album__cover album__cover--${albumKind(a).id}" tabindex="0"
-             aria-label="${esc(title(a))} – ${albumDate(a.date)}: show photo">
-          <span>${esc(title(a))} – ${albumDate(a.date)}</span>
+    ? list.map(a => {
+        const kind = albumKind(a), when = albumDate(a.date);
+        return `<article class="album">
+        <div class="album__cover album__cover--${kind.id}" tabindex="0" role="button"
+             aria-label="${esc(kind.label)}, ${when}: show group photo">
           <img class="album__img" src="${a.cover || `photos/albums/${a.date}.jpg`}" alt="${esc(a.title)}" loading="lazy">
+          <div class="album__label">
+            <span class="album__date">${when}</span>
+            <span class="album__name">${esc(kind.label)}</span>
+          </div>
         </div>
         <div class="album__body">
           <h3>${esc(a.title)}</h3>
           <p>${esc(a.description || "")}</p>
           <a class="btn" href="${esc(a.url)}" target="_blank" rel="noopener">View photos</a>
         </div>
-      </article>`).join("")
+      </article>`;
+      }).join("")
     : `<div class="card empty">No albums added yet.</div>`;
 }
-/* phones have no hover: tapping a cover shows its photo, tapping again hides it */
-$("albumList").addEventListener("click", e => {
-  const cover = e.target.closest(".album__cover");
-  if (!cover) return;
+/* touch screens have no hover: tap a cover to show its photo, tap again to hide.
+   Opening one closes any other. Enter / Space does the same from the keyboard. */
+function toggleCover(cover){
   const on = !cover.classList.contains("is-on");
   document.querySelectorAll(".album__cover.is-on").forEach(c => c.classList.remove("is-on"));
   if (on) cover.classList.add("is-on");
+}
+$("albumList").addEventListener("click", e => {
+  const cover = e.target.closest(".album__cover");
+  if (cover) toggleCover(cover);
+});
+$("albumList").addEventListener("keydown", e => {
+  const cover = e.target.closest(".album__cover");
+  if (cover && (e.key === "Enter" || e.key === " ")){ e.preventDefault(); toggleCover(cover); }
 });
 
 /* ---------- top players of the month (MONTHLY in data.js + photos/top/) ---------- */
