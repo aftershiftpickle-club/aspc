@@ -356,6 +356,34 @@ const ALBUMS = [
     url: "https://drive.google.com/drive/folders/1LUbnZKjdlJp5-Gmay35MX_4rXdB9OyF9?usp=sharing",
     cover: ""
     },
+   {
+    date: "2026-10-21",
+    title: "Oct 21, 2026 Social Play",
+    description: "Saturday Social Play",
+    url: "https://drive.google.com/drive/folders/1Wl1D-BI2Z-joQvqMrMsJ0x920kyvt6BJ?usp=sharing",
+    cover: ""
+    },
+   {
+    date: "2026-10-24",
+    title: "Oct 24, 2026 Neon Vibes",
+    description: "Saturday Social Play",
+    url: "https://drive.google.com/drive/folders/10PPpuvCBYyzclWRXmzA7lYEF2-qGcz22?usp=sharing",
+    cover: ""
+    },
+   {
+    date: "2026-11-19",
+    title: "Nov 19, 2026 Open Play",
+    description: "Saturday Social Play",
+    url: "https://drive.google.com/drive/folders/1syF0FdN6KB28fHs5yb0oxJr26k93QJ8d?usp=sharing",
+    cover: ""
+    },
+   {
+    date: "2026-11-24",
+    title: "Nov 24, 2026 Open Play",
+    description: "ASPX x 002 Social Play",
+    url: "https://drive.google.com/drive/folders/1GsC4MO9AS0KhzctOWupDXLbEDhxYku4J?usp=sharing",
+    cover: ""
+    },
  
 ];
 
